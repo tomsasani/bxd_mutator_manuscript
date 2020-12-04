@@ -1,0 +1,152 @@
+library(qtl2)
+library(ggplot2)
+library(cowplot)
+library(dplyr)
+library(optparse)
+
+option_list = list(
+  make_option(c("-j", "--json"), type="character", default=NULL),
+  make_option(c("-p", "--phenotype_file"), type="character", default=NULL),
+  make_option(c("-o", "--out_directory"), type="character", default=NULL))
+      
+opt_parser = OptionParser(option_list=option_list)
+opt = parse_args(opt_parser)
+
+# read in the JSON that directs R/qtl2 to sample genotypes,
+# phenotypes, and covariates
+bxd <- read_cross2(opt$json)
+#bxd <- read_cross2("~/harrislab/bxd/qtl-mapping/qtl2data/BXD/bxd.json")
+
+# insert pseudomarkers into the genotype map
+# following lines are from https://kbroman.org/pages/teaching.html
+gmap <- insert_pseudomarkers(bxd$gmap, step=0.2, stepwidth='max')
+pmap <- interp_map(gmap, bxd$gmap, bxd$pmap)
+
+# calculate QTL genotype probabilities
+# (error_prob taken directly from R/qtl2 user guide)
+pr <- calc_genoprob(bxd, gmap, error_prob=0.002, map_function="c-f")
+
+# read in the phenotype values for each BXD strain
+phen_df = read.csv(opt$phenotype_file, header=T)
+#phen_df = read.csv("~/harrislab/bxd_mutator_ms/mutation_summary.csv")
+
+# subset the dataframe to only include strains inbred for at least 
+# 20 total generations
+phen_df = subset(phen_df, n_inbreeding_gens >= 20 & total_mutations >= 50 & bxd_strain_conv != "BXD68_RwwJ_0462")
+
+# and further subset to only include the relevant mutation type
+phen_df_sub = subset(phen_df, base_mut == "C>A")
+
+# get covariates to include
+covariate_cols = c("epoch", "n_intercross_gens", "n_inbreeding_gens")
+covariate_matrix = as.matrix(phen_df_sub[covariate_cols])
+rownames(covariate_matrix) = phen_df_sub$bxd_strain_conv
+
+# calculate kinship between strains using the
+# "leave one chromosome out" method
+k = calc_kinship(pr, 'loco')
+
+# get special covariates for the X
+Xcovar <- get_x_covar(bxd)
+
+# get the phenotype as a log10-transformed fraction...
+phen_matrix_frac = as.matrix(log10(phen_df_sub$fraction))
+phenotype_frac = as.matrix(phen_matrix_frac[,1])
+rownames(phenotype_frac) = phen_df_sub$bxd_strain_conv
+
+# and as a rate
+phen_matrix_rate = as.matrix(phen_df_sub$rate)
+phenotype_rate = as.matrix(phen_matrix_rate[,1])
+rownames(phenotype_rate) = phen_df_sub$bxd_strain_conv
+
+# perform a genome scan, accounting for kinship and
+# epoch as an additive covarirate
+out_rate <- scan1(pr, phenotype_rate, kinship=k, 
+             addcovar=covariate_matrix, Xcovar = Xcovar)
+
+out_frac <- scan1(pr, phenotype_frac, kinship=k, 
+                  addcovar=covariate_matrix, Xcovar = Xcovar)
+
+# perform a permutation test to assess significance
+operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+
+operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
+                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+
+# get the LOD threshold for a < 0.05
+lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05)[1]
+lod_cutoff_sig_frac = summary(operm_frac, alpha=0.05)[1]
+
+# plot peaks and LOD threshold
+ymx_rate <- maxlod(out_rate)
+ymx_frac <- maxlod(out_frac)
+
+# plot LOD scores genome-wide for fraction phenotype
+setEPS()
+fname = "figure_2a.eps"
+outfile = sprintf("%s/%s", opt$out_directory, fname)
+postscript(outfile, width=10, height=5)
+par(mar=c(4.1, 4.1, 1.6, 1.1))
+plot(out_frac, pmap, lodcolumn=1, col="slateblue", ylim=c(0, ymx_frac*1.05))
+abline(h=lod_cutoff_sig_frac, col='firebrick', lwd=2, lty=2)
+dev.off()
+
+# plot LOD scores genome-wide for rate phenotype
+setEPS()
+fname = "supp_figure_2a.eps"
+outfile = sprintf("%s/%s", opt$out, fname)
+postscript(outfile, width=10, height=5)
+par(mar=c(4.1, 4.1, 1.6, 1.1))
+plot(out_rate, pmap, lodcolumn=1, col="slateblue", ylim=c(0, ymx_rate*1.05))
+abline(h=lod_cutoff_sig_rate, col='firebrick', lwd=2, lty=2)
+dev.off()
+
+# find the maximum LOD peak
+# this assumes a single peak, but it works here!
+max_peak_rate = find_peaks(out_rate, pmap, threshold = lod_cutoff_sig_rate)
+max_peak_frac = find_peaks(out_frac, pmap, threshold = lod_cutoff_sig_frac)
+
+# below is some file formatting to be able to plot
+# a phenotype x genotype plot 
+g_rate <- maxmarg(pr, pmap, chr=max_peak_rate$chr, 
+                  pos=max_peak_rate$pos, return_char=TRUE)
+g_frac <- maxmarg(pr, pmap, chr=max_peak_frac$chr, 
+                  pos=max_peak_frac$pos, return_char=TRUE)
+
+g_rate = setNames(stack(g_rate)[2:1], c('strain','haplotype'))
+g_frac = setNames(stack(g_frac)[2:1], c('strain','haplotype'))
+
+vars_to_include = c("bxd_strain_conv", "fraction", "rate")
+p = phen_df_sub[vars_to_include]
+colnames(p) <- c("strain", "fraction", "rate")
+p
+g_new_rate = inner_join(p, g_rate)$haplotype
+names(g_new_rate) = inner_join(p, g_rate)$strain
+g_new_frac = inner_join(p, g_frac)$haplotype
+names(g_new_frac) = inner_join(p, g_frac)$strain
+
+p_new_rate = inner_join(p, g_rate)$rate
+names(p_new_rate) = inner_join(p, g_rate)$strain
+p_new_frac = inner_join(p, g_frac)$fraction
+names(p_new_frac) = inner_join(p, g_frac)$strain
+
+setEPS()
+fname = "figure_2b.eps"
+outfile = sprintf("%s/%s", opt$out_directory, fname)
+postscript(outfile, width=4, height=4)
+plot_pxg(g_new_frac, p_new_frac, SEmult=2, 
+         ylab="C>A singleton mutation fraction",
+         xlab="Founder haplotype background")
+dev.off()
+
+setEPS()
+fname = "figure_2c.eps"
+outfile = sprintf("%s/%s", opt$out_directory, fname)
+postscript(outfile, width=4, height=4)
+plot_pxg(g_new_rate, p_new_rate, SEmult=2, 
+         ylab="C>A singleton mutation rate",
+         xlab="Founder haplotype background")
+dev.off()
+
+
