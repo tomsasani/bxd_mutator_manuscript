@@ -1,0 +1,7 @@
+plots/*
+data/*
+csv/*
+__pycache__/*
+Rscripts/.*
+.snakemake/*
+.DS_Store
