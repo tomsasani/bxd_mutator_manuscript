@@ -39,17 +39,23 @@ def get_bootstrap_ci(cons, n_trials=100):
 
 
 p = argparse.ArgumentParser()
-p.add_argument("--annotated_singletons")
-p.add_argument("--annotated_common")
-p.add_argument("--out")
+p.add_argument("--annotated_singletons", required=True, 
+                    help="""annotated singleton variants in extended BED format.""")
+p.add_argument("--annotated_common", required=True,
+                    help="""annotated common variants in extended BED format.""")
+p.add_argument("--out", required=True,
+                    help="""name of output plot""")
 args = p.parse_args()
 
+# read in two variant types and add a column to each indicating
+# the "type" of variant
 singletons = pd.read_csv(args.annotated_singletons)
 common = pd.read_csv(args.annotated_common)
 
 singletons['v_type'] = 'singletons'
 common['v_type'] = 'common'
 
+# combine the common and singletons variants
 combined = pd.concat([singletons, common])
 
 f, ax = plt.subplots()
@@ -79,8 +85,6 @@ ax.legend(loc="lower right", title="Variant type", frameon=False)
 ax.set_xlabel('Phastcons score (low {} high conservation)'.format(r'$\to$'))
 ax.set_ylabel('Cumulative fraction of variants')
 ax.set_xticks(np.arange(0, 1.1, 0.1))
-#ax.set_xticklabels(xticklabels)
-#ax.set_ylim(0, 1.05)
 
 sns.despine(ax=ax, top=True, right=True)
 

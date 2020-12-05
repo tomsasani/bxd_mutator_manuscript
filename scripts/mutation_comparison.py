@@ -16,9 +16,16 @@ def mutation_comparison(sub_0_counts: np.array(object),
                     " in strains with D2 vs. B6 haplotypes at QTL",
             outname='heatmap.png',
             plot_type='heatmap'):
+    """
+    plot a comparison of mutation spectra in one subset of strains
+    vs. another, using either a heatmap or scatter plot
+
+    sub_0_counts: np.array() of shape (n_strains, n_muts)
+    sub_1_counts: np.array() of shape (n_strains, n_muts)
+    mut2idx: dictionary mapping mutation types to indices
+    """
 
     plt.rc('font', size=14)
-
 
     # map "base" mutation types to output indices
     # in the final plot. the heatmap will have 6
@@ -203,36 +210,37 @@ def mutation_comparison(sub_0_counts: np.array(object),
         f.savefig(outname, bbox_inches='tight')
 
 p = argparse.ArgumentParser()
-p.add_argument("--annotated_singletons")
-p.add_argument("--out")
-p.add_argument("-subset_key", default="haplotype_at_qtl")
-p.add_argument("-plot_type", default="heatmap")
+p.add_argument("--annotated_singletons", required=True, 
+                    help="""annotated singleton variants in extended BED format.""")
+p.add_argument("--out", required=True,
+                    help="""name of output plot""")
+p.add_argument("-subset_key", default="haplotype_at_qtl",
+                    help="""name of the column in `annotated_singletons` by which you \
+                            want to subset strains. this column must take on only one \
+                            of two possible values.""")
+p.add_argument("-plot_type", default="heatmap", required=False,
+                    help="""plot type to generate. [heatmap, scatter]""")
 args = p.parse_args()
 
+# read in singletons
 singleton = pd.read_csv(args.annotated_singletons)
 
-tidy_cols = ['kmer', args.subset_key]
+group_cols = ['kmer', args.subset_key]
 
-# convert to tidy dataframe
-singleton_tidy = singleton.groupby(tidy_cols).count().add_suffix('_count').reset_index()
+# convert to wide-form dataframe, grouped by kmer
+df_wide = singleton.groupby(group_cols).count().add_suffix('_count').reset_index()
 
-# subset tidy dataframe to relevant columns
-tidy_cols.append('chrom_count')
+# subset dataframe to relevant columns
+group_cols.append('chrom_count')
+df_wide = df_wide[group_cols]
 
-singleton_tidy = singleton_tidy[tidy_cols]
-
-subset_0 = singleton_tidy[singleton_tidy[args.subset_key] == 0]['chrom_count'].values
-subset_1 = singleton_tidy[singleton_tidy[args.subset_key] == 1]['chrom_count'].values
-
-print (np.sum(subset_0))
-print (np.sum(subset_1))
-print (np.sum(subset_0) + np.sum(subset_1))
-
-print (subset_0.shape)
-print (subset_1.shape)
+# generate subsets of variants in each of two categories, defined
+# by the two unique values that the `subset_key` column can take on
+subset_0 = df_wide[df_wide[args.subset_key] == 0]['chrom_count'].values
+subset_1 = df_wide[df_wide[args.subset_key] == 1]['chrom_count'].values
 
 # get a mapping of each mutation type to a corresponding index
-uniq_kmers = list(pd.unique(singleton_tidy['kmer']))
+uniq_kmers = list(pd.unique(df_wide['kmer']))
 mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 
 mutation_comparison(subset_1, subset_0, mut2idx=mut2idx, outname=args.out, plot_type=args.plot_type)

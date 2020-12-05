@@ -27,103 +27,15 @@ def to_base_mut(k, cpg=False):
     else: base = k
     return base
 
-def combine_chr_df(path, header=None, skiprows=None):
+def combine_chr_df(path):
     main_df = None
     for f in glob.glob(path):
         if main_df is None:
-            if skiprows is not None:
-                main_df = pd.read_csv(f, header=header, skiprows=[skiprows])
-            else:
-                main_df = pd.read_csv(f, header=header)
-
+            main_df = pd.read_csv(f)
         else:
-            if skiprows is not None:
-                main_df = pd.concat([main_df, pd.read_csv(f, header=header, skiprows=[skiprows])])
-            else:
-                main_df = pd.concat([main_df, pd.read_csv(f, header=header)])
+            main_df = pd.concat([main_df, pd.read_csv(f)])
     return main_df
 
-def format_bxd_name(strain, strain_summary="/Users/tomsasani/Downloads/strain_summary.xlsx"):
-    """
-    since most BXD strains are formatted like
-    BXD002_TwJ_NNNNN, we need to hack a little bit
-    to format the strain ID properly for QTL later.
-
-    strain: str() of strain ID
-
-    """
-    
-    strain_summary = pd.read_excel(strain_summary)
-
-    official2expanded = dict(zip(strain_summary['Official name'], 
-                                 strain_summary['Expanded name']))
-
-    # extract the BXDNNN string, where
-    # NNN is the RIL number
-    if 'BXD' not in strain:
-        return strain
-    bxd_line = strain.split('_')[0]
-
-    # one special exception
-    if bxd_line == 'BXD24': return 'BXD024/TyJ-Cep290rd16/J'
-   
-    # extract the BXD RIL number (the NNN from before)
-    # and strip any preceding zeros
-    temp = re.compile("([a-zA-Z]+)([0-9]+)([a-zA-Z]*)")
-    res = temp.match(bxd_line).groups()
-    bxd_num = res[1].lstrip('0')
-   
-    # some strains have trailing information after
-    # the RIL number, like RwwJ or TyJ
-    try:
-        addtl = strain.split('_')[1]
-    except IndexError: addtl = ''
-
-    suff = res[2]
-    
-    formatted_bxd = 'BXD' + str(bxd_num) + suff
-    
-    off_name = strain
-    
-    matches = []
-    
-    for official_n in strain_summary['Official name']:
-        if formatted_bxd in official_n:
-            matches.append(official_n)
-
-    matched_off_name = None
-    
-    # if there's an obvious match, return it
-    if len(matches) == 1: 
-        matched_off_name = matches[0]
-    # if there's more than one possible match...
-    elif len(matches) > 1:
-        matched = False
-        for m in matches:
-            # check and see if the additional sample name
-            # info is enough for a match
-            if addtl in m and (formatted_bxd == m.split('/')[0] or \
-                               formatted_bxd == m.split('-')[0]): 
-                matched = True
-                matched_off_name = m
-        if not matched:
-            for m in matches:
-                if formatted_bxd == m.split('/')[0]:
-                    matched = True
-                    matched_off_name = m
-        if not matched: 
-            for m in matches:
-            # check and see if the additional sample name
-            # info is enough for a match
-                if addtl in m: 
-                    matched = True
-                    matched_off_name = m
-        # if not, probably a situation where the sample
-        # manifest has two entries and the VCF has only one
-        if not matched: matched_off_name = matches[0]
-
-    return official2expanded[matched_off_name]
-    
 def convert_bxd_name(name: str) -> str:
     """
     depending on the VCF file we're using we may
@@ -160,8 +72,9 @@ def find_haplotype(sample, location="chr4:115000000-118000000"):
     chrom = location.split(':')[0]
     start, end = location.split(':')[-1].split('-')
 
-    path = '/Users/tomsasani/harrislab/bxd/hmm_haplotypes/{}_{}_haplotypes.csv'.format(sample, chrom)
+    path_pref = "/Users/tomsasani/harrislab/bxd/hmm_haplotypes"
 
+    path = "{}/{}_{}_haplotypes.csv".format(path_pref, sample, chrom)
 
     tree = defaultdict(IntervalTree)
     added = defaultdict(int)
@@ -181,17 +94,22 @@ def find_haplotype(sample, location="chr4:115000000-118000000"):
     return hap
 
 p = argparse.ArgumentParser()
-p.add_argument("--strain_metadata")
-p.add_argument("--var_dir")
-p.add_argument("--callable_bp")
-p.add_argument("--out")
+p.add_argument("--strain_metadata", required=True, 
+                    help="""metadata about strains in Excel format.""")
+p.add_argument("--var_dir", required=True,
+                    help="""directory containing per-chromosome BED files \
+                            of variants""")
+p.add_argument("--callable_bp", required=True,
+                    help="""file containing a column with sample IDs and a \
+                            column with the number of haploid callable base \
+                            pairs in those samples.""")
+p.add_argument("--out", required=True,
+                    help="""name of the output extended BED file containing \
+                            annotated variants""")
 args = p.parse_args()
 
-### ---
 # read in strain metadata and construct relevant dictionaries that
 # map sample names to metadata
-### ---
-
 summary = pd.read_excel(args.strain_metadata)
 
 # convert verbose filial generations to integer numbers of generations in the file
@@ -199,15 +117,12 @@ summary['gen_at_seq'] = summary['Generation at sequencing'].apply(get_generation
                                                                   remove_backcrossed=True)
 
 # map expanded strain names to generation numbers
-#strain2inbreed_gen = dict(zip(summary['Expanded name'], summary['gen_at_seq']))
 strain2inbreed_gen = dict(zip(summary['bam_name'], summary['gen_at_seq']))
 
 # map expanded strain names to epochs
-#strain2epoch = dict(zip(summary['Expanded name'], summary['Epoch']))
 strain2epoch = dict(zip(summary['bam_name'], summary['Epoch']))
 
 # map expanded strain names to genenetwork names
-#strain2genenet = dict(zip(summary['Expanded name'], summary['GeneNetwork name']))
 strain2genenet = dict(zip(summary['bam_name'], summary['GeneNetwork name']))
 
 # map expanded strain names to the number of generations
@@ -219,42 +134,22 @@ strain2intercross_gens = dict(zip(summary['bam_name'],
 denominators = pd.read_csv(args.callable_bp, names=['samp', 'denominator'])
 strain2denom = dict(zip(denominators['samp'], denominators['denominator']))
 
-
-### ---
-# read in the singleton file, containing one line per singleton
-### ---
-
-singleton = combine_chr_df(args.var_dir + "*.exclude.csv", skiprows=0)
-
-# rename columns in the combined dataframe
-singleton.columns = ['chrom', 'start', 'end', 'bam_name', 'kmer', 'haplotype',
-                     'gt', 'dp', 'ab', 'phastCons']
+# read in the file of variants, containing one BED-format line per variant
+variants = combine_chr_df(args.var_dir + "*.exclude.csv")
 
 # remove very low and very high-depth mutations
-singleton = singleton.query('dp >= 10 & dp < 100')
+variants = variants.query('dp >= 10 & dp < 100')
 
 # add a column describing the 1-mer mutation type corresponding to all
 # 3-mer "kmers" in the dataframe
-singleton['base_mut'] = singleton['kmer'].apply(to_base_mut, cpg=True)
+variants['base_mut'] = variants['kmer'].apply(to_base_mut, cpg=True)
 
-# remove any potential singletons identified in founder genomes. we're
-# only interested in singletons observed in BXD RILs
+# remove any potential variantss identified in founder genomes. we're
+# only interested in variantss observed in BXD RILs
 founder_samps = ['4512-JFI-0333_C57BL_6J_two_lanes_phased_possorted_bam',
                  '4512-JFI-0334_DBA_2J_three_lanes_phased_possorted_bam']
 
-singleton = singleton[~singleton['bam_name'].isin(founder_samps)]
-
-# reformat BXD strain names from BAM notation
-singleton['bxd_strain_conv'] = singleton['bam_name'].apply(lambda x: convert_bxd_name(x))
-
-# map each of these reformatted BXD strain names to its "Expanded name" as
-# reported in the Excel metadata file
-#uniq_bxd_names = pd.unique(singleton['bxd_strain_conv'])
-#expanded_strain_names = [format_bxd_name(n) for n in uniq_bxd_names]
-#orig2expanded = dict(zip(uniq_bxd_names, expanded_strain_names))
-
-# then, add a column to the dataframe with the "Expanded name" for each strain
-#singleton['expanded_name'] = singleton['bxd_strain_conv'].apply(lambda s: orig2expanded[s])
+variants = variants[~variants['bxd_strain'].isin(founder_samps)]
 
 # remove co-isogenic samples
 iso_samps = ['4512-JFI-0348_BXD24_TyJ_Cep290_J_phased_possorted_bam',
@@ -264,20 +159,16 @@ iso_samps = ['4512-JFI-0348_BXD24_TyJ_Cep290_J_phased_possorted_bam',
              '4512-JFI-0439_BXD73a_RwwJ_phased_possorted_bam'
              '4512-JFI-0440_BXD073b_RwwJ_phased_possorted_bam']
 
-singleton = singleton[~singleton['bam_name'].isin(iso_samps)]
+variants = variants[~variants['bxd_strain'].isin(iso_samps)]
 
-# use the "Expanded name" for each BXD strain to add columns of metadata to the dataframe
-#singleton['gene_network_name'] = singleton['expanded_name'].apply(lambda s: strain2genenet[s])
-#singleton['epoch'] = singleton['expanded_name'].apply(lambda s: strain2epoch[s])
-#singleton['n_inbreeding_gens'] = singleton['expanded_name'].apply(lambda s: strain2inbreed_gen[s])
-#singleton['n_intercross_gens'] = singleton['expanded_name'].apply(lambda s: strain2intercross_gens[s])
-#singleton['n_callable_bp'] = singleton['bxd_strain'].apply(lambda s: strain2denom[s] if s in strain2denom else -1)
+# reformat BXD strain names from BAM notation
+variants['bxd_strain_conv'] = variants['bxd_strain'].apply(lambda x: convert_bxd_name(x))
 
-singleton['epoch'] = singleton['bam_name'].apply(lambda s: strain2epoch[s])
-singleton['n_inbreeding_gens'] = singleton['bam_name'].apply(lambda s: strain2inbreed_gen[s])
-singleton['n_intercross_gens'] = singleton['bam_name'].apply(lambda s: strain2intercross_gens[s])
-singleton['n_callable_bp'] = singleton['bam_name'].apply(lambda s: strain2denom[s] if s in strain2denom else -1)
+# add columns to the dataframe with relevant metadata
+variants['epoch'] = variants['bxd_strain'].apply(lambda s: strain2epoch[s])
+variants['n_inbreeding_gens'] = variants['bxd_strain'].apply(lambda s: strain2inbreed_gen[s])
+variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2intercross_gens[s])
+variants['n_callable_bp'] = variants['bxd_strain'].apply(lambda s: strain2denom[s] if s in strain2denom else "NA")
+variants['haplotype_at_qtl'] = variants['bxd_strain'].apply(lambda s: find_haplotype(s))
 
-singleton['haplotype_at_qtl'] = singleton['bam_name'].apply(lambda s: find_haplotype(s))
-
-singleton.to_csv(args.out, index=False)
+variants.to_csv(args.out, index=False)

@@ -14,8 +14,8 @@ opt = parse_args(opt_parser)
 
 # read in the JSON that directs R/qtl2 to sample genotypes,
 # phenotypes, and covariates
-bxd <- read_cross2(opt$json)
-#bxd <- read_cross2("~/harrislab/bxd/qtl-mapping/qtl2data/BXD/bxd.json")
+#bxd <- read_cross2(opt$json)
+bxd <- read_cross2("~/harrislab/bxd/qtl-mapping/qtl2data/BXD/bxd.json")
 
 # insert pseudomarkers into the genotype map
 # following lines are from https://kbroman.org/pages/teaching.html
@@ -27,20 +27,15 @@ pmap <- interp_map(gmap, bxd$gmap, bxd$pmap)
 pr <- calc_genoprob(bxd, gmap, error_prob=0.002, map_function="c-f")
 
 # read in the phenotype values for each BXD strain
-phen_df = read.csv(opt$phenotype_file, header=T)
-#phen_df = read.csv("~/harrislab/bxd_mutator_ms/mutation_summary.csv")
+#phen_df = read.csv(opt$phenotype_file, header=T)
+phen_df = read.csv("~/harrislab/bxd_mutator_ms/csv/tidy_mutation_spectra.csv")
 
 # subset the dataframe to only include strains inbred for at least 
 # 20 total generations
-phen_df = subset(phen_df, n_inbreeding_gens >= 20 & total_mutations >= 50 & bxd_strain_conv != "BXD68_RwwJ_0462")
+phen_df = subset(phen_df, n_inbreeding_gens >= 20 & bxd_strain_conv != "BXD68_RwwJ_0462")
 
 # and further subset to only include the relevant mutation type
 phen_df_sub = subset(phen_df, base_mut == "C>A")
-
-# get covariates to include
-covariate_cols = c("epoch", "n_intercross_gens", "n_inbreeding_gens")
-covariate_matrix = as.matrix(phen_df_sub[covariate_cols])
-rownames(covariate_matrix) = phen_df_sub$bxd_strain_conv
 
 # calculate kinship between strains using the
 # "leave one chromosome out" method
@@ -50,14 +45,21 @@ k = calc_kinship(pr, 'loco')
 Xcovar <- get_x_covar(bxd)
 
 # get the phenotype as a log10-transformed fraction...
-phen_matrix_frac = as.matrix(log10(phen_df_sub$fraction))
+phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
+phen_matrix_frac = as.matrix(log10(phen_df_sub_frac$estimate))
 phenotype_frac = as.matrix(phen_matrix_frac[,1])
-rownames(phenotype_frac) = phen_df_sub$bxd_strain_conv
+rownames(phenotype_frac) = phen_df_sub_frac$bxd_strain_conv
 
 # and as a rate
-phen_matrix_rate = as.matrix(phen_df_sub$rate)
+phen_df_sub_rate = subset(phen_df_sub, estimate_type == "rate")
+phen_matrix_rate = as.matrix(phen_df_sub_rate$estimate)
 phenotype_rate = as.matrix(phen_matrix_rate[,1])
-rownames(phenotype_rate) = phen_df_sub$bxd_strain_conv
+rownames(phenotype_rate) = phen_df_sub_rate$bxd_strain_conv
+
+# get covariates to include
+covariate_cols = c("epoch", "n_intercross_gens", "n_inbreeding_gens")
+covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
+rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
 
 # perform a genome scan, accounting for kinship and
 # epoch as an additive covarirate
@@ -69,10 +71,10 @@ out_frac <- scan1(pr, phenotype_frac, kinship=k,
 
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+                   addcovar=covariate_matrix, n_perm=100)#Xcovar=Xcovar, n_perm=100)
 
 operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
-                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+                        addcovar=covariate_matrix, n_perm=100)#Xcovar=Xcovar, n_perm=100)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05)[1]
@@ -81,6 +83,8 @@ lod_cutoff_sig_frac = summary(operm_frac, alpha=0.05)[1]
 # plot peaks and LOD threshold
 ymx_rate <- maxlod(out_rate)
 ymx_frac <- maxlod(out_frac)
+
+est_herit(phenotype_rate, k$`4`, addcovar=covariate_matrix)
 
 # plot LOD scores genome-wide for fraction phenotype
 setEPS()
@@ -103,9 +107,8 @@ abline(h=lod_cutoff_sig_rate, col='firebrick', lwd=2, lty=2)
 dev.off()
 
 # find the maximum LOD peak
-# this assumes a single peak, but it works here!
-max_peak_rate = find_peaks(out_rate, pmap, threshold = lod_cutoff_sig_rate)
-max_peak_frac = find_peaks(out_frac, pmap, threshold = lod_cutoff_sig_frac)
+max_peak_rate = find_peaks(out_rate, pmap, threshold = lod_cutoff_sig_rate)[1,]
+max_peak_frac = find_peaks(out_frac, pmap, threshold = lod_cutoff_sig_frac)[1,]
 
 # below is some file formatting to be able to plot
 # a phenotype x genotype plot 
@@ -117,19 +120,22 @@ g_frac <- maxmarg(pr, pmap, chr=max_peak_frac$chr,
 g_rate = setNames(stack(g_rate)[2:1], c('strain','haplotype'))
 g_frac = setNames(stack(g_frac)[2:1], c('strain','haplotype'))
 
-vars_to_include = c("bxd_strain_conv", "fraction", "rate")
-p = phen_df_sub[vars_to_include]
-colnames(p) <- c("strain", "fraction", "rate")
-p
-g_new_rate = inner_join(p, g_rate)$haplotype
-names(g_new_rate) = inner_join(p, g_rate)$strain
-g_new_frac = inner_join(p, g_frac)$haplotype
-names(g_new_frac) = inner_join(p, g_frac)$strain
+vars_to_include = c("bxd_strain_conv", "estimate")
+p_rate = phen_df_sub_rate[vars_to_include]
+colnames(p_rate) <- c("strain", "rate")
 
-p_new_rate = inner_join(p, g_rate)$rate
-names(p_new_rate) = inner_join(p, g_rate)$strain
-p_new_frac = inner_join(p, g_frac)$fraction
-names(p_new_frac) = inner_join(p, g_frac)$strain
+p_frac = phen_df_sub_frac[vars_to_include]
+colnames(p_frac) <- c("strain", "fraction")
+
+g_new_rate = inner_join(p_rate, g_rate)$haplotype
+names(g_new_rate) = inner_join(p_rate, g_rate)$strain
+g_new_frac = inner_join(p_frac, g_frac)$haplotype
+names(g_new_frac) = inner_join(p_frac, g_frac)$strain
+
+p_new_rate = inner_join(p_rate, g_rate)$rate
+names(p_new_rate) = inner_join(p_rate, g_rate)$strain
+p_new_frac = inner_join(p_frac, g_frac)$fraction
+names(p_new_frac) = inner_join(p_frac, g_frac)$strain
 
 setEPS()
 fname = "figure_2b.eps"
