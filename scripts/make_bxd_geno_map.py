@@ -24,6 +24,13 @@ geno = pd.read_csv(args.geno_file)
 
 geno = geno.rename(columns={'Unnamed: 0': 'marker'})
 
+founder_samps = ['4512-JFI-0333_C57BL_6J_phased_possorted_bam',
+                 '4512-JFI-0333_C57BL_6J_two_lanes_phased_possorted_bam',
+                 '4512-JFI-0334_DBA_2J_phased_possorted_bam',
+                 '4512-JFI-0334_DBA_2J_three_lanes_phased_possorted_bam']
+
+geno = geno.drop(columns=founder_samps)
+
 # get a new header with converted BXD names in order to
 # match names in singleton mutation dataframes
 header = list(geno)
@@ -34,6 +41,7 @@ gts = geno.values[:,1:]
 
 def gt_to_allele(gt):
     d = {0: 'B', 1: 'H', 2: 'D', -1:'NA'}
+    d = {0: 'BB', 1: 'H', 2: 'DD', -1:'NA'}
     return d[gt]
 
 # convert genotypes to haplotypes

@@ -47,7 +47,7 @@ p.add_argument("--out", required=True,
                     help="""name of output plot""")
 args = p.parse_args()
 
-# read in two variant types and add a column to each indicating
+# read in variant types and add a column to each indicating
 # the "type" of variant
 singletons = pd.read_csv(args.annotated_singletons)
 common = pd.read_csv(args.annotated_common)
@@ -70,8 +70,10 @@ for i,lab in enumerate(pd.unique(combined['v_type'])):
 
     sub_df = combined[combined['v_type'] == lab]
 
+    # if we're dealing with shared variants, we don't want to
+    # count the same variant more than once toward to the
+    # distribution of phastcons scores
     cons = sub_df[sub_df['phastCons'] != "None"]["phastCons"].values.astype(np.float64)
-    
     y, x = np.histogram(cons, bins=99)
     y = y / np.sum(y)
     y = np.cumsum(y)

@@ -112,6 +112,8 @@ def mutation_comparison(sub_0_counts: np.array(object),
     # use method from Harris et al. (2017) to adjust p-values
     adj_pvals = adj_pvalues(pvals, sub_0_counts_grid, sub_1_counts_grid)
 
+    adj_pvals = pvals
+
     # find indices where ratio of sub_0:sub_1 is significant
     # at Bonferonni-corrected p-value
     sig_adj_pvals = np.where(adj_pvals < 0.05 / 96)
@@ -177,7 +179,7 @@ def mutation_comparison(sub_0_counts: np.array(object),
 
     elif plot_type == "heatmap": 
         f, ax = plt.subplots(figsize=(3,8))
-        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w')
+        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w', vmin=-1, vmax=1)
 
         # plot "dots" in heatmap where the ratio is significant
         for (y,x) in zip(sig_adj_pvals[0], sig_adj_pvals[1]):

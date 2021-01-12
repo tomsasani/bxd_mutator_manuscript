@@ -10,6 +10,28 @@ import glob
 import sys
 import argparse
 
+def calc_new_gens(n_gens):
+    p_k_vals = defaultdict(float)
+    for k in np.arange(1, n_gens + 1):
+        if k == 1: 
+            p_k = 0
+            p_k_vals[k] = p_k
+        elif k == 2: 
+            p_k = 0.25
+            p_k_vals[k] = p_k
+        else: 
+            p_k_1 = p_k_vals[k - 1]
+            p_k_2 = p_k_vals[k - 2]
+
+            p_k = (p_k_1 / 2) + (p_k_2 / 4)
+            p_k_vals[k] = p_k
+
+    l_n = 0
+    for k in np.arange(1, n_gens + 1):
+        l_n += ((n_gens - k) * p_k_vals[k])
+    return l_n
+    #return row['count'] / (row['n_callable_bp'] * int(l_n))
+
 p = argparse.ArgumentParser()
 p.add_argument("--annotated_singletons", required=True, 
                     help="""annotated singleton variants in extended BED format.""")
@@ -60,23 +82,63 @@ smp_sums.rename(columns = {'count_sum': 'total_muts'}, inplace=True)
 # calculate overall mutation rates as the sum of singletons divided
 # by the number of generations of inbreeding and the diploid number
 # of base pairs that were "callable" in the strain
-smp_sums['rate'] = smp_sums['total_muts'] / smp_sums['n_inbreeding_gens'] / smp_sums['n_callable_bp'] / 2
+smp_sums['l_n'] = smp_sums['n_inbreeding_gens'].apply(lambda n: calc_new_gens(n))
+#smp_sums['rate'] = smp_sums['total_muts'] / smp_sums['n_inbreeding_gens'] / smp_sums['n_callable_bp']
+smp_sums['rate'] = smp_sums['total_muts'] / smp_sums['l_n'] / smp_sums['n_callable_bp']
 smp2sum = dict(zip(smp_sums['bxd_strain_conv'], smp_sums['total_muts']))
 
 df_wide['total_muts'] = df_wide['bxd_strain_conv'].apply(lambda s: smp2sum[s])
 
-# remove samples with very few singletons
-df_wide = df_wide.query('total_muts >= 50')
-
 # add a column to the dataframe with the relative fraction of each mutation type
 df_wide['fraction'] = df_wide['count'] / df_wide['total_muts']
 
+samps = pd.unique(df_wide['bxd_strain_conv'])
+muts = pd.unique(df_wide['base_mut'])
+
+smp_by_frac = np.zeros((len(samps), len(muts)))
+
+for s_i,s in enumerate(samps):
+    for mut_i,m in enumerate(muts):
+        val = df_wide[(df_wide['bxd_strain_conv'] == s) & (df_wide['base_mut'] == m)]['fraction'].values
+        if val.shape[0] == 0: continue
+        smp_by_frac[s_i, mut_i] = val[0]
+
+
+def clr(X):
+    # the geometric mean acts as the center of the composition
+    geom_mean = np.power(np.prod(X,axis=1),1/X.shape[1])
+    return np.log(X / geom_mean[:,None])
+
+sbf_clr = clr(smp_by_frac)
+
+smp2mut2clr = defaultdict(lambda: defaultdict(float))
+for s_i,s in enumerate(samps):
+    for mut_i,m in enumerate(muts):
+        smp2mut2clr[s][m] = sbf_clr[s_i, mut_i]
+
+
+
 # and add a column with the rate of mutation for each mutation type
-df_wide['rate'] = df_wide['count'] / df_wide['n_inbreeding_gens'] / df_wide['n_callable_bp'] / 2
+#df_wide['rate'] = df_wide['count'] / df_wide['n_inbreeding_gens'] / df_wide['n_callable_bp']
+df_wide['l_n'] = df_wide['n_inbreeding_gens'].apply(lambda n: calc_new_gens(n))
+#df_wide['rate'] = df_wide['count'] / df_wide['n_inbreeding_gens'] / df_wide['n_callable_bp']
+df_wide['rate'] = df_wide['count'] / df_wide['l_n'] / df_wide['n_callable_bp']
+
+df_wide['clr_fraction'] = df_wide.apply(lambda row: smp2mut2clr[row['bxd_strain_conv']][row['base_mut']], axis=1)
+
+df_wide.fillna(value=0, inplace=True)
+
+df_wide.replace(to_replace=np.inf, value=0, inplace=True)
+
+print (np.where(df_wide['clr_fraction'] > 1))
+
+print (df_wide)
+print (group_cols)
 
 # make a tidy dataframe such that there are three entries for every mutation type
 # in each sample -- one with its count, one with its rate, and one with its fraction
 df_tidy = df_wide.melt(id_vars=group_cols[:-1], var_name="estimate_type", value_name="estimate")
+#print (df_tidy.query('base_mut == "C>T" & estimate_type == "rate"').groupby(['epoch']).count())
 
 df_tidy = df_tidy.query('estimate_type != "total_muts"')
 
@@ -87,6 +149,7 @@ df_tidy.to_csv(args.out_pref + "tidy_mutation_spectra.csv", index=False)
 smp_sums[['bxd_strain_conv',
           'n_callable_bp',
           'n_inbreeding_gens',
+          'l_n',
           'n_intercross_gens',
           'epoch',
           'total_muts',

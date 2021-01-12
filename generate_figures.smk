@@ -1,7 +1,12 @@
+# set name of working directory
 WORKDIR = "/Users/tomsasani/harrislab/bxd_mutator_ms/"
 
+# set the path to the CONDA YAML
 CONDA_YAML="/Users/tomsasani/harrislab/bxd_mutator_ms/env.yaml"
 
+muts = ["C>A", "C>T", "C>G", "A>T", "A>G", "A>C"]
+
+# pseudo-rule to collect all output figures
 rule all:
 	input:
 		WORKDIR + "plots/figure_1a.eps",
@@ -14,9 +19,10 @@ rule all:
 		WORKDIR + "plots/figure_3a.eps",
 		WORKDIR + "plots/figure_3b.eps",
 		WORKDIR + "plots/supp_figure_1.eps",
-		WORKDIR + "plots/supp_figure_2a.eps",
+		WORKDIR + "plots/supp_figure_4.eps",
+		#WORKDIR + "plots/supp_figure_2a.eps",
 #		WORKDIR + "plots/supp_figure_3.eps",
-		WORKDIR + "plots/epoch_heatmap.eps"
+		WORKDIR + "plots/epoch_heatmap.eps",
 
 rule annotate_vars:
 	input: 
@@ -80,7 +86,19 @@ rule make_figure_one_c:
 							   --out {output} 
 		"""
 
-rule make_figure_two_abc: 
+rule generate_bxd_geno:
+	input:
+		gts = WORKDIR + "data/bxd_genotypes_at_rsids.csv",
+		make_geno_py = WORKDIR + "scripts/make_bxd_geno_map.py"
+	output:
+		WORKDIR + "Rqtl_data/bxd.geno.new.updated"
+	shell:
+		"""
+		python {input.make_geno_py} --geno_file {input.gts} \
+									--output {output} 
+		"""
+
+rule make_figure_two_ab: 
 	input:
 		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv",
 		qtl_rscript = WORKDIR + "Rscripts/qtl_mapping.R",
@@ -91,15 +109,30 @@ rule make_figure_two_abc:
 		outdir = WORKDIR + "plots/"
 	output:
 		WORKDIR + "plots/figure_2a.eps",
-		WORKDIR + "plots/figure_2b.eps",
-		WORKDIR + "plots/figure_2c.eps",
-		WORKDIR + "plots/supp_figure_2a.eps"
+		WORKDIR + "plots/figure_2b.eps"
+		#WORKDIR + "plots/figure_2c.eps",
+		#WORKDIR + "plots/supp_figure_2a.eps"
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
 									-p {input.mut_spectra} \
-									-o {input.outdir}
+									-o {input.outdir} 
 		"""
+
+rule make_figure_two_c:
+	input:
+		pca_py = WORKDIR + "scripts/pca_projection.py",
+		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv",
+		dumont_xls = "/Users/tomsasani/Downloads/msz026_supp/SuppTables_concat.xlsx"
+	output:
+		WORKDIR + "plots/figure_2c.eps"
+	shell:
+		"""
+		python {input.pca_py} --tidy_spectra {input.mut_spectra} \
+							  --dumont_xls {input.dumont_xls} \
+							  --out {output}
+		"""
+		
 
 rule make_figure_three_a:
 	input:
@@ -119,7 +152,7 @@ rule make_figure_three_b:
 	input:
 		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
 		cosmic_sig = WORKDIR + "data/sbs36_cosmic_signatures.csv",
-		comp_py = WORKDIR + "scripts/compare_signatures.py"
+		comp_py = WORKDIR + "scripts/compare_signatures_regression.py"
 	output:
 		WORKDIR + "plots/figure_3b.eps"
 	shell:
@@ -141,6 +174,17 @@ rule make_supp_figure_one:
 							   --out {output} \
 							   -subset_key haplotype \
 							   -plot_type scatter
+		"""
+rule make_supp_figure_four:
+	input:
+		script_py = WORKDIR + "scripts/mutation_rates_by_haplotype.py",
+		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv"
+	output:
+		WORKDIR + "plots/supp_figure_4.eps"
+	shell:
+		"""
+		python {input.script_py} --tidy_spectra {input.mut_spectra} \
+							   --out {output} 
 		"""
 
 rule make_epoch_sharing_fig:

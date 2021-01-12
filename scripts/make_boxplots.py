@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -22,6 +23,8 @@ tidy_spectra = pd.read_csv(args.tidy_spectra)
 
 tidy_rates = tidy_rates.astype({'epoch': 'int'})
 tidy_spectra = tidy_spectra.astype({'epoch': 'int'})
+
+print ('total of {} mutations in {} strains'.format(np.sum(tidy_rates['total_muts']), len(pd.unique(tidy_rates['bxd_strain_conv']))))
 
 # ---
 # generate figure 1a

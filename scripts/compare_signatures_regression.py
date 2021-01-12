@@ -6,7 +6,7 @@ import seaborn as sns
 import numpy as np
 import argparse
 
-plt.rc('font', size=12)
+plt.rc('font', size=16)
 
 p = argparse.ArgumentParser()
 p.add_argument("--annotated_singletons", required=True, 
@@ -15,8 +15,6 @@ p.add_argument("--cosmic_signature", required=True,
                     help="""file containing mutation spectrum corresponding to SBS36.""")
 p.add_argument("--out", required=True,
                     help="""name of output plots""")
-p.add_argument("-orientation", required=False, default="h",
-                    help="""make plot horizontal or vertical [h,v]""")
 args = p.parse_args()
 
 def revcomp(nuc):
@@ -42,6 +40,9 @@ def convert_cosmic_mutation(row):
 
 singleton = pd.read_csv(args.annotated_singletons)
 
+#singleton = singleton.query('bxd_strain == "4512-JFI-0462_BXD68_RwwJ_phased_possorted_bam"')
+#singleton = singleton.query('haplotype_at_qtl == 1')
+
 group_cols = ['kmer', "haplotype_at_qtl"]
 
 # convert to wide-form dataframe
@@ -59,6 +60,17 @@ subset_1 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == 1]['chrom_count'
 # convert counts in the subsets to fractions
 subset_0_fracs = subset_0 / np.sum(subset_0)
 subset_1_fracs = subset_1 / np.sum(subset_1)
+
+pvals = np.ones(subset_0.shape[0], dtype=np.float64)
+
+for i in np.arange(subset_0.shape[0]):
+    a_fore, b_fore = subset_0[i], subset_1[i]
+    a_back = np.sum(subset_0) - a_fore
+    b_back = np.sum(subset_1) - b_fore
+
+    _, p, _, _ = ss.chi2_contingency([[a_fore, b_fore], [a_back, b_back]])
+
+    pvals[i] = p
 
 # convert fractions to log-2 ratios
 ratios = subset_1_fracs / subset_0_fracs
@@ -84,10 +96,7 @@ cosmic_components = cosmic['SBS36_mm10'].values
 
 # make figure object
 
-if args.orientation == "v":
-    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 10))
-elif args.orientation == "h":
-    f, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+f, ax = plt.subplots(figsize=(6,8))
 
 sns.set_style('ticks')
 
@@ -101,26 +110,46 @@ ind = np.arange(len(mut2idx))
 reordered_idxs = np.array([mut2idx[m] for m in pd.unique(cosmic['kmer'])])
 reordered_ratios = log_ratios[reordered_idxs]
 
-
-
 # sort the COSMIC signature in decreasing order of each kmer's
 # contribution to the signature
 sorted_cosmic_idxs = np.argsort(cosmic_components)
 
-# plot the COSMIC components and my singleton enrichments in
-# the same order
+reordered_p = pvals[reordered_idxs][sorted_cosmic_idxs]
 
-if args.orientation == "v":
-    ax1.barh(ind, cosmic_components[sorted_cosmic_idxs], 1, 
-                color=bar_colors[sorted_cosmic_idxs], edgecolor='k')
-    ax2.barh(ind, reordered_ratios[sorted_cosmic_idxs], 1, 
-                color=bar_colors[sorted_cosmic_idxs], edgecolor='k')
+edgecolors = ['k' if reordered_p[i] < 0.05 / 96 else 'w' for i in np.arange(reordered_p.shape[0])]
 
-elif args.orientation == "h":
-    ax1.bar(ind, cosmic_components[sorted_cosmic_idxs], 1, 
-                color=bar_colors[sorted_cosmic_idxs], edgecolor='k')
-    ax2.bar(ind, reordered_ratios[sorted_cosmic_idxs], 1, 
-                color=bar_colors[sorted_cosmic_idxs], edgecolor='k')
+for idx in sorted_cosmic_idxs:
+
+    x = reordered_ratios[sorted_cosmic_idxs][idx]
+    y = cosmic_components[sorted_cosmic_idxs][idx]
+    c = bar_colors[sorted_cosmic_idxs][idx]
+    ec = 'w'
+    s = 100
+    if reordered_p[idx] < 0.05 / 96: ec = 'k'
+
+    mut2format = {"TCT>TAT": (-40, 20),
+                  "TCA>TAA": (-40, 20),
+                  "TCC>TAC": (-40, 20),
+                  "GCA>GAA": (-42, 50),
+                  "GCT>GAT": (5, 20),
+                  "CCA>CAA": (-40, -60),
+                  "CCT>CAT": (5, -35)}
+
+    if reordered_p[idx] < 0.05 / 96:
+        ec = 'k'
+        text = pd.unique(cosmic['kmer'])[sorted_cosmic_idxs][idx]
+        try:
+            xytext = mut2format[text]
+        except KeyError: continue
+        text = text.replace('>', r"$\to$")
+        ax.annotate(text,
+                    (x, y),
+                    xytext=xytext, 
+                    arrowprops=dict(facecolor='k',
+                    headwidth=0.1, headlength=0.2, lw=0.5),
+                    textcoords='offset points', zorder=0)
+    ax.scatter(x, y, edgecolor=ec, s=s, c=c)
+
 
 # map colors to the base mutation type they correspond to
 base_muts = []
@@ -134,27 +163,16 @@ for m in pd.unique(cosmic['kmer'])[sorted_cosmic_idxs][::-1]:
     base_muts.append(base_mut)
 c2mut = dict(zip(colors, base_muts))
 
+
 # create custom legend
-legend_elements = [Patch(facecolor=c, edgecolor='k', label=c2mut[c]) for c in c2mut]
-ax1.legend(handles=legend_elements, frameon=False, 
-            fontsize=14, loc="center")
+legend_elements = [Patch(facecolor=c, edgecolor='w', label=c2mut[c]) for c in c2mut]
+ax.legend(handles=legend_elements, frameon=False, 
+            fontsize=16)
 
-# add extra plot stuff
-if args.orientation == "v":
-    ax1.set_yticks(ind)
-    ax1.set_yticklabels([m.replace('>', r'$\to$') for m in pd.unique(cosmic['kmer'])[sorted_cosmic_idxs]], fontsize=6)
-    ax1.set_xlabel('Fraction of COSMIC\nSBS36 signature', fontsize=14)
-    ax2.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D2 vs. B6 haplotypes at QTL', fontsize=14)
-    ax2.set_yticks([])
-elif args.orientation == "h":
-    ax2.set_xticks(ind)
-    ax2.set_xticklabels([m.replace('>', r'$\to$') for m in pd.unique(cosmic['kmer'])[sorted_cosmic_idxs]], fontsize=6, rotation=90)
-    ax1.set_ylabel('Fraction of COSMIC\nSBS36 signature', fontsize=14)
-    ax2.set_ylabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D2 vs. B6\nhaplotypes at QTL', fontsize=14)
-    ax1.set_xticks([])
+ax.set_ylabel('Fraction of COSMIC SBS36 signature', fontsize=18)
+ax.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D2 vs. B6 haplotypes at QTL', fontsize=18)
 
-sns.despine(ax=ax1, top=True, right=True)
-sns.despine(ax=ax2, top=True, right=True)
+sns.despine(ax=ax, top=True, right=True)
 
 f.savefig(args.out, bbox_inches='tight')
 

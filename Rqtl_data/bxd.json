@@ -10,12 +10,13 @@
   "alleles": ["B", "D"],
   "x_chr": "X",
   "genotypes": {
-    "B": 1,
-    "D": 2
+    "BB": 1,
+	"DD": 2 
   },
   "geno_transposed": true,
   "cross_info": {
     "file": "bxd_crossinfo.csv",
-    "BxD": 0
+    "BxD": 0,
+	"DxB": 1
   }
 }
