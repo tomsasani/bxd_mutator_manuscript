@@ -13,7 +13,7 @@ def mutation_comparison(sub_0_counts: np.array(object),
             sub_1_counts: np.array(object),
             mut2idx: dict(),
             title=r"$log_{2}$" + " ratio of singleton fractions\n" +  \
-                    " in strains with D2 vs. B6 haplotypes at QTL",
+                    " in strains with D vs. B haplotypes at QTL",
             outname='heatmap.png',
             plot_type='heatmap'):
     """
@@ -119,6 +119,8 @@ def mutation_comparison(sub_0_counts: np.array(object),
     sig_adj_pvals = np.where(adj_pvals < 0.05 / 96)
     non_sig_adj_pvals = np.where(adj_pvals >= 0.05 / 96)
 
+    sns.set_style('ticks')
+
     if plot_type == "scatter":
         
         f, ax = plt.subplots()
@@ -169,16 +171,18 @@ def mutation_comparison(sub_0_counts: np.array(object),
 
         ax.legend(handles=custom_legend, frameon=False)
 
-        ax.set_xlabel("Fraction of singletons on C57BL/6J haplotypes")
-        ax.set_ylabel("Fraction of singletons on DBA/2J haplotypes")
+        ax.set_xlabel("Fraction of singletons on B haplotypes")
+        ax.set_ylabel("Fraction of singletons on D haplotypes")
 
         sns.despine(ax=ax, top=True, right=True)
+
+        f.tight_layout()
 
         f.savefig(outname, bbox_inches='tight')
 
 
     elif plot_type == "heatmap": 
-        f, ax = plt.subplots(figsize=(3,8))
+        f, ax = plt.subplots(figsize=(4,8))
         sns.heatmap(out_array, cmap='coolwarm', edgecolor='w', vmin=-1, vmax=1)
 
         # plot "dots" in heatmap where the ratio is significant
@@ -208,7 +212,7 @@ def mutation_comparison(sub_0_counts: np.array(object),
         ax.set_yticklabels(ylabs, rotation=0)
 
         ax.set_title(title, fontsize=12)
-
+        f.tight_layout()
         f.savefig(outname, bbox_inches='tight')
 
 p = argparse.ArgumentParser()

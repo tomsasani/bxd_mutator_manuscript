@@ -2,50 +2,70 @@ import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt 
 import seaborn as sns 
+import argparse
 
-df = pd.read_csv('/Users/tomsasani/harrislab/bxd_mutator_ms/data/wild_mouse_mutyh.csv', names=["interval", "strain", "gt", "ref", "alt"])
+p = argparse.ArgumentParser()
+#p.add_argument("--strain_vars")
+#p.add_argument("--out_a")
+#p.add_argument("--out_b")
+
+args = p.parse_args()
+
+
+
+df = pd.read_csv("/Users/tomsasani/harrislab/bxd_mutator_ms/data/dumont.mutyh.csv", 
+                    names=["interval", "strain", "gt", "ref", "alt"])
 
 samps = pd.unique(df['strain'])
 intervals = pd.unique(df['interval'])
 
-#sample_map = pd.read_csv("/Users/tomsasani/harrislab/bxd_mutator_ms/data/wild_mouse_sample_list.csv")
-#sample_map['Sample'] = sample_map['Sample'].apply(lambda s: s.rstrip())
+mapping = pd.read_excel("/Users/tomsasani/harrislab/bxd_mutator_ms/data/wild_mouse_sample_list.xlsx")
 
-#samps = [s for s in samps if not s.startswith("SRR")]
-#samps = sample_map['Sample'].values.astype(str)
-#samps = 
+mapping['strain'] = mapping['Sample'].astype(str).apply(lambda s: s.rstrip())
+
+mapping = mapping.sort_values("Subspecies")
+
+starts, ends = np.zeros(4), np.zeros(4)
+idx = 0
+prev_s = None
+for i in np.arange(mapping.shape[0]):
+    if prev_s is None: 
+        prev_s = mapping['Subspecies'].values[i]
+        continue
+    if mapping['Subspecies'].values[i] != prev_s:
+        ends[idx] = i
+        idx += 1
+        prev_s = mapping['Subspecies'].values[i]
+        starts[idx] = i
+        continue
+    else: continue
+ends[-1] = mapping.shape[0]
+print (pd.unique(mapping['Subspecies']))
+print (starts, ends)
+
+s2sp = dict(zip(mapping["strain"], mapping['Subspecies']))
+
 out_a = np.zeros((len(intervals), len(samps)))
 
-smp2idx = dict(zip(samps, range(len(samps))))
+smp2idx = dict(zip(mapping['strain'], range(len(mapping['strain']))))
 int2idx = dict(zip(intervals, range(len(intervals))))
 
-uniq_sp = set([s.split('_')[0] for s in samps])
-#uniq_sp = pd.unique(sample_map['Subspecies'])
-
-sp_an = np.zeros((len(uniq_sp), len(intervals)))
-sp_ac = np.zeros((len(uniq_sp), len(intervals)))
-#smp2sp = dict(zip(sample_map['Sample'].values.astype(str), sample_map['Subspecies']))
-sp2idx = dict(zip(uniq_sp, range(len(uniq_sp))))
+#uniq_sp = set([s.split('_')[0] for s in smp2idx])
+uniq_sp = set([s2sp[s] for s in smp2idx])
 
 for i,row in df.iterrows():
     i_i = int2idx[row['interval']]
     strain = row['strain']
-    #if row['strain'] not in smp2idx: 
-    #    strain = row['strain'] + u'\xa0'
-     #   continue
+    
     s_i = smp2idx[row['strain']]
-    #species = smp2sp[row['strain']]
-    sp_i = sp2idx[row['strain'].split('_')[0]]
-    #sp_i = sp2idx[species]
     out_a[i_i, s_i] = row['gt']
 
-    if row['gt'] == -1: continue
-    sp_an[sp_i, i_i] += 2
-    sp_ac[sp_i, i_i] += row['gt']
+# make heatmap in two parts to save space
+sns.set_style('ticks')
+f1, (ax1, ax2) = plt.subplots(1, 2, figsize=(14,2.5), sharex=False, gridspec_kw={'width_ratios': [1, 3]})
+f2, (ax3, ax4) = plt.subplots(1, 2, figsize=(14,2.5), sharex=False, gridspec_kw={'width_ratios': [4, 1]})
 
-f, ax = plt.subplots( figsize=(14,2))
-
-cmap = ['white', 'lightgrey', 'lightsteelblue', 'royalblue']
+cmap = ['white', 'gainsboro', 'lightsteelblue', 'royalblue']
 
 interval2mut = dict(zip(intervals, ["p.Gln5Arg",
                                    "p.Arg24Cys",
@@ -53,35 +73,40 @@ interval2mut = dict(zip(intervals, ["p.Gln5Arg",
                                    "p.Thr312Pro",
                                    "p.Thr313Pro"]))
 
-sns.heatmap(out_a, ax=ax, cmap=cmap[1:], edgecolor='k', lw=0.1)
+tick_colors_dict = dict(zip(uniq_sp, sns.color_palette('colorblind', len(uniq_sp) + 1)))
 
-print (out_a)
+for ax, s, e, t in ((ax1, 0, 8, "$\it{M. spretus}$"), (ax2, 8, 38, '$\it{M. m. castaneus}$'), 
+                    (ax3, 38, 140, '$\it{M. m. domesticus}$'), (ax4, 140, 154, '$\it{M. m. musculus}$')):
 
-samps_reform = ['_'.join(s.split('_')[:2]) for s in samps]
-#samps_reform = samps
-ax.set_xticks(np.arange(len(samps_reform)) + 0.5)
-ax.set_yticks(np.arange(len(intervals)) + 0.5)
-ax.set_yticklabels([interval2mut[it] for it in intervals], rotation=0)
-ax.set_xticklabels(samps_reform, rotation=90)
+    cbar = False
+    if ax == ax2 or ax == ax4: cbar = True
+    sns.heatmap(out_a[:,s:e], ax=ax, cmap=cmap, linecolor='k', linewidth=1, cbar=cbar)
 
-f.savefig('heatmap.png', dpi=300, bbox_inches='tight')
+    if cbar:
+        colorbar = ax.collections[0].colorbar
+        colorbar.set_ticks([0.2, 0.8, 1.4, 2])
+        colorbar.set_ticklabels(['unknown', 'homozgyous\nreference', 'heterozygous', 'homozgyous\nalternate'])
 
-f, ax = plt.subplots()
+    #samps_reform = [s.split('_')[1] for s in samps][s:e]
+    samps_reform = [s2sp[s] for s in samps][s:e]
+    samps_reform = samps[s:e]
+    samps_reform = mapping['strain'].values[s:e]
+    ax.set_xticks(np.arange(len(samps_reform)) + 0.5)
+    ax.set_xticklabels(samps_reform, rotation=90, fontsize=10)
+    if ax == ax1 or ax == ax3:
+        ax.set_yticks(np.arange(len(intervals)) + 0.5)
+        ax.set_yticklabels([interval2mut[it] for it in intervals], rotation=0)
+    else:
+        ax.set_yticks([])
 
-ind = np.arange(len(intervals))
+    #for i,ticklabel in enumerate(ax.get_xticklabels()):
+    #    ticklabel.set_color(tick_colors_dict[samps[s:e][i].split('_')[0]])
 
-colors = sns.color_palette('colorblind', len(uniq_sp))
+    ax.set_title(t)
+f1.tight_layout()
+f2.tight_layout()
+f1.savefig("/Users/tomsasani/harrislab/bxd_mutator_ms/o.png", bbox_inches='tight')
+f2.savefig("/Users/tomsasani/harrislab/bxd_mutator_ms/oo.png", bbox_inches='tight')
 
-sp_af = sp_ac / sp_an
-print (sp_an)
-print (sp_af)
-width = 0.15
-for i in np.arange(len(uniq_sp)):
-    ax.bar(ind + (width * i), sp_af[i], width, color=colors[i], label=[s for s in sp2idx][i], edgecolor='k')
+#f2.savefig(args.out_b, bbox_inches='tight')
 
-ax.legend(frameon=False)
-ax.set_xticks(ind + 0.25)
-ax.set_xticklabels([interval2mut[it] for it in intervals], rotation=30)
-
-
-f.savefig('obar.png', dpi=300, bbox_inches='tight')

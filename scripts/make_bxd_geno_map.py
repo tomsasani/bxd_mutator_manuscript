@@ -63,6 +63,8 @@ hq_markers = new_geno.iloc[sites_all_not_unk]
 # make a new header
 reordered_header = ['marker']
 reordered_header.extend([h for h in header_conv if h != "NA"])
+print (new_geno.head())
+print (reordered_header)
 
 hq_markers_reordered = hq_markers[reordered_header]
 

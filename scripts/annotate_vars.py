@@ -153,8 +153,6 @@ founder_samps = ['4512-JFI-0333_C57BL_6J_two_lanes_phased_possorted_bam',
 
 variants = variants[~variants['bxd_strain'].isin(founder_samps)]
 
-print (len(pd.unique(variants['bxd_strain'])))
-
 # remove co-isogenic samples
 iso_samps = ['4512-JFI-0348_BXD24_TyJ_Cep290_J_phased_possorted_bam',
              '4512-JFI-0347_BXD024_TyJ_phased_possorted_bam',
@@ -178,10 +176,10 @@ variants['bxd_strain_conv'] = variants['bxd_strain'].apply(lambda x: convert_bxd
 
 # add columns to the dataframe with relevant metadata
 variants['epoch'] = variants['bxd_strain'].apply(lambda s: strain2epoch[s])
-variants = variants.query('epoch != 6')
+#variants = variants.query('epoch != 6')
 variants['n_inbreeding_gens'] = variants['bxd_strain'].apply(lambda s: strain2inbreed_gen[s])
 variants = variants[variants['n_inbreeding_gens'] != "NA"]
-variants = variants.query('n_inbreeding_gens >= 20')
+#variants = variants.query('n_inbreeding_gens >= 20')
 variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2intercross_gens[s])
 variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] if s in strain2denom else "NA")
 variants['haplotype_at_qtl'] = variants['bxd_strain'].apply(lambda s: find_haplotype(s))

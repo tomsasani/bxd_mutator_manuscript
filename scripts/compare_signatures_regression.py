@@ -15,6 +15,8 @@ p.add_argument("--cosmic_signature", required=True,
                     help="""file containing mutation spectrum corresponding to SBS36.""")
 p.add_argument("--out", required=True,
                     help="""name of output plots""")
+p.add_argument("--sig_name", required=True,
+                    help="""name of COSMIC signature [SBS36_mm10, SBS18_mm10]""")
 args = p.parse_args()
 
 def revcomp(nuc):
@@ -39,9 +41,6 @@ def convert_cosmic_mutation(row):
 
 
 singleton = pd.read_csv(args.annotated_singletons)
-
-#singleton = singleton.query('bxd_strain == "4512-JFI-0462_BXD68_RwwJ_phased_possorted_bam"')
-#singleton = singleton.query('haplotype_at_qtl == 1')
 
 group_cols = ['kmer', "haplotype_at_qtl"]
 
@@ -81,7 +80,7 @@ uniq_kmers = list(pd.unique(singleton_tidy['kmer']))
 mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 
 # get a list of the 6 "base" mutation types in the signature
-base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in mut2idx]
+base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in uniq_kmers]
 base_muts = base_muts[::16]
 
 # read in the COSMIC signature
@@ -92,7 +91,7 @@ cosmic['kmer'] = cosmic.apply(convert_cosmic_mutation, axis=1)
 
 # get the components of the COSMIC mutation signature
 cosmic = cosmic.sort_values('Type')
-cosmic_components = cosmic['SBS36_mm10'].values
+cosmic_components = cosmic[args.sig_name].values
 
 # make figure object
 
@@ -169,8 +168,8 @@ legend_elements = [Patch(facecolor=c, edgecolor='w', label=c2mut[c]) for c in c2
 ax.legend(handles=legend_elements, frameon=False, 
             fontsize=16)
 
-ax.set_ylabel('Fraction of COSMIC SBS36 signature', fontsize=18)
-ax.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D2 vs. B6 haplotypes at QTL', fontsize=18)
+ax.set_ylabel('Fraction of COSMIC {} signature'.format(args.sig_name.split('_')[0]), fontsize=18)
+ax.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
 
 sns.despine(ax=ax, top=True, right=True)
 

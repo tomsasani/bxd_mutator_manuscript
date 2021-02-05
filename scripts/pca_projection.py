@@ -32,13 +32,11 @@ dumont_filtered = dumont[['Strain',
 ## rename columns
 colnames = ['strain', 'C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G']
 dumont_filtered.columns = colnames
-#
+
 ## format strain names to be more readable
 dumont_filtered['strain'] = dumont_filtered['strain'].apply(lambda x: x.replace('/', '_'))
 
 tidy_spectra = pd.read_csv(args.tidy_spectra)
-
-#bxd_strain_conv  epoch  n_inbreeding_gens  haplotype_at_qtl  n_intercross_gens  n_callable_bp base_mut estimate_type      estimate
 
 tidy_fracs = tidy_spectra.query('estimate_type == "fraction"')
 
@@ -58,11 +56,9 @@ wide_fracs.rename(columns={'A>T':'T>A', 'A>G':'T>C', 'A>C':'T>G'}, inplace=True)
 wide_fracs = wide_fracs[colnames]
 
 combined = pd.concat([wide_fracs, dumont_filtered]).reset_index()
-#combined = wide_fracs
 
 combined = combined.fillna(value=0)
 
-#combined = combined[combined['strain'].isin(['D2', 'B6'])]#, 'DBA_2J', 'DBA_1J', 'C57BL_6NJ'])]
 combined = combined[combined['strain'].isin(['D2', 'B6', 'DBA_2J', 'C57BL_6NJ'])]
 
 combined.to_csv("csv/pca.csv", index=False)
@@ -87,7 +83,6 @@ y = np.delete(y, row_zero)
 X = clr(X)
 
 strains = set(y)
-#strain2color = dict(zip(strains, ['slateblue', 'lightgreen', 'slateblue', 'lightgreen']))#, 'firebrick', 'dodgerblue']))
 strain2color = {"D2": "slateblue",
                 "DBA_2J": "slateblue",
                 "B6": "lightgreen",
@@ -117,10 +112,10 @@ ax1.scatter(x_vals[-2:], y_vals[-2:], c=colors[-2:], edgecolor='k', s=200, lw=2,
 legend_elements = [Patch(facecolor=c, edgecolor='k',
                          label=m) for m,c in strain2color.items()]
 
-legend_elements = [Line2D([0], [0], color='lightgreen', marker='x', label='D2 haplotype'),
-                   Line2D([0], [0], color='lightgreen', marker='o', label='DBA/2J'),
-                   Line2D([0], [0], color='slateblue', marker='x', label='B6 haplotype'),
-                   Line2D([0], [0], color='slateblue', marker='o', label='C57BL/6NJ')]
+legend_elements = [Line2D([0], [0], color='slateblue', marker='x', label='D2 haplotype'),
+                   Line2D([0], [0], color='slateblue', marker='o', label='DBA/2J'),
+                   Line2D([0], [0], color='lightgreen', marker='x', label='B6 haplotype'),
+                   Line2D([0], [0], color='lightgreen', marker='o', label='C57BL/6NJ')]
 
 exp_var = pca.explained_variance_ratio_
 
@@ -138,17 +133,11 @@ for i in range(coef.shape[0]):
 
 ax2.set_ylim(ymin + (ymin / 2), ymax + (ymax / 2))
 ax2.set_xlim(xmin + (xmin / 2), xmax + (xmax / 2))
-#ax1.set_xlabel("PC1 ({}%)".format(round(100 * exp_var[0]), 4), fontsize=18)
-#ax1.set_ylabel("PC2 ({}%)".format(round(100 * exp_var[1]), 3), fontsize=18)
-ax2.set_xlabel("PC1", fontsize=18)
-ax2.set_ylabel("PC2", fontsize=18)
+ax2.set_xlabel("PC1 ({}%)".format(round(100 * exp_var[0]), 4), fontsize=18)
+ax2.set_ylabel("PC2 ({}%)".format(round(100 * exp_var[1]), 3), fontsize=18)
 
 ax1.legend(handles=legend_elements)
 
-#ax1.set_xticks([])
-
 f.tight_layout()
-
-#sns.despine(ax=ax, right=True, top=True)
 
 f.savefig(args.out, bbox_inches='tight')
