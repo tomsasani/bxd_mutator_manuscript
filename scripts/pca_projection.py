@@ -49,7 +49,7 @@ wide_fracs['C>T.1'] = wide_fracs['C>T'] + wide_fracs['CpG>TpG']
 wide_fracs.drop(columns=['C>T'], inplace=True)
 wide_fracs.rename(columns={'C>T.1':'C>T'}, inplace=True)
 
-wide_fracs['strain'] = wide_fracs['haplotype_at_qtl'].apply(lambda h: 'D2' if h == 1 else 'B6')
+wide_fracs['strain'] = wide_fracs['haplotype_at_qtl']
 
 wide_fracs.rename(columns={'A>T':'T>A', 'A>G':'T>C', 'A>C':'T>G'}, inplace=True)
 
@@ -59,7 +59,7 @@ combined = pd.concat([wide_fracs, dumont_filtered]).reset_index()
 
 combined = combined.fillna(value=0)
 
-combined = combined[combined['strain'].isin(['D2', 'B6', 'DBA_2J', 'C57BL_6NJ'])]
+combined = combined[combined['strain'].isin(['D', 'B', 'DBA_2J', 'C57BL_6NJ'])]
 
 combined.to_csv("csv/pca.csv", index=False)
 
@@ -74,18 +74,15 @@ def clr(X):
 
 row_zero = np.unique(np.where(X == 0)[0])
 
-print (row_zero)
-print (X[row_zero])
-
 X = np.delete(X, row_zero, axis=0)
 y = np.delete(y, row_zero)
 
 X = clr(X)
 
 strains = set(y)
-strain2color = {"D2": "slateblue",
+strain2color = {"D": "slateblue",
                 "DBA_2J": "slateblue",
-                "B6": "lightgreen",
+                "B": "lightgreen",
                 "C57BL_6NJ": "lightgreen"}
 
 

@@ -67,35 +67,22 @@ def get_generation(gen, remove_backcrossed=False):
 
     return int(cur_gen)
 
-def find_haplotype(sample, location="chr4:115000000-118000000"):
+def find_haplotype(genos, sample):
 
-    chrom = location.split(':')[0]
-    start, end = location.split(':')[-1].split('-')
-
-    path_pref = "/Users/tomsasani/harrislab/bxd/hmm_haplotypes"
-
-    path = "{}/{}_{}_haplotypes.csv".format(path_pref, sample, chrom)
-
-    tree = defaultdict(IntervalTree)
-    added = defaultdict(int)
-    f = gzip.open(path, 'rt') if path.endswith('.gz') else open(path, 'r')
-    fh = csv.reader(f, delimiter=',')
-    for i, line in enumerate(fh):
-        tree[line[0]].add(int(line[1]), int(line[2]), other=line[-1])
-
-    hap_at_loc = tree[chrom].search(int(start), int(end))
-
-    hap = None
-
-    for interval in hap_at_loc:
-        if interval.start < int(start) and interval.end > int(end):
-            hap = interval.data
-
-    return hap
+    genos_in_smp = genos[sample].values
+    geno_freq = Counter(genos_in_smp)
+    most_freq_geno = "H"
+    for g in ["BB", "DD"]:
+        if geno_freq[g] >= (len(rsids) * 0.75): most_freq_geno = g[0]
+        else: continue
+    
+    return most_freq_geno
 
 p = argparse.ArgumentParser()
 p.add_argument("--strain_metadata", required=True, 
                     help="""metadata about strains in Excel format.""")
+p.add_argument("--strain_genotypes", required=True,
+                    help="""genotypes for each strain at each marker used in QTL scans""")
 p.add_argument("--var_dir", required=True,
                     help="""directory containing per-chromosome BED files \
                             of variants""")
@@ -133,6 +120,21 @@ strain2intercross_gens = dict(zip(summary['bam_name'],
 # map strain names to callable base pairs (referred to as "denominators")
 denominators = pd.read_csv(args.callable_bp, names=['samp', 'denominator'])
 strain2denom = dict(zip(denominators['samp'], denominators['denominator']))
+
+# read in the genotypes of every strain at each QTL marker,
+# and subset to the rsids that correspond to the length of the 
+# 95% QTL credible interval
+genos = pd.read_csv(args.strain_genotypes)
+
+rsids = ["rs47460195",
+         "rs52263933",
+         "rs32445859",
+         "rs13477933",
+         "rs28272806",
+         "rs28256540",
+         "rs27509845"]
+
+genos_at_markers = genos[genos['marker'].isin(rsids)]
 
 # read in the file of variants, containing one BED-format line per variant
 variants = combine_chr_df(args.var_dir + "*.exclude.csv")
@@ -182,6 +184,6 @@ variants = variants[variants['n_inbreeding_gens'] != "NA"]
 #variants = variants.query('n_inbreeding_gens >= 20')
 variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2intercross_gens[s])
 variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] if s in strain2denom else "NA")
-variants['haplotype_at_qtl'] = variants['bxd_strain'].apply(lambda s: find_haplotype(s))
-
+variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, s))
+variants['haplotype'] = variants['haplotype'].apply(lambda h: "B" if h == 0 else "D")
 variants.to_csv(args.out, index=False)

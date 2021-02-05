@@ -59,11 +59,10 @@ group_cols.append('chrom_count')
 singleton_tidy = singleton_tidy[group_cols]
 
 
-
 # generate subsets of variants in each of two categories, defined
 # by the two unique values that the `subset_key` column can take on
-subset_0 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == 0]['chrom_count'].values
-subset_1 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == 1]['chrom_count'].values
+subset_0 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "B"]['chrom_count'].values
+subset_1 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "D"]['chrom_count'].values
 
 # convert counts in the subsets to fractions
 subset_0_fracs = subset_0 / np.sum(subset_0)
@@ -95,20 +94,22 @@ base_muts = base_muts[::16]
 # read in the TOY-KO signature
 toyko = pd.read_excel(args.ohno_data, header=4)
 
+# filter the TOY-KO data to only include the 
+# individual mutations observed, plus or minus 50bp of context
 colname = "SEQUENCE  (50+[W/M]+50)"
-
 toyko = toyko[[colname]]
 toyko = toyko.fillna(0)
 toyko = toyko[toyko[colname] != 0]
 
+# convert the raw sequence to a 3-mer mutation
 toyko['kmer'] = toyko[colname].apply(lambda s: convert_toyko_mutation(s))
 
+# only consider the C>A mutation types (99% of the data)
 toyko = toyko.query('kmer != "not_CA"')
 
+# get the relative frequencies of each 3-mer C>A mutation
 toyko_wide = toyko.groupby('kmer').count().add_suffix('_count').reset_index()
-
 toyko_total = np.sum(toyko_wide[colname + '_count'])
-
 toyko_wide['frac'] = toyko_wide[colname + '_count'] / toyko_total
 
 f, ax = plt.subplots(figsize=(8,8))
@@ -117,6 +118,7 @@ sns.set_style('ticks')
 
 ind = np.arange(len(mut2idx))
 
+# get number of significantly enriched mutation types in the BXD
 n_sig = np.where(pvals < 0.05 / 96)[0].shape[0]
 
 colors = sns.color_palette('colorblind', n_sig)
@@ -128,29 +130,43 @@ for mut in mut2idx:
     if toyko_sub.shape[0] == 0: continue
     toyko_frac = toyko_sub['frac'].values[0]
 
-    bxd_or = log_ratios[mut2idx[mut]]
+    idx = mut2idx[mut]
 
-    bxd_pval = pvals[mut2idx[mut]]
+    # manual adjustments so that text annotations look OK
+    mut2format = {"TCT>TAT": (10, 30),
+                  "TCA>TAA": (-40, 40),
+                  "TCC>TAC": (-40, 20),
+                  "GCA>GAA": (-42, -50),
+                  "GCT>GAT": (-60, 50),
+                  "CCA>CAA": (-40, -60),
+                  "CCT>CAT": (25, -35)}
+    print (mut, log_ratios.shape)
+    x = log_ratios[mut2idx[mut]]
+    y = toyko_frac
 
     edgecolor = "w"
     label = None
     color = "grey"
-    if bxd_pval < 0.05 / 96: 
+    if pvals[idx] < 0.05 / 96: 
         edgecolor = 'k'
         label = mut
-        color = colors[sig_counted]
+        color = "firebrick"
         sig_counted += 1
 
-    ax.scatter(bxd_or, toyko_frac, c=color, s=150, edgecolor=edgecolor, label=label)
+    ax.scatter(x, y, c=color, s=200, edgecolor=edgecolor)
 
-
-
-ax.legend()
-
-# create custom legend
-#legend_elements = [Patch(facecolor=c, edgecolor='w', label=c2mut[c]) for c in c2mut]
-#ax.legend(handles=legend_elements, frameon=False, 
-#            fontsize=16)
+    if pvals[idx] < 0.05 / 96:
+        text = mut
+        try:
+            xytext = mut2format[text]
+        except KeyError: continue
+        text = text.replace('>', r"$\to$")
+        ax.annotate(text,
+                    (x, y),
+                    xytext=xytext, 
+                    arrowprops=dict(facecolor='k',
+                    headwidth=0.1, headlength=0.2, lw=0.5),
+                    textcoords='offset points', zorder=0)
 
 ax.set_ylabel('Fraction of de novo germline\nmutations in TOY-KO mice', fontsize=18)
 ax.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)

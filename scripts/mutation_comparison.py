@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 import math
 import argparse
-from adj_pvalues import adj_pvalues
 
 def mutation_comparison(sub_0_counts: np.array(object),
             sub_1_counts: np.array(object),
@@ -69,6 +68,9 @@ def mutation_comparison(sub_0_counts: np.array(object),
     muts_out = np.zeros(out_shape, dtype=object)
     base_muts_out = np.zeros(out_shape, dtype=object)
 
+    print (sub_0_counts_grid)
+    print (sub_1_counts_grid)
+
     # loop over mutation and its total in sub_0
     for mut_idx,x in enumerate(sub_0_counts):
 
@@ -81,10 +83,11 @@ def mutation_comparison(sub_0_counts: np.array(object),
                                         [y, np.sum(sub_1_counts)] ])
 
         orig_mut = muts[mut_idx]
-
+        print (orig_mut)
         # access the "base" 1-mer mutation and its 5'
         # and 3' flanking nucleotides
         base_mut = orig_mut.split('>')[0][1] + '>' + orig_mut.split('>')[1][1]
+        print (base_mut)
         five_pr, three_pr = orig_mut.split('>')[0][0], orig_mut.split('>')[0][-1]
 
         # calculate the index of this particular 3-mer
@@ -108,9 +111,9 @@ def mutation_comparison(sub_0_counts: np.array(object),
         muts_out[out_idx_x, out_idx_y] = orig_mut
         base_muts_out[out_idx_x, out_idx_y] = base_mut
         pvals[out_idx_x, out_idx_y] = p
-
+    print (base_muts_out)
     # use method from Harris et al. (2017) to adjust p-values
-    adj_pvals = adj_pvalues(pvals, sub_0_counts_grid, sub_1_counts_grid)
+    #adj_pvals = adj_pvalues(pvals, sub_0_counts_grid, sub_1_counts_grid)
 
     adj_pvals = pvals
 
@@ -143,7 +146,6 @@ def mutation_comparison(sub_0_counts: np.array(object),
             if x_frac > x_max: x_max = x_frac
 
             base_mut = base_muts_out[y, x]
-
             ax.scatter(x_frac, y_frac, edgecolor='k', color=mut_colors[base_mut], s=75)
         
         for (y,x) in zip(non_sig_adj_pvals[0], non_sig_adj_pvals[1]):
@@ -242,8 +244,8 @@ df_wide = df_wide[group_cols]
 
 # generate subsets of variants in each of two categories, defined
 # by the two unique values that the `subset_key` column can take on
-subset_0 = df_wide[df_wide[args.subset_key] == 0]['chrom_count'].values
-subset_1 = df_wide[df_wide[args.subset_key] == 1]['chrom_count'].values
+subset_0 = df_wide[df_wide[args.subset_key] == "B"]['chrom_count'].values
+subset_1 = df_wide[df_wide[args.subset_key] == "D"]['chrom_count'].values
 
 # get a mapping of each mutation type to a corresponding index
 uniq_kmers = list(pd.unique(df_wide['kmer']))

@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
+import scipy.stats as ss
 
 plt.rc('font', size=12)
 
@@ -36,11 +37,16 @@ df_total = tidy_rates.groupby(['bxd_strain_conv', 'haplotype_at_qtl']).sum().res
 df_total = df_total[cols]
 df_total['rate_type'] = r'combined'
 
+mean_hap_0 = np.mean(df_ca.query('haplotype_at_qtl == "B"')['estimate'])
+mean_hap_1 = np.mean(df_ca.query('haplotype_at_qtl == "D"')['estimate'])
+print (ss.ttest_ind(df_ca.query('haplotype_at_qtl == "B"')['estimate'], 
+                    df_ca.query('haplotype_at_qtl == "D"')['estimate'],
+                    equal_var=False))
+print (mean_hap_0, mean_hap_1, mean_hap_1 / mean_hap_0)
+
 combined = pd.concat([df_total, df_no_ca, df_ca])
 
-print (combined)
-
-combined['Haplotype at QTL'] = combined['haplotype_at_qtl'].apply(lambda h: "DBA/2J" if h == 1 else "C57BL/6J")
+combined['Haplotype at QTL'] = combined['haplotype_at_qtl']
 
 sns.set_style('ticks')
 

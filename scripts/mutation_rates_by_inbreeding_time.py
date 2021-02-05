@@ -25,7 +25,7 @@ df_ca = tidy_rates.query('base_mut == "C>A"')
 #df_ca = df_ca[cols]
 #df_ca['rate_type'] = r'C$\to$A'
 
-df_ca['Haplotype at QTL'] = df_ca['haplotype_at_qtl'].apply(lambda h: "DBA/2J" if h == 1 else "C57BL/6J")
+df_ca['Haplotype at QTL'] = df_ca['haplotype_at_qtl']
 df_ca['Inbreeding time'] = df_ca['n_inbreeding_gens'].apply(lambda g: "< 20 generations" if g < 20 else ">= 20 generations")
 
 sns.set_style('ticks')

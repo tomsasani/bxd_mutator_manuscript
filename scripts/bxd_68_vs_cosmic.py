@@ -13,6 +13,7 @@ p.add_argument("--annotated_singletons", required=True,
                     help="""annotated singleton variants in extended BED format.""")
 p.add_argument("--cosmic_signature", required=True,
                     help="""file containing mutation spectrum corresponding to SBS36.""")
+p.add_argument("--out", required=True)
 args = p.parse_args()
 
 def revcomp(nuc):
@@ -38,8 +39,7 @@ def convert_cosmic_mutation(row):
 
 singleton = pd.read_csv(args.annotated_singletons)
 
-singleton = singleton.query('haplotype_at_qtl == 1')
-#singleton = singleton.query('bxd_strain == "4512-JFI-0462_BXD68_RwwJ_phased_possorted_bam"')
+singleton = singleton.query('bxd_strain == "4512-JFI-0462_BXD68_RwwJ_phased_possorted_bam"')
 
 group_cols = ['kmer']
 
@@ -50,8 +50,11 @@ singleton_tidy = singleton.groupby(group_cols).count().add_suffix('_count').rese
 group_cols.append('chrom_count')
 singleton_tidy = singleton_tidy[group_cols]
 
+
 # read in the COSMIC signature
 cosmic = pd.read_csv(args.cosmic_signature)
+
+cosmic_sig = args.cosmic_signature.split('/')[-1].split("_")[0].upper() + "_mm10"
 
 # convert COSMIC mutation notation to match mine
 cosmic['kmer'] = cosmic.apply(convert_cosmic_mutation, axis=1)
@@ -61,12 +64,13 @@ uniq_kmers = list(pd.unique(cosmic['kmer']))
 mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 
 # get a list of the 6 "base" mutation types in the signature
-base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in mut2idx]
+#base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in mut2idx]
+base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in uniq_kmers]
 base_muts = base_muts[::16]
 
 # get the components of the COSMIC mutation signature
 cosmic = cosmic.sort_values('Type')
-cosmic_components = cosmic['SBS36_mm10'].values
+cosmic_components = cosmic[cosmic_sig].values
 
 # make figure object
 
@@ -89,10 +93,11 @@ for m in pd.unique(cosmic['kmer']):
     s_count = singleton_tidy[singleton_tidy['kmer'] == m]['chrom_count'].values
     if s_count.shape[0] == 0: continue
     singleton_complete[idx] = s_count
+
 singleton_fracs = singleton_complete / np.sum(singleton_complete)
 
-reordered_fracs = singleton_fracs[reordered_idxs]
 
+reordered_fracs = singleton_fracs[reordered_idxs]
 
 # sort the COSMIC signature in decreasing order of each kmer's
 # contribution to the signature
@@ -100,16 +105,40 @@ sorted_cosmic_idxs = np.argsort(cosmic_components)
 
 singleton_ranks = np.argsort(reordered_fracs)
 cosmic_ranks = np.argsort(cosmic_components)
+colors = sns.color_palette('colorblind', 6)
+bar_colors = np.repeat(colors, 16, axis=0)
+for idx in sorted_cosmic_idxs:
+    
+    x = reordered_fracs[sorted_cosmic_idxs][idx]
+    y = cosmic_components[sorted_cosmic_idxs][idx]
+    c = bar_colors[sorted_cosmic_idxs][idx]
+    ec = 'k'
+    s = 100
 
-print (ss.kendalltau(singleton_ranks, cosmic_ranks))
-
-ax.scatter(reordered_fracs[sorted_cosmic_idxs], 
-           cosmic_components[sorted_cosmic_idxs], 
-           c=bar_colors[sorted_cosmic_idxs], edgecolor='w', s=100)
-
+    mut2format = {"TCT>TAT": (-100, -30),
+                  "TCA>TAA": (-40, 20),
+                  "TCC>TAC": (-40, 40),
+                  "GCA>GAA": (10, 20),
+                  "GCT>GAT": (-100, 20),
+                  "CCA>CAA": (-40, -60),
+                  "CCT>CAT": (5, -35)}
+    text = pd.unique(cosmic['kmer'])[sorted_cosmic_idxs][idx]   
+    if text in mut2format: 
+        ec = 'k'
+        #try:
+        xytext = mut2format[text]
+        #except KeyError: continue
+        text = text.replace('>', r"$\to$")
+        ax.annotate(text,
+                    (x, y),
+                    xytext=xytext, 
+                    arrowprops=dict(facecolor='k',
+                    headwidth=0.1, headlength=0.2, lw=0.5),
+                    textcoords='offset points', zorder=0)
+    ax.scatter(x, y, edgecolor=ec, s=s, c=c)
 # map colors to the base mutation type they correspond to
 base_muts = []
-for m in pd.unique(cosmic['kmer']):
+for m in pd.unique(cosmic['kmer'])[sorted_cosmic_idxs][::-1]:
     nuc_a = m.split('>')[0][1]
     nuc_b = m.split('>')[1][1]
 
@@ -124,7 +153,9 @@ legend_elements = [Patch(facecolor=c, edgecolor='w', label=c2mut[c]) for c in c2
 ax.legend(handles=legend_elements, frameon=False, 
             fontsize=16)
 
-ax.set_ylabel('Fraction of COSMIC SBS36 signature', fontsize=18)
-ax.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D2 vs. B6 haplotypes at QTL', fontsize=18)
-f.savefig('oo.eps', bbox_inches='tight')
+ax.set_ylabel('Fraction of COSMIC {} signature'.format(cosmic_sig.split('_')[0]), fontsize=18)
+ax.set_xlabel('Fraction of singletons in BXD68', fontsize=18)
+
+sns.despine(top=True, right=True)
+f.savefig(args.out, bbox_inches='tight')
 

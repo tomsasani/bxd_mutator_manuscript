@@ -9,7 +9,7 @@ library(RNOmni)
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
   make_option(c("-p", "--phenotype_file"), type="character", default=NULL),
-  make_option(c("-o", "--out_directory"), type="character", default=NULL))
+  make_option(c("-o", "--out_prefix"), type="character", default=NULL))
       
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
@@ -82,6 +82,7 @@ out_frac <- scan1(pr, phenotype_frac, kinship=k,
                   addcovar=covariate_matrix)
 
 print (dim(phenotype_rate))
+print (phen_df_sub_rate$bxd_strain_conv)
 
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
@@ -110,7 +111,7 @@ ymx_frac <- maxlod(out_frac)
 # plot LOD scores genome-wide for fraction phenotype
 setEPS()
 fname = "figure_2a.eps"
-outfile = sprintf("%s/%s", opt$out_directory, fname)
+outfile = sprintf("%s/%s", opt$out_prefix, fname)
 postscript(outfile, width=7, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- c("green3", "slateblue")
@@ -125,7 +126,7 @@ dev.off()
 
 setEPS()
 fname = "figure_2b.eps"
-outfile = sprintf("%s/%s", opt$out_directory, fname)
+outfile = sprintf("%s/%s", opt$out_prefix, fname)
 postscript(outfile, width=4, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- c("green3", "slateblue")
@@ -163,7 +164,7 @@ names(p_new_frac) = inner_join(p_frac, g_frac)$strain
 
 setEPS()
 fname = "figure_2c.eps"
-outfile = sprintf("%s/%s", opt$out_directory, fname)
+outfile = sprintf("%s/%s", opt$out_prefix, fname)
 postscript(outfile, width=4, height=4)
 plot_pxg(g_new_frac, p_new_frac, SEmult=2, 
          ylab="C>A singleton mutation fraction",
