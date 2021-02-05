@@ -6,24 +6,33 @@ CONDA_YAML="/Users/tomsasani/harrislab/bxd_mutator_ms/env.yaml"
 
 muts = ["C>A", "C>T", "C>G", "A>T", "A>G", "A>C"]
 
+# include separate "rule" files for each figure
+include: WORKDIR + "rules/make_figure_one.smk"
+include: WORKDIR + "rules/make_figure_two.smk"
+include: WORKDIR + "rules/make_figure_three.smk"
+include: WORKDIR + "rules/make_figure_four.smk"
+#include: WORKDIR + "rules/make_figure_five.smk"
+include: WORKDIR + "rules/make_supp_figures.smk"
+
 # pseudo-rule to collect all output figures
+main_figures = ["1a", "1b", "1c", "1d", 
+				   "2a", "2b", "2c", "2d",
+				   "3a", "3b",
+				   "4a", "4bc"]
+
+supp_figures = ["1", "4", "5a", "5b",
+				"6a", "6b", "7"]
+
 rule all:
 	input:
-		WORKDIR + "plots/figure_1a.eps",
-		WORKDIR + "plots/figure_1b.eps",
-		WORKDIR + "plots/figure_1c.eps",
-		WORKDIR + "plots/figure_1d.eps",
-		WORKDIR + "plots/figure_2a.eps",
-		WORKDIR + "plots/figure_2b.eps",
-		WORKDIR + "plots/figure_2c.eps",
-		WORKDIR + "plots/figure_3a.eps",
-		WORKDIR + "plots/figure_3b.eps",
-		WORKDIR + "plots/supp_figure_1.eps",
-		WORKDIR + "plots/supp_figure_4.eps",
-		#WORKDIR + "plots/supp_figure_2a.eps",
-#		WORKDIR + "plots/supp_figure_3.eps",
-		WORKDIR + "plots/epoch_heatmap.eps",
+		# generate all of the main and supplementary figures
+		expand(WORKDIR + "plots/figure_{fig_num}.eps", fig_num=main_figures),
+		expand(WORKDIR + "plots/supp_figure_{fig_num}.eps", fig_num=supp_figures),
+		# we generate supplementary figure 3 a little differently, since it
+		# comprises a sub-panel for every mutation type
+		expand(WORKDIR + "plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", mut_type = [m.replace('>', '.') for m in muts])
 
+# annotate a "BED-like" file of variants
 rule annotate_vars:
 	input: 
 		var_dir = WORKDIR + "data/{var_type}/",
@@ -42,6 +51,11 @@ rule annotate_vars:
 			   --callable_bp {input.strain_callable_bp} \
 			   --out {output}
 		"""
+
+# ---
+# convert the "BED-like" file of annotated variants into
+# a "tidy" dataframe 
+# --- 
 rule generate_tidy_data:
 	input:
 		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
@@ -56,136 +70,6 @@ rule generate_tidy_data:
 			   --out_pref /Users/tomsasani/harrislab/bxd_mutator_ms/csv/
 		"""
 
-rule make_figure_one_abd: 
-	input:
-		boxplot_py = WORKDIR + "scripts/make_boxplots.py",
-		mut_rates = WORKDIR + "csv/tidy_mutation_rates.csv",
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv"
-	output:
-		WORKDIR + "plots/figure_1a.eps",
-		WORKDIR + "plots/figure_1b.eps",
-		WORKDIR + "plots/figure_1d.eps"
-	shell:
-		"""
-		python {input.boxplot_py} --tidy_rates {input.mut_rates} \
-								  --tidy_spectra {input.mut_spectra} \
-								  --outdir /Users/tomsasani/harrislab/bxd_mutator_ms/plots/
-		"""
-
-rule make_figure_one_c: 
-	input:
-		cons_py = WORKDIR + "scripts/plot_conservation.py",
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		annotated_common = WORKDIR + "csv/annotated_common.csv",
-	output:
-		WORKDIR + "plots/figure_1c.eps"
-	shell:
-		"""
-		python {input.cons_py} --annotated_singletons {input.annotated_singletons} \
-							   --annotated_common {input.annotated_common} \
-							   --out {output} 
-		"""
-
-rule generate_bxd_geno:
-	input:
-		gts = WORKDIR + "data/bxd_genotypes_at_rsids.csv",
-		make_geno_py = WORKDIR + "scripts/make_bxd_geno_map.py"
-	output:
-		WORKDIR + "Rqtl_data/bxd.geno.new.updated"
-	shell:
-		"""
-		python {input.make_geno_py} --geno_file {input.gts} \
-									--output {output} 
-		"""
-
-rule make_figure_two_ab: 
-	input:
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv",
-		qtl_rscript = WORKDIR + "Rscripts/qtl_mapping.R",
-		qtl_json = WORKDIR + "Rqtl_data/bxd.json",
-		qtl_geno = WORKDIR + "Rqtl_data/bxd.geno.new.updated",
-		qtl_gmap = WORKDIR + "Rqtl_data/bxd.gmap",
-		qtl_pmap = WORKDIR + "Rqtl_data/bxd.pmap",
-		outdir = WORKDIR + "plots/"
-	output:
-		WORKDIR + "plots/figure_2a.eps",
-		WORKDIR + "plots/figure_2b.eps"
-		#WORKDIR + "plots/figure_2c.eps",
-		#WORKDIR + "plots/supp_figure_2a.eps"
-	shell:
-		"""
-		Rscript {input.qtl_rscript} -j {input.qtl_json} \
-									-p {input.mut_spectra} \
-									-o {input.outdir} 
-		"""
-
-rule make_figure_two_c:
-	input:
-		pca_py = WORKDIR + "scripts/pca_projection.py",
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv",
-		dumont_xls = "/Users/tomsasani/Downloads/msz026_supp/SuppTables_concat.xlsx"
-	output:
-		WORKDIR + "plots/figure_2c.eps"
-	shell:
-		"""
-		python {input.pca_py} --tidy_spectra {input.mut_spectra} \
-							  --dumont_xls {input.dumont_xls} \
-							  --out {output}
-		"""
-		
-
-rule make_figure_three_a:
-	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		comp_py = WORKDIR + "scripts/mutation_comparison.py"
-	output:
-		WORKDIR + "plots/figure_3a.eps"
-	shell:
-		"""
-		python {input.comp_py} --annotated_singletons {input.annotated_singletons} \
-							   --out {output} \
-							   -subset_key haplotype_at_qtl \
-							   -plot_type heatmap
-		"""
-
-rule make_figure_three_b:
-	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		cosmic_sig = WORKDIR + "data/sbs36_cosmic_signatures.csv",
-		comp_py = WORKDIR + "scripts/compare_signatures_regression.py"
-	output:
-		WORKDIR + "plots/figure_3b.eps"
-	shell:
-		"""
-		python {input.comp_py} --annotated_singletons {input.annotated_singletons} \
-						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output}
-		"""
-
-rule make_supp_figure_one:
-	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		comp_py = WORKDIR + "scripts/mutation_comparison.py"
-	output:
-		WORKDIR + "plots/supp_figure_1.eps"
-	shell:
-		"""
-		python {input.comp_py} --annotated_singletons {input.annotated_singletons} \
-							   --out {output} \
-							   -subset_key haplotype \
-							   -plot_type scatter
-		"""
-rule make_supp_figure_four:
-	input:
-		script_py = WORKDIR + "scripts/mutation_rates_by_haplotype.py",
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv"
-	output:
-		WORKDIR + "plots/supp_figure_4.eps"
-	shell:
-		"""
-		python {input.script_py} --tidy_spectra {input.mut_spectra} \
-							   --out {output} 
-		"""
 
 rule make_epoch_sharing_fig:
 	input:
@@ -196,5 +80,5 @@ rule make_epoch_sharing_fig:
 	shell:
 		"""
 		python {input.heatmap_py} --annotated_vars {input.annotated_vars} \
-							   	  --out {output}
+									 --out {output}
 		"""
