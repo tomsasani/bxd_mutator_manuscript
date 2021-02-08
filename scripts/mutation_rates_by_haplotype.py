@@ -18,12 +18,14 @@ args = p.parse_args()
 # read in tidy data
 tidy_spectra = pd.read_csv(args.tidy_spectra)
 
-tidy_spectra = tidy_spectra.astype({'epoch': 'int'})
-
+# only consider mutation rates (not fractions)
 tidy_rates = tidy_spectra.query('estimate_type == "rate"')
 
 cols = ['bxd_strain_conv', 'haplotype_at_qtl', 'estimate']
 
+# subset dataframe into three separate dataframes
+# (one for just C>A mutations, one for all but C>A mutations,
+# and one for the overall mutation rate including all types)
 df_no_ca = tidy_rates.query('base_mut != "C>A"')
 df_ca = tidy_rates.query('base_mut == "C>A"')
 df_ca = df_ca[cols]
@@ -44,6 +46,8 @@ print (ss.ttest_ind(df_ca.query('haplotype_at_qtl == "B"')['estimate'],
                     equal_var=False))
 print (mean_hap_0, mean_hap_1, mean_hap_1 / mean_hap_0)
 
+# combine the three dataframes, which now each have a unique
+# "rate_type" value
 combined = pd.concat([df_total, df_no_ca, df_ca])
 
 combined['Haplotype at QTL'] = combined['haplotype_at_qtl']

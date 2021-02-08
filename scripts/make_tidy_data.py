@@ -10,8 +10,14 @@ import glob
 import sys
 import argparse
 
-def calc_new_gens(n_gens):
+def calc_new_gens(n_gens: int) -> int:
+    """
+    use the method from Uchimura et al. (2015) to calculate
+    the number of generations in which an observed homozgyous
+    singleton could have occurred in a given strain.
+    """
     p_k_vals = defaultdict(float)
+
     for k in np.arange(1, n_gens + 1):
         if k == 1: 
             p_k = 0
@@ -30,7 +36,6 @@ def calc_new_gens(n_gens):
     for k in np.arange(1, n_gens + 1):
         l_n += ((n_gens - k) * p_k_vals[k])
     return l_n
-    #return row['count'] / (row['n_callable_bp'] * int(l_n))
 
 p = argparse.ArgumentParser()
 p.add_argument("--annotated_singletons", required=True, 
@@ -115,8 +120,6 @@ smp2mut2clr = defaultdict(lambda: defaultdict(float))
 for s_i,s in enumerate(samps):
     for mut_i,m in enumerate(muts):
         smp2mut2clr[s][m] = sbf_clr[s_i, mut_i]
-
-
 
 # and add a column with the rate of mutation for each mutation type
 #df_wide['rate'] = df_wide['count'] / df_wide['n_inbreeding_gens'] / df_wide['n_callable_bp']

@@ -11,72 +11,7 @@ import sys
 import math
 import argparse
 import re
-
-def to_base_mut(k, cpg=False):
-    if k == '0' or k == 0: return '0'
-    if k == 'indel': return 'indel'
-    nuc_1, nuc_2 = k.split('>')
-    if not (len(nuc_1) == 3 and len(nuc_2) == 3): return 'indel'
-    base = 'na'
-    if len(nuc_1) % 2 == 1:
-        mid_idx = int(len(nuc_1) / 2)
-        base = nuc_1[mid_idx] + '>' + nuc_2[mid_idx]
-        subseq_nuc = nuc_1[mid_idx + 1]
-        if cpg:
-            if nuc_1[mid_idx] == 'C' and subseq_nuc == 'G' and nuc_2[mid_idx] == 'T': base = 'CpG>TpG'
-    else: base = k
-    return base
-
-def combine_chr_df(path):
-    main_df = None
-    for f in glob.glob(path):
-        if main_df is None:
-            main_df = pd.read_csv(f)
-        else:
-            main_df = pd.concat([main_df, pd.read_csv(f)])
-    return main_df
-
-def convert_bxd_name(name: str) -> str:
-    """
-    depending on the VCF file we're using we may
-    have to convert BXD strain names for portability
-    """
-    bxd_line_name = '_'.join(name.split('_phased')[0].split('_')[1:])
-    bxd_line_num = name.split('_phased')[0].split('_')[0].split('-')[-1]
-
-    bxd_line_new = bxd_line_name + '_' + bxd_line_num
-
-    return bxd_line_new
-
-def get_generation(gen, remove_backcrossed=False):
-    split = None
-    try:
-        split = re.split('(\d+)', gen)
-    except TypeError: return 'NA'
-
-    cur_gen = 0
-
-    for i,e in enumerate(split):
-        if 'F' in e:
-            cur_gen += int(split[i + 1])
-        elif 'N' in e:
-            if remove_backcrossed: return 'NA'
-            else:
-                cur_gen /= (2 ** int(split[i + 1]))
-        else: continue
-
-    return int(cur_gen)
-
-def find_haplotype(genos, sample):
-
-    genos_in_smp = genos[sample].values
-    geno_freq = Counter(genos_in_smp)
-    most_freq_geno = "H"
-    for g in ["BB", "DD"]:
-        if geno_freq[g] >= (len(rsids) * 0.75): most_freq_geno = g[0]
-        else: continue
-    
-    return most_freq_geno
+from utils import *
 
 p = argparse.ArgumentParser()
 p.add_argument("--strain_metadata", required=True, 

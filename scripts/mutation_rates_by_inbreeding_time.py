@@ -17,14 +17,16 @@ args = p.parse_args()
 # read in tidy data
 tidy_spectra = pd.read_csv(args.tidy_spectra)
 
+# only consider mutation rates (not fractions)
 tidy_rates = tidy_spectra.query('estimate_type == "rate"')
 
 cols = ['bxd_strain_conv', 'haplotype_at_qtl', 'estimate']
 
+# limit dataframe to only C>A mutations
 df_ca = tidy_rates.query('base_mut == "C>A"')
-#df_ca = df_ca[cols]
-#df_ca['rate_type'] = r'C$\to$A'
 
+# discretize the inbreeding time of each strain to be
+# less than or greater than 20 generations
 df_ca['Haplotype at QTL'] = df_ca['haplotype_at_qtl']
 df_ca['Inbreeding time'] = df_ca['n_inbreeding_gens'].apply(lambda g: "< 20 generations" if g < 20 else ">= 20 generations")
 
@@ -42,7 +44,7 @@ handles, labels = ax.get_legend_handles_labels()
 
 # When creating the legend, only use the first two elements
 # to effectively remove the last two.
-ax.legend(handles[2:], labels[2:], frameon=False, title="Haplotype at QTL")
+ax.legend(handles[3:], labels[3:], frameon=False, title="Haplotype at QTL")
 
 sns.despine(ax=ax, top=True, right=True)
 

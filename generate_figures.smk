@@ -30,7 +30,7 @@ rule all:
 		expand(WORKDIR + "plots/supp_figure_{fig_num}.eps", fig_num=supp_figures),
 		# we generate supplementary figure 3 a little differently, since it
 		# comprises a sub-panel for every mutation type
-		expand(WORKDIR + "plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", mut_type = [m.replace('>', '.') for m in muts])
+		#expand(WORKDIR + "plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", mut_type = [m.replace('>', '.') for m in muts])
 
 # annotate a "BED-like" file of variants
 rule annotate_vars:
@@ -38,7 +38,8 @@ rule annotate_vars:
 		var_dir = WORKDIR + "data/{var_type}/",
 		strain_metadata = WORKDIR + "data/bam_names_to_metadata.xlsx",
 		strain_callable_bp = WORKDIR + "data/smp2denominator.csv",
-		annotate_py = WORKDIR + "scripts/annotate_vars.py"
+		annotate_py = WORKDIR + "scripts/annotate_vars.py",
+		qtl_geno = WORKDIR + "Rqtl_data/bxd.geno.new.updated"
 	output:
 		WORKDIR + "csv/annotated_{var_type}.csv"
 	conda:
@@ -47,6 +48,7 @@ rule annotate_vars:
 		"""
 		python {input.annotate_py} \
 			   --var_dir {input.var_dir} \
+			   --strain_genotypes {input.qtl_geno} \
 			   --strain_metadata {input.strain_metadata} \
 			   --callable_bp {input.strain_callable_bp} \
 			   --out {output}

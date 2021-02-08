@@ -5,3 +5,7 @@ __pycache__/*
 Rscripts/.*
 .snakemake/*
 .DS_Store
+*.png
+*.eps
+*.ipynb
+*.csv

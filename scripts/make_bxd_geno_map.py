@@ -1,18 +1,7 @@
 import pandas as pd
 import numpy as np
 import argparse
-
-def convert_bxd_name(name: str) -> str:
-    """
-    depending on the VCF file we're using we may
-    have to convert BXD strain names for portability
-    """
-    bxd_line_name = '_'.join(name.split('_phased')[0].split('_')[1:])
-    bxd_line_num = name.split('_phased')[0].split('_')[0].split('-')[-1]
-
-    bxd_line_new = bxd_line_name + '_' + bxd_line_num
-
-    return bxd_line_new
+from utils import convert_bxd_name
 
 p = argparse.ArgumentParser()
 p.add_argument("--geno_file")
@@ -63,8 +52,6 @@ hq_markers = new_geno.iloc[sites_all_not_unk]
 # make a new header
 reordered_header = ['marker']
 reordered_header.extend([h for h in header_conv if h != "NA"])
-print (new_geno.head())
-print (reordered_header)
 
 hq_markers_reordered = hq_markers[reordered_header]
 

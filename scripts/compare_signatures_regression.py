@@ -5,26 +5,19 @@ from matplotlib.patches import Patch
 import seaborn as sns
 import numpy as np
 import argparse
-
-plt.rc('font', size=16)
-
-p = argparse.ArgumentParser()
-p.add_argument("--annotated_singletons", required=True, 
-                    help="""annotated singleton variants in extended BED format.""")
-p.add_argument("--cosmic_signature", required=True,
-                    help="""file containing mutation spectrum corresponding to SBS36.""")
-p.add_argument("--out", required=True,
-                    help="""name of output plots""")
-p.add_argument("--sig_name", required=True,
-                    help="""name of COSMIC signature [SBS36_mm10, SBS18_mm10]""")
-args = p.parse_args()
-
-def revcomp(nuc):
-    d = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
-
-    return ''.join([d[n] for n in list(nuc)])[::-1] 
+from utils import revcomp
 
 def convert_cosmic_mutation(row):
+    """
+    convert cosmic mutation notation to 3-mer 
+    mutation notation so that it matches the BXD data
+
+    >>> convert_cosmic_mutation("C>G,ACA")
+    "ACA>AGA"
+    >>> convert_cosmic_mutation("T>C,CTG")
+    "CAG>CGG"
+    """
+    
     context = row['Subtype']
     mutation = row['Type']
 
@@ -40,8 +33,20 @@ def convert_cosmic_mutation(row):
     return context + '>' + e_kmer
 
 
+p = argparse.ArgumentParser()
+p.add_argument("--annotated_singletons", required=True, 
+                    help="""annotated singleton variants in extended BED format.""")
+p.add_argument("--cosmic_signature", required=True,
+                    help="""file containing mutation spectrum corresponding to SBS36.""")
+p.add_argument("--out", required=True,
+                    help="""name of output plots""")
+p.add_argument("--sig_name", required=True,
+                    help="""name of COSMIC signature [SBS36_mm10, SBS18_mm10]""")
+args = p.parse_args()
+
+plt.rc('font', size=16)
+
 singleton = pd.read_csv(args.annotated_singletons)
-print (singleton)
 
 group_cols = ['kmer', "haplotype_at_qtl"]
 
@@ -51,8 +56,6 @@ singleton_tidy = singleton.groupby(group_cols).count().add_suffix('_count').rese
 # subset tidy dataframe to relevant columns
 group_cols.append('chrom_count')
 singleton_tidy = singleton_tidy[group_cols]
-
-print (singleton_tidy)
 
 # generate subsets of variants in each of two categories, defined
 # by the two unique values that the `subset_key` column can take on
@@ -64,7 +67,7 @@ muts_0 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "B"]['kmer'].value
 muts_1 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "D"]['kmer'].values
 
 assert np.sum(muts_0 == muts_1) == muts_0.shape[0]
-print (muts_0)
+
 # convert counts in the subsets to fractions
 subset_0_fracs = subset_0 / np.sum(subset_0)
 subset_1_fracs = subset_1 / np.sum(subset_1)
@@ -101,8 +104,6 @@ cosmic['kmer'] = cosmic.apply(convert_cosmic_mutation, axis=1)
 # the `log_ratios` numpy array
 cosmic['kmer_idx'] = cosmic['kmer'].apply(lambda k: mut2idx[k])
 cosmic = cosmic.sort_values('kmer_idx')
-
-print (cosmic)
 
 # get the components of the COSMIC mutation signature
 #cosmic = cosmic.sort_values('Type')

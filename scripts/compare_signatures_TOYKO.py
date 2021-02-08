@@ -5,6 +5,7 @@ from matplotlib.patches import Patch
 import seaborn as sns
 import numpy as np
 import argparse
+from utils import revcomp
 
 plt.rc('font', size=16)
 
@@ -17,17 +18,15 @@ p.add_argument("--out", required=True,
                     help="""name of output plots""")
 args = p.parse_args()
 
-def revcomp(nuc):
-    d = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
-
-    return ''.join([d[n] for n in list(nuc)])[::-1] 
-
 def convert_toyko_mutation(sequence):
+    """
+    convert TOY-KO mutations (reported as a string of 50
+    upstream nucleotides plus the mutation plus a string of 50
+    downstream nucleotides) to notation that matches the BXD data
+    """
     mutation = sequence.split('[')[-1].split(']')[0]
     left_flank_1bp = sequence.split('/')[0].split('[')[0][-1]
     right_flank_1bp = sequence.split('/')[-1].split(']')[-1][0]
-
-    #print (mutation, left_flank_1bp, right_flank_1bp)
 
     anc, der = mutation.split('/')
 
@@ -40,13 +39,11 @@ def convert_toyko_mutation(sequence):
     rc = False
     if mutation[0] == "G":
         rc = True
- 
     
     if rc: return "{}>{}".format(revcomp(kmer_anc), revcomp(kmer_der))
     else: return "{}>{}".format(kmer_anc, kmer_der)
 
-
-
+# read in BXD singleton data
 singleton = pd.read_csv(args.annotated_singletons)
 
 group_cols = ['kmer', "haplotype_at_qtl"]
@@ -57,7 +54,6 @@ singleton_tidy = singleton.groupby(group_cols).count().add_suffix('_count').rese
 # subset tidy dataframe to relevant columns
 group_cols.append('chrom_count')
 singleton_tidy = singleton_tidy[group_cols]
-
 
 # generate subsets of variants in each of two categories, defined
 # by the two unique values that the `subset_key` column can take on
@@ -140,7 +136,7 @@ for mut in mut2idx:
                   "GCT>GAT": (-60, 50),
                   "CCA>CAA": (-40, -60),
                   "CCT>CAT": (25, -35)}
-    print (mut, log_ratios.shape)
+
     x = log_ratios[mut2idx[mut]]
     y = toyko_frac
 
