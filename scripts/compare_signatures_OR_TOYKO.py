@@ -149,7 +149,7 @@ for mut in mut2idx:
         color = "firebrick"
         sig_counted += 1
 
-    ax.scatter(x, y, c=color, s=200, edgecolor=edgecolor)
+    ax.scatter(x, y, color=color, s=200, edgecolor=edgecolor)
 
     if pvals[idx] < 0.05 / 96:
         text = mut

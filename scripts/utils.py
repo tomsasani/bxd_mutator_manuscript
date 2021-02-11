@@ -1,7 +1,10 @@
 import doctest
 import pandas as pd
+import re
+import glob
+from collections import Counter
 
-def to_base_mut(k: str, cpg=False): -> str
+def to_base_mut(k: str, cpg=False) -> str:
     """
     convert a 3-mer mutation type into its 
     single-nucleotide mutation type
@@ -31,9 +34,9 @@ def to_base_mut(k: str, cpg=False): -> str
     # special situation where mutation is CpG>TpG
     subseq_nuc = nuc_1[mid_idx + 1]
     if cpg:
-        if base == "C>T" and nuc_2[mid_idx] == 'T': 
+        if base == "C>T" and subseq_nuc == 'G': 
             base = 'CpG>TpG'
-    
+        
     return base
 
 def convert_bxd_name(name: str) -> str:
@@ -86,7 +89,8 @@ def get_generation(gen: str) -> int:
     split = None
     try:
         split = re.split('(\d+)', gen)
-    except TypeError: return 'NA'
+    except TypeError: 
+        return 'NA'
 
     cur_gen = 0
 
@@ -103,7 +107,7 @@ def get_generation(gen: str) -> int:
 
     return int(cur_gen)
 
-def find_haplotype(genos: list, sample: str) -> str:
+def find_haplotype(genos: list, sample: str, rsids: []) -> str:
     """
     figure out whether each strain has a B or D haplotype,
     or is heterozygous, at the genotype marker at the peak

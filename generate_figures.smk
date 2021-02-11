@@ -18,10 +18,10 @@ include: WORKDIR + "rules/make_supp_figures.smk"
 main_figures = ["1a", "1b", "1c", "1d", 
 				   "2a", "2b", "2c", "2d",
 				   "3a", "3b",
-				   "4a", "4bc"]
+				   "4a", "4bc", "4d"]
 
 supp_figures = ["1", "4", "5a", "5b",
-				"6a", "6b", "7"]
+				"6a", "6b", "6c", "6d", "7"]
 
 rule all:
 	input:
@@ -30,7 +30,8 @@ rule all:
 		expand(WORKDIR + "plots/supp_figure_{fig_num}.eps", fig_num=supp_figures),
 		# we generate supplementary figure 3 a little differently, since it
 		# comprises a sub-panel for every mutation type
-		#expand(WORKDIR + "plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", mut_type = [m.replace('>', '.') for m in muts])
+		expand(WORKDIR + "plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", 
+						mut_type = [m.replace('>', '.') for m in muts])
 
 # annotate a "BED-like" file of variants
 rule annotate_vars:

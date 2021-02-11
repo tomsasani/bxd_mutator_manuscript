@@ -159,7 +159,7 @@ for mut in mut2idx:
                     arrowprops=dict(facecolor='k',
                     headwidth=0.1, headlength=0.2, lw=0.5),
                     textcoords='offset points', zorder=0)
-    ax.scatter(x, y, edgecolor=ec, s=s, c=c)
+    ax.scatter(x, y, edgecolor=ec, s=s, color=c)
 
 # create custom legend
 legend_elements = [Patch(facecolor=mut2c[mut], edgecolor='w', label=mut) for mut in mut2c]

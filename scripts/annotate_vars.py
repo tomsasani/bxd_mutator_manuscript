@@ -35,8 +35,7 @@ args = p.parse_args()
 summary = pd.read_excel(args.strain_metadata)
 
 # convert verbose filial generations to integer numbers of generations in the file
-summary['gen_at_seq'] = summary['Generation at sequencing'].apply(get_generation,
-                                                                  remove_backcrossed=True)
+summary['gen_at_seq'] = summary['Generation at sequencing'].apply(get_generation)
 
 # map expanded strain names to generation numbers
 strain2inbreed_gen = dict(zip(summary['bam_name'], summary['gen_at_seq']))
@@ -68,6 +67,8 @@ rsids = ["rs47460195",
          "rs28272806",
          "rs28256540",
          "rs27509845"]
+
+rsids = ["rs32445859"]
 
 genos_at_markers = genos[genos['marker'].isin(rsids)]
 
@@ -115,10 +116,11 @@ variants['bxd_strain_conv'] = variants['bxd_strain'].apply(lambda x: convert_bxd
 variants['epoch'] = variants['bxd_strain'].apply(lambda s: strain2epoch[s])
 #variants = variants.query('epoch != 6')
 variants['n_inbreeding_gens'] = variants['bxd_strain'].apply(lambda s: strain2inbreed_gen[s])
-variants = variants[variants['n_inbreeding_gens'] != "NA"]
+variants = variants[~variants['n_inbreeding_gens'].isin([-1, "NA"])]
 #variants = variants.query('n_inbreeding_gens >= 20')
 variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2intercross_gens[s])
-variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] if s in strain2denom else "NA")
-variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, s))
+variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] \
+                                                                if s in strain2denom else "NA")
+variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, s, rsids))
 variants['haplotype'] = variants['haplotype'].apply(lambda h: "B" if h == 0 else "D")
 variants.to_csv(args.out, index=False)
