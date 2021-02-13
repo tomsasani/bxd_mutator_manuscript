@@ -4,9 +4,9 @@ The code in this repository is sufficient to reproduce the entire manuscript fro
 downloading a reference genome to generating supplementary figures. To do so, **there are a few dependencies you'll need**:
 
 ### Software dependencies
-Make sure that these are installed prior to running any pipelines!
+Make sure that these are installed and in your system $PATH!
 
-#### Only required if you want to generate figures using pre-computed singleton data
+#### Required if you only want to generate figures using pre-computed singleton data
 * [conda](https://docs.conda.io/en/latest/)
 * [snakemake](https://snakemake.readthedocs.io/en/stable/)
 
@@ -15,7 +15,7 @@ Make sure that these are installed prior to running any pipelines!
 * [bedops](https://bedops.readthedocs.io/en/latest/)
 * [tabix](http://www.htslib.org/doc/tabix.html)
 
-All `python` dependencies will be handled by `snakemake` and `conda` when a pipeline is executed. 
+All `python` dependencies will be handled by `conda` when a pipeline is executed. 
 
 ### Directory structure
 
@@ -30,27 +30,31 @@ All `python` dependencies will be handled by `snakemake` and `conda` when a pipe
 * `data/`
     * raw data files output by the `count_mutations.smk` pipeline (e.g., singleton calls, HMM-inferred haplotypes, etc.)
 * `misc/`
-    * miscellaneous data files needed to count singletons
+    * miscellaneous data files needed to count or annotate singletons
 * `figure_generation.yaml`
     * `conda` YAML file containing all of the dependencies required to generate figures.
 * `singleton_calling.yaml`
     * `conda` YAML file containing all of the dependencies required to call singletons.
+* `generate_figures.smk`
+    * main `snakemake` pipeline that generates main and supplementary figures
+* `identify_singletons.smk`
+    * main `snakemake` pipeline that identifies singletons using the BXD VCF
 
 ### Usage
 
 The basic outline of the pipeline is as follows:
 
-1) Identify high-quality singleton mutations from the BXD VCF using `count_mutations.smk`
+1) Identify high-quality singleton mutations from the BXD VCF using `count_mutations.smk`.
 
-2) Annotate singleton calls and generate figures using `generate_figures.smk`
+2) Annotate singleton calls and generate figures using `generate_figures.smk`.
 
-##### NOTE!
+#### NOTE!
 
-**Identifying singletons is much, much easier if the `count_mutations.smk` pipeline is run on a high-performance computing system. The `count_mutations.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores.**
+Identifying singletons is much, much easier if the `count_mutations.smk` pipeline is run on a high-performance computing system. The `count_mutations.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores.
 
-**For this reason, the `data/` directory already contains the files output by the `count_mutations.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.**
+For this reason, the `data/` directory already contains the files output by the `count_mutations.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.
 
-To generate all of the figures in the manuscript **using pre-computed files in the `data/` directory**, run the following steps.
+### How to generate figures using pre-computed data files
 
 ```
 # enter a directory of your choice (make sure
@@ -74,6 +78,18 @@ snakemake \
 ```
 
 This will produce plots from every main and supplementary figure in the manuscript, accessible in the `plots/` directory.
+
+### How to generate all raw data
+
+#### What steps are involved?
+
+1) Download mm10 reference assemblies for each chromosome.
+2) Download phastCons 60-way placental mammal WIG files for each chromosome, and convert to BED format.
+3) Use an HMM to identify D2 and B6 haplotype tracts in each BXD.
+4) Determine the 3-mer nucleotide composition of D2 and B6 haplotypes in each BXD.
+5) Identify singletons in each BXD.
+6) Identify "fixed" variants in D2 that we'll use for conservation score comparisons.
+7) Get genotypes of every BXD at each of ~7,000 markers we'll use for QTL mapping.
 
 To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and with at least 100 Gbp of free space in the working directory.
 
@@ -104,6 +120,8 @@ snakemake \
         -j 20 \ # number of simultaneous jobs to run
         -s singleton_calling.smk # name of the snakemake pipeline
 ```
+
+### How to generate all raw data using cluster job submission
 
 The Department of Genome Sciences at UW uses the Sun Grid Engine (SGE) for job management on the cluster. As an example, I've included a config file that can be used in conjunction with the following command to run the `singleton_calling.smk` pipeline on a system with SGE. If you use a different job management system (e.g., SLURM), there is documentation on how to submit jobs using `snakemake` [here](https://snakemake.readthedocs.io/en/stable/executing/cluster.html).
 
