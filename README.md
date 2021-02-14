@@ -58,7 +58,16 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 ```
 ## Usage for generating manuscript figures using precomputed data
 
-In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **Before moving on to the command-line instructions below, first get these third-party datasets as follows:** 
+If you'd rather not spend the time (and compute) needed to generate all of the singleton data from scratch, I've included the output of `identify_singletons.smk` in the `data/` directory. These files include raw singleton calls and HMM-derived haplotype tracts in each BXD, among others. The command-line instructions below will reproduce every figure in the manuscript using these data.
+
+#### What steps are involved?
+
+1) Annotate singletons and fixed variants with various metadata.
+2) Construct "tidy" dataframes containing summary information about mutation rates and spectra in each BXD.
+3) Perform QTL scans for phenotypes related to the mutation rate.
+4) Make plots that constitute all figures.
+
+In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **Before moving on to the command-line instructions below, first obtain these third-party datasets as follows:** 
 
 * singleton data from [Dumont 2019](https://academic.oup.com/mbe/article/36/5/865/5315518)
     * download ZIP file from [Supplementary data](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/mbe/36/5/10.1093_molbev_msz026/2/msz026_supp.zip?Expires=1616302324&Signature=u8neUFiV~0aBABDNG-ZPeMwd~usDZPmIO5TVjLHqKVcjHXrUWBm7MnR1ZJpSkMmDmQhMGrcdK~G7hySKLp79xgpQnj-SCFD09Hj7e9uCi9oYvVT-guMav1JY6qEMzSCubzlChpHfItUKJt15lXbxmuT2FxTibIs2gSrXvHCexmwGLxQYCoIAZJHY1nOjOfSDDlIejE-aGrPFozB86PXTZz~uM9JuAnmfZ5wmARxwuEzOHMfYZWh7WnWzeXEaNwKqYzrYHYDhej5sq~LSOfsQTzSPI-nrtn~KOV7x9ckk0RzqJ0kIhmF0uBLMkF8grDXTTRTHEjYV1dBALvxO1ZMVmA__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) associated with the manuscript
@@ -107,7 +116,7 @@ This will produce plots from every main and supplementary figure in the manuscri
 
 To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 100 Gbp of free space in the working directory.**
 
-Step #5 above is by far the most time-consuming -- the method used to get 3-mer nucleotide compositions in haplotype in each sample on each chromosome is slow and generates a unique file for every combination of sample and chromosome (almost 3,000 individual files). Since the `data/` directory already contains precomputed versions of these files, I've removed the Snakemake rule that generates the files from `identify_singletons.smk`. If you want to recreate these files, just uncomment the part of the `rule all:` input that generates the nucleotide composition files and re-run the pipeline.
+Step #4 above is by far the most time-consuming -- the method used to get 3-mer nucleotide compositions in haplotype in each sample on each chromosome is slow and generates a unique file for every combination of sample and chromosome (almost 3,000 individual files). Since the `data/` directory already contains precomputed versions of these files, I've removed the Snakemake rule that generates the files from `identify_singletons.smk`. If you want to recreate these files, just uncomment the part of the `rule all:` input that generates the nucleotide composition files and re-run the pipeline.
 
 ```
 # enter a directory of your choice (make sure
