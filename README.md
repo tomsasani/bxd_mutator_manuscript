@@ -5,23 +5,27 @@ Thomas A. Sasani, David G. Ashbrook, Abraham A. Palmer, Robert W. Williams, Jona
 The code in this repository is sufficient to reproduce the entire manuscript from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to
 simply generate the figures in the manuscript using pre-computed data, since the latter require very large input files and quite a bit of time to create.
 
-The basic outline of the pipeline is as follows:
+**The basic outline of the pipeline is as follows:**
 
-1) Identify high-quality singleton mutations from the BXD VCF using `count_mutations.smk`.
+1) Identify high-quality singleton mutations from the BXD VCF using `identify_singletons.smk`.
 
 2) Annotate singleton calls and generate figures using `generate_figures.smk`.
 
->Identifying singletons is much, much easier if the `count_mutations.smk` pipeline is run on a high-performance computing system. The `count_mutations.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores.
+**IMPORTANT NOTE:**
 
->For this reason, the `data/` directory already contains the files output by the `count_mutations.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.
+>Identifying singletons is much, much easier if the `identify_singletons.smk` pipeline is run on a high-performance computing system. The `identify_singletons.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores. It also involves hundreds of individual steps, so it will finish much more quickly if those steps are run in parallel.
+
+>For this reason, the `data/` directory already contains the files output by the `identify_singletons.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.
+
+>If you want to generate all raw data from scratch, see the section entitled [Usage for generating all raw data](#usage-data). 
 
 ## Table of Contents
 
 1. [Dependencies](#dependencies)
 2. [Directory structure](#directory-structure)
-3. [Usage for generating manuscript figures using pre-computed data](#usage-figures)
-4. [Usage for generating all raw data](#usage-data)
-5. [How to generate raw data on a HPC](#usage-hpc)
+3. [Usage for generating manuscript figures using pre-computed data](#usage-for-generation-manuscript)
+4. [Usage for generating all raw data](#usage-for-generating-all)
+5. [How to generate raw data on a HPC](#how-to-generate)
 
 ## Dependencies
 Make sure that these are installed and in your system `$PATH`!
