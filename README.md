@@ -43,7 +43,7 @@ Make sure that these are installed and in your system `$PATH`!
 All other `python` dependencies will be handled by `conda` when a pipeline is executed. 
 
 ## Directory structure
-
+```
 .
 |__rules                        # individual `snakemake` "rule files" that are imported by the main pipelines
 |__py_scripts                   # all of the `python` scripts called by `snakemake` rules
@@ -55,7 +55,7 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 |__singleton_calling.yaml       # YAML file containing all of the dependencies required to call singletons
 |__generate_figures.smk         # main `snakemake` pipeline that generates main and supplementary figures
 |__identify_singletons.smk      # main `snakemake` pipeline that identifies singletons using the BXD VCF
-
+```
 ## Usage for generating manuscript figures using pre-computed data
 
 ```
