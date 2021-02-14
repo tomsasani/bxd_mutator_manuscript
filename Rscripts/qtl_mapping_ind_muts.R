@@ -30,8 +30,6 @@ pr <- calc_genoprob(bxd, gmap, error_prob=0.002, map_function="c-f")
 # read in the phenotype values for each BXD strain
 phen_df = read.csv(opt$phenotype_file, header=T)
 
-print (head(phen_df))
-
 phen_df = subset(phen_df, bxd_strain_conv != "BXD68_RwwJ_0462")
 
 # calculate kinship between strains using the
