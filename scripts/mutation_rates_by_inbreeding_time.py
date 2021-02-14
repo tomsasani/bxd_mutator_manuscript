@@ -28,14 +28,18 @@ df_ca = tidy_rates.query('base_mut == "C>A"')
 # discretize the inbreeding time of each strain to be
 # less than or greater than 20 generations
 df_ca['Haplotype at QTL'] = df_ca['haplotype_at_qtl']
-df_ca['Inbreeding time'] = df_ca['n_inbreeding_gens'].apply(lambda g: "< 20 generations" if g < 20 else ">= 20 generations")
+df_ca['Inbreeding time'] = df_ca['n_inbreeding_gens'].apply(lambda g: "< 20 generations" \
+        if g < 20 else ">= 20 generations")
 
 sns.set_style('ticks')
 
 f, ax = plt.subplots()
 
-sns.boxplot(x="Inbreeding time", y="estimate", hue="Haplotype at QTL", data=df_ca, ax=ax, color='w', fliersize=0)
-sns.stripplot(x="Inbreeding time", y="estimate", hue="Haplotype at QTL", data=df_ca, ax=ax, palette='colorblind', dodge=True, edgecolor='k', lw=1.5)
+sns.boxplot(x="Inbreeding time", y="estimate", hue="Haplotype at QTL", 
+                        data=df_ca, ax=ax, color='w', fliersize=0)
+sns.stripplot(x="Inbreeding time", y="estimate", hue="Haplotype at QTL", 
+                        data=df_ca, ax=ax, palette='colorblind', dodge=True, 
+                        edgecolor='k', lw=1.5)
 
 ax.set_xlabel("Length of inbreeding in strain")
 ax.set_ylabel(r'C$\to$A' + " mutation rate (per bp, per gen.)")

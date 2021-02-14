@@ -136,7 +136,7 @@ df_wide.replace(to_replace=np.inf, value=0, inplace=True)
 # make a tidy dataframe such that there are three entries for every mutation type
 # in each sample -- one with its count, one with its rate, and one with its fraction
 df_tidy = df_wide.melt(id_vars=group_cols[:-1], var_name="estimate_type", value_name="estimate")
-#print (df_tidy.query('base_mut == "C>T" & estimate_type == "rate"').groupby(['epoch']).count())
+print (df_tidy.query('base_mut == "C>T" & estimate_type == "rate"').groupby(['epoch']).count())
 
 df_tidy = df_tidy.query('estimate_type != "total_muts"')
 

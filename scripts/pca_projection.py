@@ -12,10 +12,22 @@ import seaborn as sns
 from matplotlib.patches import Patch
 from matplotlib import gridspec
 
+def clr(X):
+    """
+    perform a centered log-ratio transform
+    """
+    # the geometric mean acts as the center of the composition
+    geom_mean = np.power(np.prod(X,axis=1),1/X.shape[1])
+    return np.log(X / geom_mean[:,None])
+
+
 p = argparse.ArgumentParser()
-p.add_argument("--tidy_spectra")
-p.add_argument("--dumont_xls")
-p.add_argument("--out")
+p.add_argument("--tidy_spectra", required=True, 
+                    help="""tidy dataframe containing BXD mutation spectra""")
+p.add_argument("--dumont_xls", required=True,
+                    help="""Supplementary data from Dumont 2019""")
+p.add_argument("--out", required=True,
+                    help="""name of output plot""")
 args = p.parse_args()
 plt.rc('font', size=18)
 
@@ -43,7 +55,8 @@ tidy_fracs = tidy_spectra.query('estimate_type == "fraction"')
 tidy_fracs = tidy_fracs.query('n_inbreeding_gens >= 20')
 tidy_fracs = tidy_fracs[['bxd_strain_conv', 'haplotype_at_qtl', 'base_mut', 'estimate']]
 
-wide_fracs = tidy_fracs.pivot(index=['bxd_strain_conv', 'haplotype_at_qtl'], columns='base_mut', values='estimate').reset_index()
+wide_fracs = tidy_fracs.pivot(index=['bxd_strain_conv', 'haplotype_at_qtl'], 
+                                columns='base_mut', values='estimate').reset_index()
 
 wide_fracs['C>T.1'] = wide_fracs['C>T'] + wide_fracs['CpG>TpG']
 wide_fracs.drop(columns=['C>T'], inplace=True)
@@ -66,11 +79,6 @@ combined.to_csv("csv/pca.csv", index=False)
 muts = ['C>A', 'C>T', 'C>G', 'T>A', 'T>G', 'T>C']
 X = combined[muts].values
 y = combined['strain'].values
-
-def clr(X):
-    # the geometric mean acts as the center of the composition
-    geom_mean = np.power(np.prod(X,axis=1),1/X.shape[1])
-    return np.log(X / geom_mean[:,None])
 
 row_zero = np.unique(np.where(X == 0)[0])
 

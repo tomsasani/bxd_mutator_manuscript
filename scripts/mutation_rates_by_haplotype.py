@@ -56,8 +56,11 @@ sns.set_style('ticks')
 
 f, ax = plt.subplots()
 
-sns.boxplot(x="rate_type", y="estimate", hue="Haplotype at QTL", data=combined, ax=ax, color='w', fliersize=0)
-sns.stripplot(x="rate_type", y="estimate", hue="Haplotype at QTL", data=combined, ax=ax, palette='colorblind', dodge=True, edgecolor='k', lw=1.5)
+sns.boxplot(x="rate_type", y="estimate", hue="Haplotype at QTL", 
+                data=combined, ax=ax, color='w', fliersize=0)
+sns.stripplot(x="rate_type", y="estimate", hue="Haplotype at QTL", 
+                data=combined, ax=ax, palette='colorblind', dodge=True, 
+                edgecolor='k', lw=1.5)
 
 ax.set_xlabel("Rate estimate type")
 ax.set_ylabel("Mutation rate (per bp, per gen.)")
@@ -66,7 +69,7 @@ handles, labels = ax.get_legend_handles_labels()
 
 # When creating the legend, only use the first two elements
 # to effectively remove the last two.
-ax.legend(handles[2:], labels[2:], frameon=False, title="Haplotype at QTL")
+ax.legend(handles[3:], labels[3:], frameon=False, title="Haplotype at QTL")
 
 sns.despine(ax=ax, top=True, right=True)
 

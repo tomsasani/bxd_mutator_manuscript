@@ -68,7 +68,7 @@ rsids = ["rs47460195",
          "rs28256540",
          "rs27509845"]
 
-rsids = ["rs32445859"]
+#rsids = ["rs32445859"]
 
 genos_at_markers = genos[genos['marker'].isin(rsids)]
 
@@ -103,7 +103,7 @@ iso_samps = ['4512-JFI-0348_BXD24_TyJ_Cep290_J_phased_possorted_bam',
              '4512-JFI-0382_BXD048a_RwwJ_phased_possorted_bam',
              '4512-JFI-0387_BXD65a_RwwJ_phased_possorted_bam'
              '4512-JFI-0388_BXD65b_RwwJ_phased_possorted_bam',
-             '4512-JFI-0439_BXD73a_RwwJ_phased_possorted_bam'
+             '4512-JFI-0439_BXD73a_RwwJ_phased_possorted_bam',
              '4512-JFI-0440_BXD073b_RwwJ_phased_possorted_bam']
 
 variants = variants[~variants['bxd_strain'].isin(iso_samps)]
@@ -114,10 +114,8 @@ variants['bxd_strain_conv'] = variants['bxd_strain'].apply(lambda x: convert_bxd
 
 # add columns to the dataframe with relevant metadata
 variants['epoch'] = variants['bxd_strain'].apply(lambda s: strain2epoch[s])
-#variants = variants.query('epoch != 6')
 variants['n_inbreeding_gens'] = variants['bxd_strain'].apply(lambda s: strain2inbreed_gen[s])
 variants = variants[~variants['n_inbreeding_gens'].isin([-1, "NA"])]
-#variants = variants.query('n_inbreeding_gens >= 20')
 variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2intercross_gens[s])
 variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] \
                                                                 if s in strain2denom else "NA")

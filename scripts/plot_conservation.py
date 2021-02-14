@@ -8,6 +8,9 @@ import math
 import argparse
 
 def get_bootstrap_ci(cons, n_trials=100): 
+    """
+    generate a bootstrap confidence interval
+    """
     cons_trials = np.zeros((n_trials, cons.shape[0]))
     
     for t in range(n_trials):
@@ -24,7 +27,7 @@ def get_bootstrap_ci(cons, n_trials=100):
     sorted_idxs = cons_trials_diffs.argsort()
     sorted_vals = cons_trials[sorted_idxs]
 
-    critval = int(0.99 * n_trials)
+    critval = int(0.95 * n_trials)
     lo_crit, hi_crit = n_trials - critval - 1, critval - 1
 
     lo_bound = sorted_vals[lo_crit]
