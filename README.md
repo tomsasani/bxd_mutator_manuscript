@@ -13,7 +13,7 @@ simply generate the figures in the manuscript using pre-computed data, since the
 
 **IMPORTANT NOTE:**
 
->Identifying singletons is much, much easier if the `identify_singletons.smk` pipeline is run on a high-performance computing system. The `identify_singletons.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores. It also involves hundreds of individual steps, so it will finish much more quickly if those steps are run in parallel.
+>Identifying singletons is much, much easier if the `identify_singletons.smk` pipeline is run on a high-performance computing system. The `identify_singletons.smk` pipeline involves downloading the BXD VCF (~70 Gb), the mm10 reference genome (~1 Gb), and many Gbs of phastCons scores. It also involves hundreds of individual steps, so it will finish much more quickly if those steps are run in parallel.
 
 >If you want to generate all raw data from scratch, see the section entitled [Usage for generating all raw data](#usage-data). 
 
@@ -56,7 +56,16 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 |__generate_figures.smk         # main `snakemake` pipeline that generates main and supplementary figures
 |__identify_singletons.smk      # main `snakemake` pipeline that identifies singletons using the BXD VCF
 ```
-## Usage for generating manuscript figures using pre-computed data
+## Usage for generating manuscript figures using precomputed data
+
+In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **Before moving on to the command-line instructions below, first get these third-party datasets as follows:** 
+
+* singleton data from [Dumont 2019](https://academic.oup.com/mbe/article/36/5/865/5315518)
+    * download ZIP file from [Supplementary data](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/mbe/36/5/10.1093_molbev_msz026/2/msz026_supp.zip?Expires=1616302324&Signature=u8neUFiV~0aBABDNG-ZPeMwd~usDZPmIO5TVjLHqKVcjHXrUWBm7MnR1ZJpSkMmDmQhMGrcdK~G7hySKLp79xgpQnj-SCFD09Hj7e9uCi9oYvVT-guMav1JY6qEMzSCubzlChpHfItUKJt15lXbxmuT2FxTibIs2gSrXvHCexmwGLxQYCoIAZJHY1nOjOfSDDlIejE-aGrPFozB86PXTZz~uM9JuAnmfZ5wmARxwuEzOHMfYZWh7WnWzeXEaNwKqYzrYHYDhej5sq~LSOfsQTzSPI-nrtn~KOV7x9ckk0RzqJ0kIhmF0uBLMkF8grDXTTRTHEjYV1dBALvxO1ZMVmA__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) associated with the manuscript
+    * uncompress file and move `SuppTables_concat.xlsx` into the `data` directory of the cloned version of this repository
+* *de novo* germline mutation data from [Ohno et al. 2014](https://www.nature.com/articles/srep04689)
+    * download [Supplementary Data 1](https://static-content.springer.com/esm/art%3A10.1038%2Fsrep04689/MediaObjects/41598_2014_BFsrep04689_MOESM2_ESM.xls)
+    * move `41598_2014_BFsrep04689_MOESM2_ESM.xls` into the `data` directory of the cloned version of this repository
 
 ```
 # enter a directory of your choice (make sure
