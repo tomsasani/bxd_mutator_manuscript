@@ -5,11 +5,21 @@ Thomas A. Sasani, David G. Ashbrook, Abraham A. Palmer, Robert W. Williams, Jona
 The code in this repository is sufficient to reproduce the entire manuscript from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to
 simply generate the figures in the manuscript using pre-computed data, since the latter require very large input files and quite a bit of time to create.
 
+The basic outline of the pipeline is as follows:
+
+1) Identify high-quality singleton mutations from the BXD VCF using `count_mutations.smk`.
+
+2) Annotate singleton calls and generate figures using `generate_figures.smk`.
+
+>Identifying singletons is much, much easier if the `count_mutations.smk` pipeline is run on a high-performance computing system. The `count_mutations.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores.
+
+>For this reason, the `data/` directory already contains the files output by the `count_mutations.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.
+
 ## Table of Contents
 
 1. [Dependencies](#dependencies)
 2. [Directory structure](#directory-structure)
-3. [Usage for generating manuscript figures](#usage-figures)
+3. [Usage for generating manuscript figures using pre-computed data](#usage-figures)
 4. [Usage for generating all raw data](#usage-data)
 5. [How to generate raw data on a HPC](#usage-hpc)
 
@@ -21,9 +31,9 @@ Make sure that these are installed and in your system `$PATH`!
 * [snakemake](https://snakemake.readthedocs.io/en/stable/)
 
 ### Required only if you want to generate singleton data from scratch
-* [bedtools v2.29.2](https://bedtools.readthedocs.io/en/latest/)
-* [bedops v2.4.38](https://bedops.readthedocs.io/en/latest/)
-* [tabix v1.10.2-125-g4162046](http://www.htslib.org/doc/tabix.html)
+* [bedtools (v2.29.2)](https://bedtools.readthedocs.io/en/latest/)
+* [bedops (v2.4.38)](https://bedops.readthedocs.io/en/latest/)
+* [tabix (v1.10.2-125-g4162046)](http://www.htslib.org/doc/tabix.html)
 * [mutyper](https://harrispopgen.github.io/mutyper/install.html)
 
 All other `python` dependencies will be handled by `conda` when a pipeline is executed. 
@@ -39,7 +49,7 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 * `Rqtl_data/`
     * data used by R/qtl2 for QTL mapping
 * `data/`
-    * raw data files output by the `count_mutations.smk` pipeline (e.g., singleton calls, HMM-inferred haplotypes, etc.)
+    * raw data files output by the `identify_singletons.smk` pipeline (e.g., singleton calls, HMM-inferred haplotypes, etc.)
 * `misc/`
     * miscellaneous data files needed to count or annotate singletons
 * `figure_generation.yaml`
@@ -51,19 +61,7 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 * `identify_singletons.smk`
     * main `snakemake` pipeline that identifies singletons using the BXD VCF
 
-The basic outline of the pipeline is as follows:
-
-1) Identify high-quality singleton mutations from the BXD VCF using `count_mutations.smk`.
-
-2) Annotate singleton calls and generate figures using `generate_figures.smk`.
-
-### NOTE!
-
-Identifying singletons is much, much easier if the `count_mutations.smk` pipeline is run on a high-performance computing system. The `count_mutations.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores.
-
-For this reason, the `data/` directory already contains the files output by the `count_mutations.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.
-
-## How to generate figures using pre-computed data files
+## Usage for generating manuscript figures using pre-computed data
 
 ```
 # enter a directory of your choice (make sure
@@ -88,7 +86,7 @@ snakemake \
 
 This will produce plots from every main and supplementary figure in the manuscript, accessible in the `plots/` directory.
 
-## How to generate all raw data
+## Usage for generating all raw data
 
 #### What steps are involved?
 
@@ -130,7 +128,7 @@ snakemake \
         -s singleton_calling.smk # name of the snakemake pipeline
 ```
 
-## How to generate all raw data using cluster job submission
+## How to generate raw data on a HPC
 
 The Department of Genome Sciences at UW uses the Sun Grid Engine (SGE) for job management on the cluster. As an example, I've included a config file that can be used in conjunction with the following command to run the `singleton_calling.smk` pipeline on a system with SGE. If you use a different job management system (e.g., SLURM), there is documentation on how to submit jobs using `snakemake` [here](https://snakemake.readthedocs.io/en/stable/executing/cluster.html).
 
