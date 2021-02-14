@@ -15,17 +15,17 @@ simply generate the figures in the manuscript using pre-computed data, since the
 
 >Identifying singletons is much, much easier if the `identify_singletons.smk` pipeline is run on a high-performance computing system. The `identify_singletons.smk` pipeline involves downloading the BXD VCF (~70 Gbp), the mm10 reference genome (~3 Gbp), and many Gbps of phastCons scores. It also involves hundreds of individual steps, so it will finish much more quickly if those steps are run in parallel.
 
->For this reason, the `data/` directory already contains the files output by the `identify_singletons.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.
-
 >If you want to generate all raw data from scratch, see the section entitled [Usage for generating all raw data](#usage-data). 
+
+For this reason, the `data/` directory already contains the files output by the `identify_singletons.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.
 
 ## Table of Contents
 
 1. [Dependencies](#dependencies)
 2. [Directory structure](#directory-structure)
-3. [Usage for generating manuscript figures using pre-computed data](#usage-for-generation-manuscript)
-4. [Usage for generating all raw data](#usage-for-generating-all)
-5. [How to generate raw data on a HPC](#how-to-generate)
+3. [Usage for generating manuscript figures using precomputed data](#usage-for-generating-manuscript-figures-using-precomputed-data)
+4. [Usage for generating all raw data](#usage-for-generating-all-raw-data)
+5. [How to generate raw data on a HPC](#how-to-generate-raw-data-on-a-hpc)
 
 ## Dependencies
 Make sure that these are installed and in your system `$PATH`!
@@ -44,26 +44,17 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 
 ## Directory structure
 
-* `rules/`
-    * individual `snakemake` "rule files" that are imported by the main pipelines
-* `py_scripts/`
-    * all of the `python` scripts called by `snakemake` rules
-* `R_scripts/`
-    * all of the `R` scripts called by `snakemake` rules
-* `Rqtl_data/`
-    * data used by R/qtl2 for QTL mapping
-* `data/`
-    * raw data files output by the `identify_singletons.smk` pipeline (e.g., singleton calls, HMM-inferred haplotypes, etc.)
-* `misc/`
-    * miscellaneous data files needed to count or annotate singletons
-* `figure_generation.yaml`
-    * `conda` YAML file containing all of the dependencies required to generate figures.
-* `singleton_calling.yaml`
-    * `conda` YAML file containing all of the dependencies required to call singletons.
-* `generate_figures.smk`
-    * main `snakemake` pipeline that generates main and supplementary figures
-* `identify_singletons.smk`
-    * main `snakemake` pipeline that identifies singletons using the BXD VCF
+.
+|__rules                        # individual `snakemake` "rule files" that are imported by the main pipelines
+|__py_scripts                   # all of the `python` scripts called by `snakemake` rules
+|__R_scripts                    # all of the `R` scripts called by `snakemake` rules
+|__Rqtl_data                    # data used by R/qtl2 for QTL mapping
+|__data                         # raw data files output by the `identify_singletons.smk` pipeline
+|__misc                         # miscellaneous data files needed to count or annotate singletons
+|__figure_generation.yaml       # YAML file containing all of the dependencies required to generate figures
+|__singleton_calling.yaml       # YAML file containing all of the dependencies required to call singletons
+|__generate_figures.smk         # main `snakemake` pipeline that generates main and supplementary figures
+|__identify_singletons.smk      # main `snakemake` pipeline that identifies singletons using the BXD VCF
 
 ## Usage for generating manuscript figures using pre-computed data
 
@@ -94,7 +85,7 @@ This will produce plots from every main and supplementary figure in the manuscri
 
 #### What steps are involved?
 
-1) Download mm10 reference assemblies for each chromosome.
+1) Download mm10 reference assembly.
 2) Download phastCons 60-way placental mammal WIG files for each chromosome, and convert to BED format.
 3) Use an HMM to identify D2 and B6 haplotype tracts in each BXD.
 4) Determine the 3-mer nucleotide composition of D2 and B6 haplotypes in each BXD.
@@ -102,7 +93,7 @@ This will produce plots from every main and supplementary figure in the manuscri
 6) Identify "fixed" variants in D2 that we'll use for conservation score comparisons.
 7) Get genotypes of every BXD at each of ~7,000 markers we'll use for QTL mapping.
 
-To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and with at least 100 Gbp of free space in the working directory.
+To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 100 Gbp of free space in the working directory.**
 
 ```
 # enter a directory of your choice (make sure
