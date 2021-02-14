@@ -7,7 +7,7 @@ def gt_to_allele(gt: int) -> int:
     """
     convert integer genotypes to haplotypes
     """
-    d = {0: 'BB', 1: 'H', 2: 'DD', -1:'NA'}
+    d = {0: 'B', 1: 'H', 2: 'D', -1:'NA'}
     return d[gt]
 
 p = argparse.ArgumentParser()

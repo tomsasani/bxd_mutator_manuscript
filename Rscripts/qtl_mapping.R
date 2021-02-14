@@ -73,16 +73,18 @@ covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
 rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
 #rownames(covariate_matrix_with_count) = phen_df_sub_frac$bxd_strain_conv
 
+Xcovar = get_x_covar(bxd)
+
 # perform a genome scan, accounting for kinship and
 # epoch as an additive covarirate
 out_rate <- scan1(pr, phenotype_rate, kinship=k, 
-             addcovar=covariate_matrix)
+             addcovar=covariate_matrix, Xcovar=Xcovar)
 
 out_frac <- scan1(pr, phenotype_frac, kinship=k, 
-                  addcovar=covariate_matrix)
+                  addcovar=covariate_matrix, Xcovar=Xcovar)
 
 print (dim(phenotype_rate))
-print (phen_df_sub_rate$bxd_strain_conv)
+#print (phen_df_sub_rate$bxd_strain_conv)
 
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 

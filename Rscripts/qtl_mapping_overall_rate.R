@@ -66,7 +66,7 @@ operm <- scan1perm(pr, phenotype_rate, kinship=k,
 lod_cutoff_sig = summary(operm, alpha=0.05 / 15)[1]
 
 # plot peaks and LOD threshold
-ymx <- maxlod(out)
+ymx <- max(c(maxlod(out), lod_cutoff_sig))
 
 # plot LOD scores genome-wide for fraction phenotype
 setEPS()
@@ -75,7 +75,7 @@ outfile = sprintf("%s/%s", opt$out_prefix, fname)
 postscript(outfile, width=7, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- "green3"
-plot(ou, pmap, lodcolumn=1, col=color, ylim=c(0, ymx_frac*1.05))
+plot(out, pmap, lodcolumn=1, col=color, ylim=c(0, ymx*1.05))
 abline(h=lod_cutoff_sig, col='green3', lwd=2, lty=2)
 
 legend("topright", lwd=2, col=color, "overall rate", bg="gray90", lty=c(1,1,2))

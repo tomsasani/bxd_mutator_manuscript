@@ -2,22 +2,12 @@ import csv
 import argparse
 import pandas as pd
 from collections import defaultdict
+from utils import convert_bxd_name
 
 p = argparse.ArgumentParser()
 p.add_argument("--csv")
 p.add_argument("--xls")
 p.add_argument("--out")
-def convert_bxd_name(name: str) -> str:
-    """
-    depending on the VCF file we're using we may
-    have to convert BXD strain names for portability
-    """
-    bxd_line_name = '_'.join(name.split('_phased')[0].split('_')[1:])
-    bxd_line_num = name.split('_phased')[0].split('_')[0].split('-')[-1]
-
-    bxd_line_new = bxd_line_name + '_' + bxd_line_num
-
-    return bxd_line_new
 
 args = p.parse_args()
 

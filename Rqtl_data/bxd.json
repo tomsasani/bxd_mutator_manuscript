@@ -4,14 +4,14 @@
   "sep": ",",
   "na.strings": ["-", "NA"],
   "comment.char": "#",
-  "geno": "bxd.geno.new.updated",
+  "geno": "bxd.geno.broman.conv",
   "gmap": "bxd.gmap",
   "pmap": "bxd.pmap",
-  "alleles": ["BB", "DD"],
+  "alleles": ["B", "D"],
   "x_chr": "X",
   "genotypes": {
     "B": 1,
-	  "D": 2 
+	"D": 2 
   },
   "geno_transposed": true,
   "cross_info": {

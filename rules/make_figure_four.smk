@@ -1,6 +1,6 @@
 rule make_figure_four_a:
 	input:
-		mgp_mutyh_vars ="data/mgp.mutyh.csv",
+		mgp_mutyh_vars ="data/mgp.mutyh_genotypes.csv",
 		py_script = "scripts/make_mutyh_grid.py"
 	output:
 		"plots/figure_4a.eps"
@@ -23,7 +23,7 @@ rule make_figure_four_bc:
 		"""
 rule make_figure_four_d:
 	input:
-		wild_mutyh_vars = "data/wild.mutyh.csv",
+		wild_mutyh_vars = "data/wild.mutyh_genotypes.csv",
 		py_script = "scripts/make_mutyh_grid.py"
 	output:
 		"plots/figure_4d.eps",

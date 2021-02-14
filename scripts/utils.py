@@ -56,7 +56,7 @@ def convert_bxd_name(name: str) -> str:
 
     return bxd_line_new
 
-def combine_chr_df(path: str) -> pd.DataFrame():
+def combine_chr_df(path_list: []) -> pd.DataFrame():
     """
     singleton variants are stored in per-chromosome CSV files.
     before annotating or processing these variants, we first
@@ -64,7 +64,7 @@ def combine_chr_df(path: str) -> pd.DataFrame():
     single pandas DataFrame
     """
     main_df = None
-    for f in glob.glob(path):
+    for f in path_list:
         if main_df is None:
             main_df = pd.read_csv(f)
         else:
@@ -117,8 +117,8 @@ def find_haplotype(genos: list, sample: str, rsids: []) -> str:
     genos_in_smp = genos[sample].values
     geno_freq = Counter(genos_in_smp)
     most_freq_geno = "H"
-    for g in ["BB", "DD"]:
-        if geno_freq[g] >= (len(rsids) * 0.75): most_freq_geno = g[0]
+    for g in ["B", "D"]:
+        if geno_freq[g] > (len(rsids) * 0.75): most_freq_geno = g[0]
         else: continue
     
     return most_freq_geno

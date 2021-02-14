@@ -92,7 +92,7 @@ snakemake \
         -s generate_figures.smk # name of the snakemake pipeline
 ```
 
-This will produce plots from every main and supplementary figure in the manuscript, accessible in the `plots/` directory.
+This will produce plots from every main and supplementary figure in the manuscript, which will be added to a new `plots/` directory.
 
 ## Usage for generating all raw data
 
@@ -104,9 +104,10 @@ This will produce plots from every main and supplementary figure in the manuscri
 4) Determine the 3-mer nucleotide composition of D2 and B6 haplotypes in each BXD.
 5) Identify singletons in each BXD.
 6) Identify "fixed" variants in D2 that we'll use for conservation score comparisons.
-7) Get genotypes of every BXD at each of ~7,000 markers we'll use for QTL mapping.
 
 To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 100 Gbp of free space in the working directory.**
+
+Step #5 above is by far the most time-consuming -- the method used to get 3-mer nucleotide compositions in haplotype in each sample on each chromosome is slow and generates a unique file for every combination of sample and chromosome (almost 3,000 individual files). Since the `data/` directory already contains precomputed versions of these files, I've removed the Snakemake rule that generates the files from `identify_singletons.smk`. If you want to recreate these files, just uncomment the part of the `rule all:` input that generates the nucleotide composition files and re-run the pipeline.
 
 ```
 # enter a directory of your choice (make sure

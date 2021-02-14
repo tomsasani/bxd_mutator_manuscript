@@ -49,7 +49,6 @@ dumont_filtered.columns = colnames
 # types in the BXD dataframe
 dumont_filtered.rename(columns={'T>A':'A>T', 'T>C':'A>G', 'T>G':'A>C'}, inplace=True)
 
-
 ## format strain names to be more readable
 dumont_filtered['strain'] = dumont_filtered['strain'].apply(lambda x: x.replace('/', '_'))
 
@@ -72,11 +71,15 @@ wide_fracs.rename(columns={'C>T.1':'C>T'}, inplace=True)
 # be the haplotype of the strain at the QTL
 wide_fracs['strain'] = wide_fracs['haplotype_at_qtl']
 
-wide_fracs = wide_fracs[colnames]
+muts = ['C>A', 'C>T', 'C>G', 'A>T', 'A>C', 'A>G']
+new_colnames = muts
+new_colnames.append('strain')
+wide_fracs = wide_fracs[new_colnames]
 
 # combine the dumont and BXD data into a single dataframe
 combined = pd.concat([wide_fracs, dumont_filtered]).reset_index()
 combined = combined.fillna(value=0)
+
 combined = combined[combined['strain'].isin(['D', 'B', 'DBA_2J', 'C57BL_6NJ'])]
 
 muts = ['C>A', 'C>T', 'C>G', 'A>T', 'A>C', 'A>G']
@@ -85,10 +88,10 @@ X = combined[muts].values
 y = combined['strain'].values
 
 # get rid of any strains that have no mutation data
-#row_zero = np.unique(np.where(X == 0)[0])
+row_zero = np.unique(np.where(X == 0)[0])
 
-#X = np.delete(X, row_zero, axis=0)
-#y = np.delete(y, row_zero)
+X = np.delete(X, row_zero, axis=0)
+y = np.delete(y, row_zero)
 
 # perform centered log ratio transform on fraction data
 X = clr(X)

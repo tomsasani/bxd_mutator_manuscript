@@ -44,8 +44,8 @@ def get_bootstrap_ci(cons, n_trials=100):
 p = argparse.ArgumentParser()
 p.add_argument("--annotated_singletons", required=True, 
                     help="""annotated singleton variants in extended BED format.""")
-p.add_argument("--annotated_common", required=True,
-                    help="""annotated common variants in extended BED format.""")
+p.add_argument("--annotated_fixed", required=True,
+                    help="""annotated fixed variants in extended BED format.""")
 p.add_argument("--out", required=True,
                     help="""name of output plot""")
 args = p.parse_args()
@@ -53,10 +53,10 @@ args = p.parse_args()
 # read in variant types and add a column to each indicating
 # the "type" of variant
 singletons = pd.read_csv(args.annotated_singletons)
-common = pd.read_csv(args.annotated_common)
+common = pd.read_csv(args.annotated_fixed)
 
 singletons['v_type'] = 'singletons'
-common['v_type'] = 'common'
+common['v_type'] = 'fixed'
 
 # combine the common and singleton variants
 combined = pd.concat([singletons, common])
@@ -74,8 +74,7 @@ for i,lab in enumerate(pd.unique(combined['v_type'])):
     # or singleton variants
     sub_df = combined[combined['v_type'] == lab]
 
-    # remove any variants for which phastCons scores weren't
-    # available
+    # remove any variants for which phastCons scores weren't available
     cons = sub_df[sub_df['phastCons'] != -1]["phastCons"].values.astype(np.float64)
 
     # get histogram of conservation values

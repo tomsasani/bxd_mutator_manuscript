@@ -1,16 +1,5 @@
-import matplotlib.pyplot as plt
 import pandas as pd
-import csv
-import scipy.stats as ss
-from collections import defaultdict, Counter
-from quicksect import IntervalTree
-import numpy as np
-import seaborn as sns
-import glob
-import sys
-import math
 import argparse
-import re
 from utils import *
 
 p = argparse.ArgumentParser()
@@ -18,7 +7,7 @@ p.add_argument("--strain_metadata", required=True,
                     help="""metadata about strains in Excel format.""")
 p.add_argument("--strain_genotypes", required=True,
                     help="""genotypes for each strain at each marker used in QTL scans""")
-p.add_argument("--singleton_vars", required=True, nargs="*",
+p.add_argument("--var_list", required=True, nargs="*",
                     help="""paths to per-chromosome BED files of variants""")
 p.add_argument("--callable_bp", required=True,
                     help="""file containing a column with sample IDs and a \
@@ -72,12 +61,13 @@ rsids = ["rs47460195",
 genos_at_markers = genos[genos['marker'].isin(rsids)]
 
 # read in the file of variants, containing one BED-format line per variant
-variants = combine_chr_df(args.singleton_vars)
+variants = combine_chr_df(args.var_list)
+
+if 'haplotype' not in list(variants):
+    variants['haplotype'] = "D"
 
 # remove very low and very high-depth mutations
-# remove variants with low allele balance
 variants = variants.query('dp >= 10 & dp < 100')
-variants = variants.query('ab >= 0.9')
 
 # add a column describing the 1-mer mutation type corresponding to all
 # 3-mer "kmers" in the dataframe

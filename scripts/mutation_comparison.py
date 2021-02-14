@@ -222,7 +222,7 @@ def mutation_comparison(sub_0_counts: np.array(np.int64),
         sns.heatmap(out_array, cmap='coolwarm', edgecolor='w', vmin=-1, vmax=1)
 
         # plot "dots" in heatmap where the ratio is significant
-        for (y,x) in zip(sig_adj_pvals[0], sig_adj_pvals[1]):
+        for (y,x) in zip(sig_pvals[0], sig_pvals[1]):
             ax.scatter(x + 0.5, y + 0.5, c='w', edgecolor='k')
 
         # add boundary lines between each block of 16 mutations

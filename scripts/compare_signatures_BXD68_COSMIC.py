@@ -79,8 +79,6 @@ cosmic['kmer_idx'] = cosmic['kmer'].apply(lambda k: mut2idx[k] if k in mut2idx e
 cosmic = cosmic[cosmic['kmer_idx'] != "NA"]
 cosmic = cosmic.sort_values('kmer_idx')
 
-print (cosmic)
-
 # get the components of the COSMIC mutation signature
 #cosmic = cosmic.sort_values('Type')
 cosmic_components = cosmic[args.sig_name].values
@@ -92,8 +90,6 @@ sns.set_style('ticks')
 
 colors = sns.color_palette('colorblind', len(base_muts))
 mut2c = dict(zip(base_muts, colors))
-
-print (mut2c)
 
 for mut in mut2idx:
 

@@ -18,13 +18,13 @@ rule make_figure_one_abd:
 rule make_figure_one_c: 
 	input:
 		py_script = "scripts/plot_conservation.py",
-		annotated_singletons = "csv/annotated_singletons.csv",
-		annotated_common = "csv/annotated_common.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		annotated_fixed = "csv/annotated_fixed_vars.csv",
 	output:
 		"plots/figure_1c.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-							   --annotated_common {input.annotated_common} \
+							   --annotated_fixed {input.annotated_fixed} \
 							   --out {output} 
 		"""

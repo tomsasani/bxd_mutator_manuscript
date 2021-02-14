@@ -1,11 +1,14 @@
 
-rule make_supp_figure_one:
+samples, = glob_wildcards("data/nucleotide_composition/{sample}_nucleotide_composition.csv")
+
+
+rule make_supp_figure_two:
 	input:
 		annotated_singletons = "csv/annotated_singletons.csv",
 		py_script = "scripts/mutation_comparison.py",
-		nuc_comp = "data/nucleotide_composition/"
+		nuc_comp = expand("data/nucleotide_composition/{sample}_nucleotide_composition.csv", sample=samples)
 	output:
-		"plots/supp_figure_1.eps"
+		"plots/supp_figure_2.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
@@ -20,7 +23,7 @@ rule make_supp_figure_three_a:
 		mut_rates = "csv/tidy_mutation_rates.csv",
 		qtl_rscript = "Rscripts/qtl_mapping_overall_rate.R",
 		qtl_json = "Rqtl_data/bxd.json",
-		qtl_geno = "Rqtl_data/bxd.geno.new.updated",
+		qtl_geno = "Rqtl_data/bxd.geno.from_vcf",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 		outpref = "plots/"
@@ -38,7 +41,7 @@ rule make_supp_figure_three_b:
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		qtl_rscript = "Rscripts/qtl_mapping_ind_muts.R",
 		qtl_json = "Rqtl_data/bxd.json",
-		qtl_geno = "Rqtl_data/bxd.geno.new.updated",
+		qtl_geno = "Rqtl_data/bxd.geno.from_vcf",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 		outpref = "plots/all_qtl_maps"
@@ -73,7 +76,7 @@ rule make_supp_figure_five_a:
 	input:
 		annotated_singletons = "csv/annotated_singletons.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
-		py_script = "scripts/compare_signatures_regression.py"
+		py_script = "scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_5a.eps"
 	shell:
@@ -88,7 +91,7 @@ rule make_supp_figure_five_b:
 	input:
 		annotated_singletons = "csv/annotated_singletons.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
-		py_script = "scripts/compare_signatures_regression.py"
+		py_script = "scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_5b.eps"
 	shell:

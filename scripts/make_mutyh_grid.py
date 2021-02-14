@@ -124,9 +124,10 @@ for s, e, sp in zip(starts, ends, uniq_sp):
         hap_sums = np.sum(grid_vals, axis=0)
         sorted_haps = np.argsort(hap_sums)[::-1]
         grid_vals = grid_vals[:,sorted_haps]
-
+    lw = 2
+    if wild: lw=3
     sns.heatmap(grid_vals, ax=ax2use, cmap=cmap, 
-            linecolor='k', linewidth=3, cbar=False)
+            linecolor='k', linewidth=lw, cbar=False)
 
     # tick formatting
     if wild: 

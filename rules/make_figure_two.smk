@@ -3,10 +3,10 @@
 # to genotypes at each of ~7,000 autosomal markers
 rule generate_bxd_geno:
 	input:
-		gts = "data/bxd_genotypes_at_rsids.csv",
+		gts = "data/bxd_genotypes_at_markers.csv",
 		py_script = "scripts/make_bxd_geno_map.py"
 	output:
-		"Rqtl_data/bxd.geno.new.updated"
+		"Rqtl_data/bxd.geno.from_vcf"
 	shell:
 		"""
 		python {input.py_script} --geno_file {input.gts} \
@@ -18,7 +18,7 @@ rule make_figure_two_ab:
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		qtl_rscript = "Rscripts/qtl_mapping.R",
 		qtl_json = "Rqtl_data/bxd.json",
-		qtl_geno = "Rqtl_data/bxd.geno.new.updated",
+		qtl_geno = "Rqtl_data/bxd.geno.from_vcf",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 		outpref = "plots"

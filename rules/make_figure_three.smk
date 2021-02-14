@@ -1,4 +1,5 @@
 
+
 rule make_figure_three_a:
 	input:
 		annotated_singletons = "csv/annotated_singletons.csv",
@@ -17,7 +18,7 @@ rule make_figure_three_b:
 	input:
 		annotated_singletons = "csv/annotated_singletons.csv",
 		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
-		py_script = "scripts/compare_signatures_TOYKO.py"
+		py_script = "scripts/compare_signatures_OR_TOYKO.py"
 	output:
 		"plots/figure_3b.eps"
 	shell:
