@@ -53,6 +53,8 @@ subset_1 = singleton_no_bxd68_tidy[singleton_no_bxd68_tidy["haplotype_at_qtl"] =
 subset_0_fracs = subset_0 / np.sum(subset_0)
 subset_1_fracs = subset_1 / np.sum(subset_1)
 
+# calculate significant odds-ratio differences between
+# the two subsets
 pvals = np.ones(subset_0.shape[0], dtype=np.float64)
 
 for i in np.arange(subset_0.shape[0]):
@@ -104,7 +106,7 @@ for mut in mut2idx:
                   "TCC>TAC": (-40, 20),
                   "GCA>GAA": (-42, 30),
                   "GCT>GAT": (5, 50),
-                  "CCA>CAA": (-75, -60),
+                  "CCA>CAA": (-100, -60),
                   "CCT>CAT": (-125, 35)}
 
     y = log_ratios[mut2idx[mut]]

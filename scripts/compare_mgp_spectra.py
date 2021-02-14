@@ -158,8 +158,6 @@ for cat_i,cat in enumerate([("5/5", "3/5"), ("3/5", "2/5")]):
 
     _,p,_,_ = ss.chi2_contingency([[a_fore, b_fore], [a_back, b_back]])
 
-    print (p)
-
     axarr[cat_i].legend(frameon=False, fontsize=16)
     if cat_i == 0:
         axarr[cat_i].set_ylabel('Fraction of singletons', fontsize=16)

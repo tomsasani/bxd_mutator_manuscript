@@ -18,9 +18,8 @@ p.add_argument("--strain_metadata", required=True,
                     help="""metadata about strains in Excel format.""")
 p.add_argument("--strain_genotypes", required=True,
                     help="""genotypes for each strain at each marker used in QTL scans""")
-p.add_argument("--var_dir", required=True,
-                    help="""directory containing per-chromosome BED files \
-                            of variants""")
+p.add_argument("--singleton_vars", required=True, nargs="*",
+                    help="""paths to per-chromosome BED files of variants""")
 p.add_argument("--callable_bp", required=True,
                     help="""file containing a column with sample IDs and a \
                             column with the number of haploid callable base \
@@ -57,7 +56,9 @@ strain2denom = dict(zip(denominators['samp'], denominators['denominator']))
 
 # read in the genotypes of every strain at each QTL marker,
 # and subset to the rsids that correspond to the length of the 
-# 95% QTL credible interval
+# 95% QTL credible interval. we use this data to query
+# the strains' haplotype data to figure out which strains
+# were B or D at the QTL
 genos = pd.read_csv(args.strain_genotypes)
 
 rsids = ["rs47460195",
@@ -68,23 +69,21 @@ rsids = ["rs47460195",
          "rs28256540",
          "rs27509845"]
 
-#rsids = ["rs32445859"]
-
 genos_at_markers = genos[genos['marker'].isin(rsids)]
 
 # read in the file of variants, containing one BED-format line per variant
-variants = combine_chr_df(args.var_dir + "*.exclude.csv")
+variants = combine_chr_df(args.singleton_vars)
 
 # remove very low and very high-depth mutations
+# remove variants with low allele balance
 variants = variants.query('dp >= 10 & dp < 100')
-
 variants = variants.query('ab >= 0.9')
 
 # add a column describing the 1-mer mutation type corresponding to all
 # 3-mer "kmers" in the dataframe
 variants['base_mut'] = variants['kmer'].apply(to_base_mut, cpg=True)
 
-# remove any potential variantss identified in founder genomes. we're
+# remove any potential variants identified in founder genomes. we're
 # only interested in variantss observed in BXD RILs
 founder_samps = ['4512-JFI-0333_C57BL_6J_two_lanes_phased_possorted_bam',
                  '4512-JFI-0334_DBA_2J_three_lanes_phased_possorted_bam']

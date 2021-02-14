@@ -18,7 +18,7 @@ def get_bootstrap_ci(cons, n_trials=100):
         shuff_scores = np.random.choice(cons, cons.shape[0], replace=True)
         cons_trials[t, :] = shuff_scores   
     
-    conf_ints = np.zeros((2, 99))
+    conf_ints = np.zeros((2, n_trials - 1))
 
     # sort shuffled conservation scores by calculating difference
     # between empirical and true means
@@ -58,11 +58,10 @@ common = pd.read_csv(args.annotated_common)
 singletons['v_type'] = 'singletons'
 common['v_type'] = 'common'
 
-# combine the common and singletons variants
+# combine the common and singleton variants
 combined = pd.concat([singletons, common])
 
 f, ax = plt.subplots()
-
 sns.set_style('ticks')
 
 cols = sns.color_palette("colorblind", 2)
@@ -71,12 +70,15 @@ xticklabels = None
 
 for i,lab in enumerate(pd.unique(combined['v_type'])):
 
+    # get each "sub" dataframe containing either fixed
+    # or singleton variants
     sub_df = combined[combined['v_type'] == lab]
 
-    # if we're dealing with shared variants, we don't want to
-    # count the same variant more than once toward to the
-    # distribution of phastcons scores
-    cons = sub_df[sub_df['phastCons'] != "None"]["phastCons"].values.astype(np.float64)
+    # remove any variants for which phastCons scores weren't
+    # available
+    cons = sub_df[sub_df['phastCons'] != -1]["phastCons"].values.astype(np.float64)
+
+    # get histogram of conservation values
     y, x = np.histogram(cons, bins=99)
     y = y / np.sum(y)
     y = np.cumsum(y)

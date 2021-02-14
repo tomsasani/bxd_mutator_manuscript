@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import seaborn as sns 
 import argparse
+
 p = argparse.ArgumentParser()
 p.add_argument("--strain_vars", required=True,
                 help="""genotypes of strains at each of the five \
@@ -127,7 +128,7 @@ for s, e, sp in zip(starts, ends, uniq_sp):
     sns.heatmap(grid_vals, ax=ax2use, cmap=cmap, 
             linecolor='k', linewidth=3, cbar=False)
 
-    
+    # tick formatting
     if wild: 
         xticks = np.arange(unique_haps.shape[1]) + 0.5
         xlabs = counts[sorted_idxs]

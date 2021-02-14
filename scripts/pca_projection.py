@@ -45,47 +45,57 @@ dumont_filtered = dumont[['Strain',
 colnames = ['strain', 'C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G']
 dumont_filtered.columns = colnames
 
+# change mutation types to batch the complement-collapsed
+# types in the BXD dataframe
+dumont_filtered.rename(columns={'T>A':'A>T', 'T>C':'A>G', 'T>G':'A>C'}, inplace=True)
+
+
 ## format strain names to be more readable
 dumont_filtered['strain'] = dumont_filtered['strain'].apply(lambda x: x.replace('/', '_'))
 
+# read in BXD mutation spectra
 tidy_spectra = pd.read_csv(args.tidy_spectra)
-
 tidy_fracs = tidy_spectra.query('estimate_type == "fraction"')
-
-tidy_fracs = tidy_fracs.query('n_inbreeding_gens >= 20')
 tidy_fracs = tidy_fracs[['bxd_strain_conv', 'haplotype_at_qtl', 'base_mut', 'estimate']]
 
+# convert tidy to wide dataframe
 wide_fracs = tidy_fracs.pivot(index=['bxd_strain_conv', 'haplotype_at_qtl'], 
                                 columns='base_mut', values='estimate').reset_index()
 
+# make a new column in the dataframe containing the sum of
+# both types of C>T mutation fractions
 wide_fracs['C>T.1'] = wide_fracs['C>T'] + wide_fracs['CpG>TpG']
 wide_fracs.drop(columns=['C>T'], inplace=True)
 wide_fracs.rename(columns={'C>T.1':'C>T'}, inplace=True)
 
+# change the strain column in the BXD data to just
+# be the haplotype of the strain at the QTL
 wide_fracs['strain'] = wide_fracs['haplotype_at_qtl']
-
-wide_fracs.rename(columns={'A>T':'T>A', 'A>G':'T>C', 'A>C':'T>G'}, inplace=True)
 
 wide_fracs = wide_fracs[colnames]
 
+# combine the dumont and BXD data into a single dataframe
 combined = pd.concat([wide_fracs, dumont_filtered]).reset_index()
-
 combined = combined.fillna(value=0)
-
 combined = combined[combined['strain'].isin(['D', 'B', 'DBA_2J', 'C57BL_6NJ'])]
 
-combined.to_csv("csv/pca.csv", index=False)
+muts = ['C>A', 'C>T', 'C>G', 'A>T', 'A>C', 'A>G']
 
-muts = ['C>A', 'C>T', 'C>G', 'T>A', 'T>G', 'T>C']
 X = combined[muts].values
 y = combined['strain'].values
 
-row_zero = np.unique(np.where(X == 0)[0])
+# get rid of any strains that have no mutation data
+#row_zero = np.unique(np.where(X == 0)[0])
 
-X = np.delete(X, row_zero, axis=0)
-y = np.delete(y, row_zero)
+#X = np.delete(X, row_zero, axis=0)
+#y = np.delete(y, row_zero)
 
+# perform centered log ratio transform on fraction data
 X = clr(X)
+
+# perform PCA on data
+pca = PCA()
+X_new = pca.fit_transform(X)
 
 strains = set(y)
 strain2color = {"D": "slateblue",
@@ -93,11 +103,7 @@ strain2color = {"D": "slateblue",
                 "B": "lightgreen",
                 "C57BL_6NJ": "lightgreen"}
 
-
-pca = PCA()
-X_new = pca.fit_transform(X)
-
-labels = [r'C$\to$A', r'C$\to$T', r'C$\to$G', r'T$\to$A', r'T$\to$G', r'T$\to$C']
+labels = [r'C$\to$A', r'C$\to$T', r'C$\to$G', r'A$\to$T', r'A$\to$C', r'A$\to$G']
 
 sns.set_style('ticks')
 
@@ -111,19 +117,13 @@ y_vals = X_new[:,1]
 
 colors = [strain2color[s] for s in y]
 
+# plot each BXD and founder on PC plot
 ax1.scatter(x_vals[:-2], y_vals[:-2], c=colors[:-2], edgecolor='k', s=200, lw=2, marker='x')
 ax1.scatter(x_vals[-2:], y_vals[-2:], c=colors[-2:], edgecolor='k', s=200, lw=2, marker='o')
 
-legend_elements = [Patch(facecolor=c, edgecolor='k',
-                         label=m) for m,c in strain2color.items()]
-
-legend_elements = [Line2D([0], [0], color='slateblue', marker='x', label='D2 haplotype'),
-                   Line2D([0], [0], color='slateblue', marker='o', label='DBA/2J'),
-                   Line2D([0], [0], color='lightgreen', marker='x', label='B6 haplotype'),
-                   Line2D([0], [0], color='lightgreen', marker='o', label='C57BL/6NJ')]
-
 exp_var = pca.explained_variance_ratio_
 
+# plot PCA loadings
 coef = np.transpose(pca.components_[0:2, :])
 ymin, ymax = 1, -1
 xmin, xmax = 1, -1
@@ -135,6 +135,14 @@ for i in range(coef.shape[0]):
     if t_y < ymin: ymin = t_y 
     if t_x > xmax: xmax = t_x 
     if t_x < xmin: xmin = t_x 
+
+legend_elements = [Patch(facecolor=c, edgecolor='k',
+                         label=m) for m,c in strain2color.items()]
+
+legend_elements = [Line2D([0], [0], color='slateblue', marker='x', label='D2 haplotype'),
+                   Line2D([0], [0], color='slateblue', marker='o', label='DBA/2J'),
+                   Line2D([0], [0], color='lightgreen', marker='x', label='B6 haplotype'),
+                   Line2D([0], [0], color='lightgreen', marker='o', label='C57BL/6NJ')]
 
 ax2.set_ylim(ymin + (ymin / 2), ymax + (ymax / 2))
 ax2.set_xlim(xmin + (xmin / 2), xmax + (xmax / 2))

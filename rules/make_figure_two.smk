@@ -1,14 +1,12 @@
-# set name of working directory
-WORKDIR = "/Users/tomsasani/harrislab/bxd_mutator_ms/"
 
 # generate a `.geno` file that R/qtl2 uses to map sample IDs
 # to genotypes at each of ~7,000 autosomal markers
 rule generate_bxd_geno:
 	input:
-		gts = WORKDIR + "data/bxd_genotypes_at_rsids.csv",
-		py_script = WORKDIR + "scripts/make_bxd_geno_map.py"
+		gts = "data/bxd_genotypes_at_rsids.csv",
+		py_script = "scripts/make_bxd_geno_map.py"
 	output:
-		WORKDIR + "Rqtl_data/bxd.geno.new.updated"
+		"Rqtl_data/bxd.geno.new.updated"
 	shell:
 		"""
 		python {input.py_script} --geno_file {input.gts} \
@@ -17,18 +15,17 @@ rule generate_bxd_geno:
 
 rule make_figure_two_ab: 
 	input:
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv",
-		qtl_rscript = WORKDIR + "Rscripts/qtl_mapping.R",
-		qtl_json = WORKDIR + "Rqtl_data/bxd.json",
-		#qtl_geno = WORKDIR + "Rqtl_data/bxd.geno.new.updated",
-		qtl_geno = WORKDIR + "Rqtl_data/bxd.geno.broman.conv",
-		qtl_gmap = WORKDIR + "Rqtl_data/bxd.gmap",
-		qtl_pmap = WORKDIR + "Rqtl_data/bxd.pmap",
-		outpref = WORKDIR + "plots"
+		mut_spectra = "csv/tidy_mutation_spectra.csv",
+		qtl_rscript = "Rscripts/qtl_mapping.R",
+		qtl_json = "Rqtl_data/bxd.json",
+		qtl_geno = "Rqtl_data/bxd.geno.new.updated",
+		qtl_gmap = "Rqtl_data/bxd.gmap",
+		qtl_pmap = "Rqtl_data/bxd.pmap",
+		outpref = "plots"
 	output:
-		WORKDIR + "plots/figure_2a.eps",
-		WORKDIR + "plots/figure_2b.eps",
-		WORKDIR + "plots/figure_2c.eps"
+		"plots/figure_2a.eps",
+		"plots/figure_2b.eps",
+		"plots/figure_2c.eps"
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
@@ -38,11 +35,11 @@ rule make_figure_two_ab:
 
 rule make_figure_two_d:
 	input:
-		py_script = WORKDIR + "scripts/pca_projection.py",
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv",
-		dumont_xls = "/Users/tomsasani/Downloads/msz026_supp/SuppTables_concat.xlsx"
+		py_script = "scripts/pca_projection.py",
+		mut_spectra = "csv/tidy_mutation_spectra.csv",
+		dumont_xls = "data/SuppTables_concat.xlsx"
 	output:
-		WORKDIR + "plots/figure_2d.eps"
+		"plots/figure_2d.eps"
 	shell:
 		"""
 		python {input.py_script} --tidy_spectra {input.mut_spectra} \

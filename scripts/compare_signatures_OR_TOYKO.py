@@ -64,6 +64,8 @@ subset_1 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "D"]['chrom_coun
 subset_0_fracs = subset_0 / np.sum(subset_0)
 subset_1_fracs = subset_1 / np.sum(subset_1)
 
+# calculate significant odds-ratio differences between
+# the two subsets
 pvals = np.ones(subset_0.shape[0], dtype=np.float64)
 
 for i in np.arange(subset_0.shape[0]):

@@ -1,39 +1,55 @@
-# set name of working directory
-WORKDIR = "/Users/tomsasani/harrislab/bxd_mutator_ms/"
 
 rule make_supp_figure_one:
 	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		py_script = WORKDIR + "scripts/mutation_comparison.py"
+		annotated_singletons = "csv/annotated_singletons.csv",
+		py_script = "scripts/mutation_comparison.py",
+		nuc_comp = "data/nucleotide_composition/"
 	output:
-		WORKDIR + "plots/supp_figure_1.eps"
+		"plots/supp_figure_1.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 							   --out {output} \
+							   -nmers_for_normalization {input.nuc_comp} \
 							   -subset_key haplotype \
 							   -plot_type scatter
 		"""
 
-rule make_supp_figure_three:
+rule make_supp_figure_three_a:
 	input:
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv",
-		qtl_rscript = WORKDIR + "Rscripts/qtl_mapping_ind_muts.R",
-		qtl_json = WORKDIR + "Rqtl_data/bxd.json",
-		#qtl_geno = WORKDIR + "Rqtl_data/bxd.geno.new.updated",
-		qtl_geno = WORKDIR + "Rqtl_data/bxd.geno.broman.conv",
-		qtl_gmap = WORKDIR + "Rqtl_data/bxd.gmap",
-		qtl_pmap = WORKDIR + "Rqtl_data/bxd.pmap",
-		outpref = WORKDIR + "plots/all_qtl_maps"
+		mut_rates = "csv/tidy_mutation_rates.csv",
+		qtl_rscript = "Rscripts/qtl_mapping_overall_rate.R",
+		qtl_json = "Rqtl_data/bxd.json",
+		qtl_geno = "Rqtl_data/bxd.geno.new.updated",
+		qtl_gmap = "Rqtl_data/bxd.gmap",
+		qtl_pmap = "Rqtl_data/bxd.pmap",
+		outpref = "plots/"
 	output:
-		WORKDIR + "plots/all_qtl_maps/supp_figure_3_C.T.eps",
-        WORKDIR + "plots/all_qtl_maps/supp_figure_3_C.A.eps",
+		"plots/supp_figure_3a.eps"
+	shell:
+		"""
+		Rscript {input.qtl_rscript} -j {input.qtl_json} \
+									-p {input.mut_rates} \
+									-o {input.outpref} 
+		""" 
 
-		WORKDIR + "plots/all_qtl_maps/supp_figure_3_C.G.eps",
-		WORKDIR + "plots/all_qtl_maps/supp_figure_3_A.T.eps",
-		WORKDIR + "plots/all_qtl_maps/supp_figure_3_A.G.eps",
-		WORKDIR + "plots/all_qtl_maps/supp_figure_3_A.C.eps",
-		WORKDIR + "plots/all_qtl_maps/supp_figure_3_CpG.TpG.eps" 
+rule make_supp_figure_three_b:
+	input:
+		mut_spectra = "csv/tidy_mutation_spectra.csv",
+		qtl_rscript = "Rscripts/qtl_mapping_ind_muts.R",
+		qtl_json = "Rqtl_data/bxd.json",
+		qtl_geno = "Rqtl_data/bxd.geno.new.updated",
+		qtl_gmap = "Rqtl_data/bxd.gmap",
+		qtl_pmap = "Rqtl_data/bxd.pmap",
+		outpref = "plots/all_qtl_maps"
+	output:
+		"plots/all_qtl_maps/supp_figure_3_C.T.eps",
+        "plots/all_qtl_maps/supp_figure_3_C.A.eps",
+		"plots/all_qtl_maps/supp_figure_3_C.G.eps",
+		"plots/all_qtl_maps/supp_figure_3_A.T.eps",
+		"plots/all_qtl_maps/supp_figure_3_A.G.eps",
+		"plots/all_qtl_maps/supp_figure_3_A.C.eps",
+		"plots/all_qtl_maps/supp_figure_3_CpG.TpG.eps" 
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
@@ -43,10 +59,10 @@ rule make_supp_figure_three:
 
 rule make_supp_figure_four:
 	input:
-		py_script = WORKDIR + "scripts/mutation_rates_by_haplotype.py",
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv"
+		py_script = "scripts/mutation_rates_by_haplotype.py",
+		mut_spectra = "csv/tidy_mutation_spectra.csv"
 	output:
-		WORKDIR + "plots/supp_figure_4.eps"
+		"plots/supp_figure_4.eps"
 	shell:
 		"""
 		python {input.py_script} --tidy_spectra {input.mut_spectra} \
@@ -55,11 +71,11 @@ rule make_supp_figure_four:
 
 rule make_supp_figure_five_a:
 	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		cosmic_sig = WORKDIR + "data/sbs36_cosmic_signatures.csv",
-		py_script = WORKDIR + "scripts/compare_signatures_regression.py"
+		annotated_singletons = "csv/annotated_singletons.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
+		py_script = "scripts/compare_signatures_regression.py"
 	output:
-		WORKDIR + "plots/supp_figure_5a.eps"
+		"plots/supp_figure_5a.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
@@ -70,11 +86,11 @@ rule make_supp_figure_five_a:
 
 rule make_supp_figure_five_b:
 	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		cosmic_sig = WORKDIR + "data/sbs18_cosmic_signatures.csv",
-		py_script = WORKDIR + "scripts/compare_signatures_regression.py"
+		annotated_singletons = "csv/annotated_singletons.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
+		py_script = "scripts/compare_signatures_regression.py"
 	output:
-		WORKDIR + "plots/supp_figure_5b.eps"
+		"plots/supp_figure_5b.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
@@ -85,37 +101,65 @@ rule make_supp_figure_five_b:
 
 rule make_supp_figure_six_a:
 	input:
-		py_script = WORKDIR + "scripts/bxd_68_vs_cosmic.py",
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		cosmic_sig = WORKDIR + "data/sbs36_cosmic_signatures.csv",
+		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singletons.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
 	output:
-		WORKDIR + "plots/supp_figure_6a.eps"
+		"plots/supp_figure_6a.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output}
+							   --out {output} \
+							   --sig_name SBS36_mm10
+
 		"""
 rule make_supp_figure_six_b:
 	input:
-		py_script = WORKDIR + "scripts/bxd_68_vs_cosmic.py",
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		cosmic_sig = WORKDIR + "data/sbs18_cosmic_signatures.csv",
+		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singletons.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
 	output:
-		WORKDIR + "plots/supp_figure_6b.eps"
+		"plots/supp_figure_6b.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS18_mm10
+		"""
+
+rule make_supp_figure_six_c:
+	input:
+		py_script = "scripts/compare_signatures_BXD68_TOYKO.py",
+		annotated_singletons = "csv/annotated_singletons.csv",
+		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
+	output:
+		"plots/supp_figure_6c.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --ohno_data {input.ohno_data} \
+							   --out {output} 
+		"""
+rule make_supp_figure_six_d:
+	input:
+		py_script = "scripts/compare_signatures_BXD68_OR.py",
+		annotated_singletons = "csv/annotated_singletons.csv",
+	output:
+		"plots/supp_figure_6d.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 							   --out {output}
 		"""
 
 rule make_supp_figure_seven:
 	input:
-		script_py = WORKDIR + "scripts/mutation_rates_by_inbreeding_time.py",
-		mut_spectra = WORKDIR + "csv/tidy_mutation_spectra.csv"
+		script_py = "scripts/mutation_rates_by_inbreeding_time.py",
+		mut_spectra = "csv/tidy_mutation_spectra.csv"
 	output:
-		WORKDIR + "plots/supp_figure_7.eps"
+		"plots/supp_figure_7.eps"
 	shell:
 		"""
 		python {input.script_py} --tidy_spectra {input.mut_spectra} \

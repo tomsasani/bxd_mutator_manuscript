@@ -1,5 +1,5 @@
 {
-  "description": "BXD mouse data from GeneNetwork",
+  "description": "BXD mouse data",
   "crosstype": "risib",
   "sep": ",",
   "na.strings": ["-", "NA"],
@@ -7,16 +7,16 @@
   "geno": "bxd.geno.new.updated",
   "gmap": "bxd.gmap",
   "pmap": "bxd.pmap",
-  "alleles": ["B", "D"],
+  "alleles": ["BB", "DD"],
   "x_chr": "X",
   "genotypes": {
-    "BB": 1,
-	"DD": 2 
+    "B": 1,
+	  "D": 2 
   },
   "geno_transposed": true,
   "cross_info": {
     "file": "bxd_crossinfo.csv",
     "BxD": 0,
-	"DxB": 1
+	  "DxB": 1
   }
 }

@@ -1,12 +1,10 @@
-# set name of working directory
-WORKDIR = "/Users/tomsasani/harrislab/bxd_mutator_ms/"
 
 rule make_figure_three_a:
 	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		py_script = WORKDIR + "scripts/mutation_comparison.py"
+		annotated_singletons = "csv/annotated_singletons.csv",
+		py_script = "scripts/mutation_comparison.py"
 	output:
-		WORKDIR + "plots/figure_3a.eps"
+		"plots/figure_3a.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
@@ -17,11 +15,11 @@ rule make_figure_three_a:
 
 rule make_figure_three_b:
 	input:
-		annotated_singletons = WORKDIR + "csv/annotated_singletons.csv",
-		ohno_data = WORKDIR + "data/ohno_etal.xls",
-		py_script = WORKDIR + "scripts/compare_signatures_TOYKO.py"
+		annotated_singletons = "csv/annotated_singletons.csv",
+		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
+		py_script = "scripts/compare_signatures_TOYKO.py"
 	output:
-		WORKDIR + "plots/figure_3b.eps"
+		"plots/figure_3b.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \

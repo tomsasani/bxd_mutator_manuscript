@@ -7,10 +7,13 @@ import pandas as pd
 import numpy as np
 import math
 import argparse
+import glob
+from utils import convert_bxd_name
 
-def mutation_comparison(sub_0_counts: np.array(object),
-            sub_1_counts: np.array(object),
+def mutation_comparison(sub_0_counts: np.array(np.int64),
+            sub_1_counts: np.array(np.int64),
             mut2idx: dict(),
+            nmer4norm=None,
             title=r"$log_{2}$" + " ratio of singleton fractions\n" +  \
                     " in strains with D vs. B haplotypes at QTL",
             outname='heatmap.png',
@@ -68,26 +71,55 @@ def mutation_comparison(sub_0_counts: np.array(object),
     muts_out = np.zeros(out_shape, dtype=object)
     base_muts_out = np.zeros(out_shape, dtype=object)
 
-    print (sub_0_counts_grid)
-    print (sub_1_counts_grid)
+    # if we want to normalize counts of mutations by the
+    # sum of 3-mer nucleotides of each type across the strains
+    # in subset 0 or subset 1, we query the nmer4norm dataframe
+    if nmer4norm is not None:
 
-    # loop over mutation and its total in sub_0
+        # loop over mutation and its total in sub_0
+        for mut_idx,x in enumerate(sub_0_counts):
+
+            orig_mut = muts[mut_idx]
+            mut_nmer = orig_mut.split('>')[0]
+
+            # get that mutation's total in sub_1
+            y = sub_1_counts[mut_idx]
+
+            # get the sum of 3-mer nucleotides of the base mutation
+            # type we're looking at in subset_0 and subset_1
+            nmer_comp = nmer4norm[nmer4norm['nmer'] == mut_nmer]
+
+            nmer_sub0_comp = nmer_comp[nmer_comp['haplotype'] == 0]['count_sum'].values[0]
+            nmer_sub1_comp = nmer_comp[nmer_comp['haplotype'] == 1]['count_sum'].values[0]
+
+            # if the sum of 3-mer nucleotides is higher in subset_1,
+            # we adjust the counts of mutations in subset_1 *down*, and
+            # vice versa
+            if nmer_sub0_comp > nmer_sub1_comp:
+                scaling_f = nmer_sub1_comp / nmer_sub0_comp
+                sub_0_counts[mut_idx] = int(x * scaling_f)
+                sub_1_counts[mut_idx] = y
+            elif nmer_sub1_comp > nmer_sub0_comp:
+                scaling_f = nmer_sub0_comp / nmer_sub1_comp
+                sub_1_counts[mut_idx] = int(y * scaling_f)
+                sub_0_counts[mut_idx] = x
+
     for mut_idx,x in enumerate(sub_0_counts):
 
         # get that mutation's total in sub_1
         y = sub_1_counts[mut_idx]
 
-        # chi2 contingency table to compare mutaiton
+        # chi2 contingency table to compare mutation
         # frequencies in either subset
         _,p,_,_ = ss.chi2_contingency([ [x, np.sum(sub_0_counts)],
                                         [y, np.sum(sub_1_counts)] ])
 
         orig_mut = muts[mut_idx]
-        print (orig_mut)
+
         # access the "base" 1-mer mutation and its 5'
         # and 3' flanking nucleotides
         base_mut = orig_mut.split('>')[0][1] + '>' + orig_mut.split('>')[1][1]
-        print (base_mut)
+
         five_pr, three_pr = orig_mut.split('>')[0][0], orig_mut.split('>')[0][-1]
 
         # calculate the index of this particular 3-mer
@@ -111,16 +143,11 @@ def mutation_comparison(sub_0_counts: np.array(object),
         muts_out[out_idx_x, out_idx_y] = orig_mut
         base_muts_out[out_idx_x, out_idx_y] = base_mut
         pvals[out_idx_x, out_idx_y] = p
-    print (base_muts_out)
-    # use method from Harris et al. (2017) to adjust p-values
-    #adj_pvals = adj_pvalues(pvals, sub_0_counts_grid, sub_1_counts_grid)
-
-    adj_pvals = pvals
 
     # find indices where ratio of sub_0:sub_1 is significant
     # at Bonferonni-corrected p-value
-    sig_adj_pvals = np.where(adj_pvals < 0.05 / 96)
-    non_sig_adj_pvals = np.where(adj_pvals >= 0.05 / 96)
+    sig_pvals = np.where(pvals < 0.05 / 96)
+    non_sig_pvals = np.where(pvals >= 0.05 / 96)
 
     sns.set_style('ticks')
 
@@ -138,7 +165,12 @@ def mutation_comparison(sub_0_counts: np.array(object),
 
         x_max, y_max = 0, 0
 
-        for (y,x) in zip(sig_adj_pvals[0], sig_adj_pvals[1]):
+        # plot data, and record maximum x and y values
+        # so that we can plot an abline later
+
+        # plot significant values first, with a black stroke
+        # on outside of circles
+        for (y,x) in zip(sig_pvals[0], sig_pvals[1]):
             x_frac = sub_0_counts_grid[y,x] / np.sum(sub_0_counts_grid)
             y_frac = sub_1_counts_grid[y,x] / np.sum(sub_1_counts_grid)
 
@@ -148,7 +180,9 @@ def mutation_comparison(sub_0_counts: np.array(object),
             base_mut = base_muts_out[y, x]
             ax.scatter(x_frac, y_frac, edgecolor='k', color=mut_colors[base_mut], s=75)
         
-        for (y,x) in zip(non_sig_adj_pvals[0], non_sig_adj_pvals[1]):
+        # then plot non-significant values, with a white stroke
+        # on outside of circles
+        for (y,x) in zip(non_sig_pvals[0], non_sig_pvals[1]):
             x_frac = sub_0_counts_grid[y,x] / np.sum(sub_0_counts_grid)
             y_frac = sub_1_counts_grid[y,x] / np.sum(sub_1_counts_grid)
             
@@ -222,6 +256,9 @@ p.add_argument("--annotated_singletons", required=True,
                     help="""annotated singleton variants in extended BED format.""")
 p.add_argument("--out", required=True,
                     help="""name of output plot""")
+p.add_argument("-nmers_for_normalization", nargs="*",
+                    help="""list of paths to files containing numbers of every possible
+                            3-mer nucleotide in B or D haplotypes in each BXD strain""")
 p.add_argument("-subset_key", default="haplotype_at_qtl",
                     help="""name of the column in `annotated_singletons` by which you \
                             want to subset strains. this column must take on only one \
@@ -251,4 +288,20 @@ subset_1 = df_wide[df_wide[args.subset_key] == "D"]['chrom_count'].values
 uniq_kmers = list(pd.unique(df_wide['kmer']))
 mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 
-mutation_comparison(subset_1, subset_0, mut2idx=mut2idx, outname=args.out, plot_type=args.plot_type)
+# if we want to normalize, create a 2d numpy array containing sums of 3-mer
+# nucleotides contained in B or D haplotypes across the dataset
+nmer4norm = None
+if args.nmers_for_normalization:
+    for fh in args.nmers_for_normalization:
+        sample = '_'.join(fh.split('/')[-1].split('_')[:2])
+        sample_conv = convert_bxd_name(sample)
+        df = pd.read_csv(fh, names=["haplotype", "nmer", "count"])
+        df['sample'] = sample_conv
+        if nmer4norm is None: nmer4norm = df
+        else: nmer4norm = pd.concat([nmer4norm, df])
+
+    # sum the numbers of 3-mer nucleotides in B or D haplotypes
+    nmer4norm = nmer4norm.groupby(["haplotype", "nmer"]).sum().add_suffix("_sum").reset_index()
+
+mutation_comparison(subset_1, subset_0, mut2idx=mut2idx, 
+            outname=args.out, nmer4norm=nmer4norm, plot_type=args.plot_type)

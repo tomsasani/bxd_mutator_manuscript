@@ -72,6 +72,8 @@ assert np.sum(muts_0 == muts_1) == muts_0.shape[0]
 subset_0_fracs = subset_0 / np.sum(subset_0)
 subset_1_fracs = subset_1 / np.sum(subset_1)
 
+# calculate significant odds-ratio differences between
+# the two subsets
 pvals = np.ones(subset_0.shape[0], dtype=np.float64)
 
 for i in np.arange(subset_0.shape[0]):
@@ -106,11 +108,9 @@ cosmic['kmer_idx'] = cosmic['kmer'].apply(lambda k: mut2idx[k])
 cosmic = cosmic.sort_values('kmer_idx')
 
 # get the components of the COSMIC mutation signature
-#cosmic = cosmic.sort_values('Type')
 cosmic_components = cosmic[args.sig_name].values
 
 # make figure object
-
 f, ax = plt.subplots(figsize=(6,8))
 
 sns.set_style('ticks')

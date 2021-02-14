@@ -3,9 +3,19 @@ import numpy as np
 import argparse
 from utils import convert_bxd_name
 
+def gt_to_allele(gt: int) -> int:
+    """
+    convert integer genotypes to haplotypes
+    """
+    d = {0: 'BB', 1: 'H', 2: 'DD', -1:'NA'}
+    return d[gt]
+
 p = argparse.ArgumentParser()
-p.add_argument("--geno_file")
-p.add_argument("--output")
+p.add_argument("--geno_file", required=True, 
+                    help="""file containing genotypes at roughly 7,000 markers for each \
+                            BXD strain""")
+p.add_argument("--output", required=True,
+                    help="""name of output file""")
 args = p.parse_args()
 
 # read in the genotypes file
@@ -13,6 +23,7 @@ geno = pd.read_csv(args.geno_file)
 
 geno = geno.rename(columns={'Unnamed: 0': 'marker'})
 
+# remove founder samples from the output file
 founder_samps = ['4512-JFI-0333_C57BL_6J_phased_possorted_bam',
                  '4512-JFI-0333_C57BL_6J_two_lanes_phased_possorted_bam',
                  '4512-JFI-0334_DBA_2J_phased_possorted_bam',
@@ -27,11 +38,6 @@ header_conv = [convert_bxd_name(n) for n in header[1:]]
 
 # access the genotypes at each site
 gts = geno.values[:,1:]
-
-def gt_to_allele(gt):
-    d = {0: 'B', 1: 'H', 2: 'D', -1:'NA'}
-    d = {0: 'BB', 1: 'H', 2: 'DD', -1:'NA'}
-    return d[gt]
 
 # convert genotypes to haplotypes
 vf = np.vectorize(gt_to_allele)

@@ -52,6 +52,7 @@ group_cols = ['kmer']
 
 # convert to wide-form dataframe
 singleton_tidy = singleton.groupby(group_cols).count().add_suffix('_count').reset_index()
+
 # subset tidy dataframe to relevant columns
 group_cols.append('chrom_count')
 singleton_tidy = singleton_tidy[group_cols]

@@ -88,7 +88,6 @@ smp_sums.rename(columns = {'count_sum': 'total_muts'}, inplace=True)
 # by the number of generations of inbreeding and the diploid number
 # of base pairs that were "callable" in the strain
 smp_sums['l_n'] = smp_sums['n_inbreeding_gens'].apply(lambda n: calc_new_gens(n))
-#smp_sums['rate'] = smp_sums['total_muts'] / smp_sums['n_inbreeding_gens'] / smp_sums['n_callable_bp']
 smp_sums['rate'] = smp_sums['total_muts'] / smp_sums['l_n'] / smp_sums['n_callable_bp']
 smp2sum = dict(zip(smp_sums['bxd_strain_conv'], smp_sums['total_muts']))
 
@@ -104,7 +103,8 @@ smp_by_frac = np.zeros((len(samps), len(muts)))
 
 for s_i,s in enumerate(samps):
     for mut_i,m in enumerate(muts):
-        val = df_wide[(df_wide['bxd_strain_conv'] == s) & (df_wide['base_mut'] == m)]['fraction'].values
+        val = df_wide[(df_wide['bxd_strain_conv'] == s) & \
+                (df_wide['base_mut'] == m)]['fraction'].values
         if val.shape[0] == 0: continue
         smp_by_frac[s_i, mut_i] = val[0]
 
@@ -122,9 +122,7 @@ for s_i,s in enumerate(samps):
         smp2mut2clr[s][m] = sbf_clr[s_i, mut_i]
 
 # and add a column with the rate of mutation for each mutation type
-#df_wide['rate'] = df_wide['count'] / df_wide['n_inbreeding_gens'] / df_wide['n_callable_bp']
 df_wide['l_n'] = df_wide['n_inbreeding_gens'].apply(lambda n: calc_new_gens(n))
-#df_wide['rate'] = df_wide['count'] / df_wide['n_inbreeding_gens'] / df_wide['n_callable_bp']
 df_wide['rate'] = df_wide['count'] / df_wide['l_n'] / df_wide['n_callable_bp']
 
 df_wide['clr_fraction'] = df_wide.apply(lambda row: smp2mut2clr[row['bxd_strain_conv']][row['base_mut']], axis=1)
@@ -136,7 +134,6 @@ df_wide.replace(to_replace=np.inf, value=0, inplace=True)
 # make a tidy dataframe such that there are three entries for every mutation type
 # in each sample -- one with its count, one with its rate, and one with its fraction
 df_tidy = df_wide.melt(id_vars=group_cols[:-1], var_name="estimate_type", value_name="estimate")
-print (df_tidy.query('base_mut == "C>T" & estimate_type == "rate"').groupby(['epoch']).count())
 
 df_tidy = df_tidy.query('estimate_type != "total_muts"')
 

@@ -64,7 +64,6 @@ mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 # get a list of the 6 "base" mutation types in the signature
 base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in uniq_kmers]
 base_muts = list(set(base_muts))
-print (base_muts)
 
 # read in the COSMIC signature
 cosmic = pd.read_csv(args.cosmic_signature)
