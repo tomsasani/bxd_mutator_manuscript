@@ -66,6 +66,9 @@ In a number of analyses, we compare mutation spectra between the BXD singletons 
 * *de novo* germline mutation data from [Ohno et al. 2014](https://www.nature.com/articles/srep04689)
     * download [Supplementary Data 1](https://static-content.springer.com/esm/art%3A10.1038%2Fsrep04689/MediaObjects/41598_2014_BFsrep04689_MOESM2_ESM.xls)
     * move `41598_2014_BFsrep04689_MOESM2_ESM.xls` into the `data` directory of the cloned version of this repository
+* mutation signatures from [COSMIC](https://cancer.sanger.ac.uk/cosmic)
+    * [SBS36](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS36.csv)
+    * [SBS18](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS18.csv)
 
 ```
 # enter a directory of your choice (make sure
