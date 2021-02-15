@@ -1,24 +1,25 @@
-
-# generate a `.geno` file that R/qtl2 uses to map sample IDs
-# to genotypes at each of ~7,000 autosomal markers
-rule generate_bxd_geno:
+rule make_geno_file:
 	input:
-		gts = "data/bxd_genotypes_at_markers.csv",
-		py_script = "scripts/make_bxd_geno_map.py"
+		strain_metadata = "data/bam_names_to_metadata.xlsx",
+		geno = "Rqtl_data/bxd.geno",
+		py_script = "scripts/orig_to_new_geno.py"
 	output:
-		"Rqtl_data/bxd.geno.from_vcf"
+		"Rqtl_data/bxd.geno.new"
 	shell:
 		"""
-		python {input.py_script} --geno_file {input.gts} \
-									--output {output} 
+		python {input.py_script} --geno {input.geno} \
+								 --strain_metadata {input.strain_metadata} \
+								 --out {output}
 		"""
+
+
 
 rule make_figure_two_ab: 
 	input:
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		qtl_rscript = "Rscripts/qtl_mapping.R",
+		qtl_geno = "Rqtl_data/bxd.geno.new",
 		qtl_json = "Rqtl_data/bxd.json",
-		qtl_geno = "Rqtl_data/bxd.geno.from_vcf",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 		outpref = "plots"

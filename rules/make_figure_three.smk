@@ -1,8 +1,6 @@
-
-
 rule make_figure_three_a:
 	input:
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		py_script = "scripts/mutation_comparison.py"
 	output:
 		"plots/figure_3a.eps"
@@ -16,7 +14,7 @@ rule make_figure_three_a:
 
 rule make_figure_three_b:
 	input:
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
 		py_script = "scripts/compare_signatures_OR_TOYKO.py"
 	output:

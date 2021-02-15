@@ -4,7 +4,7 @@
   "sep": ",",
   "na.strings": ["-", "NA"],
   "comment.char": "#",
-  "geno": "bxd.geno.broman.conv",
+  "geno": "bxd.geno.new",
   "gmap": "bxd.gmap",
   "pmap": "bxd.pmap",
   "alleles": ["B", "D"],

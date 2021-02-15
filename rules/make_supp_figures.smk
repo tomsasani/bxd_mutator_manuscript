@@ -1,10 +1,8 @@
-
 samples, = glob_wildcards("data/nucleotide_composition/{sample}_nucleotide_composition.csv")
-
 
 rule make_supp_figure_two:
 	input:
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		py_script = "scripts/mutation_comparison.py",
 		nuc_comp = expand("data/nucleotide_composition/{sample}_nucleotide_composition.csv", sample=samples)
 	output:
@@ -22,8 +20,8 @@ rule make_supp_figure_three_a:
 	input:
 		mut_rates = "csv/tidy_mutation_rates.csv",
 		qtl_rscript = "Rscripts/qtl_mapping_overall_rate.R",
+		qtl_geno = "Rqtl_data/bxd.geno.new",
 		qtl_json = "Rqtl_data/bxd.json",
-		qtl_geno = "Rqtl_data/bxd.geno.from_vcf",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 		outpref = "plots/"
@@ -40,8 +38,8 @@ rule make_supp_figure_three_b:
 	input:
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		qtl_rscript = "Rscripts/qtl_mapping_ind_muts.R",
+		qtl_geno = "Rqtl_data/bxd.geno.new",
 		qtl_json = "Rqtl_data/bxd.json",
-		qtl_geno = "Rqtl_data/bxd.geno.from_vcf",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 		outpref = "plots/all_qtl_maps"
@@ -74,7 +72,7 @@ rule make_supp_figure_four:
 
 rule make_supp_figure_five_a:
 	input:
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
 		py_script = "scripts/compare_signatures_OR_COSMIC.py"
 	output:
@@ -89,7 +87,7 @@ rule make_supp_figure_five_a:
 
 rule make_supp_figure_five_b:
 	input:
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
 		py_script = "scripts/compare_signatures_OR_COSMIC.py"
 	output:
@@ -105,7 +103,7 @@ rule make_supp_figure_five_b:
 rule make_supp_figure_six_a:
 	input:
 		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
 	output:
 		"plots/supp_figure_6a.eps"
@@ -120,7 +118,7 @@ rule make_supp_figure_six_a:
 rule make_supp_figure_six_b:
 	input:
 		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
 	output:
 		"plots/supp_figure_6b.eps"
@@ -135,7 +133,7 @@ rule make_supp_figure_six_b:
 rule make_supp_figure_six_c:
 	input:
 		py_script = "scripts/compare_signatures_BXD68_TOYKO.py",
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
 	output:
 		"plots/supp_figure_6c.eps"
@@ -148,7 +146,7 @@ rule make_supp_figure_six_c:
 rule make_supp_figure_six_d:
 	input:
 		py_script = "scripts/compare_signatures_BXD68_OR.py",
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 	output:
 		"plots/supp_figure_6d.eps"
 	shell:

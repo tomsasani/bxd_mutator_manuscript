@@ -1,9 +1,9 @@
 # Discovery of a quantitative trait locus for the germline mutation rate in mice
 
-Thomas A. Sasani, David G. Ashbrook, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris
+*Thomas A. Sasani, David G. Ashbrook, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
 
 The code in this repository is sufficient to reproduce the entire manuscript from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to
-simply generate the figures in the manuscript using pre-computed data, since the latter require very large input files and quite a bit of time to create.
+simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
 
 **The basic outline of the pipeline is as follows:**
 

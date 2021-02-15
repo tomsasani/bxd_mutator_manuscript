@@ -30,7 +30,11 @@ pr <- calc_genoprob(bxd, gmap, error_prob=0.002, map_function="c-f")
 # read in the phenotype values for each BXD strain
 phen_df = read.csv(opt$phenotype_file, header=T)
 
+# don't include outlier strain in QTL scans
 phen_df = subset(phen_df, bxd_strain_conv != "BXD68_RwwJ_0462")
+
+phen_df$is_ail[phen_df$n_intercross_gens == 0] <- 0
+phen_df$is_ail[phen_df$n_intercross_gens > 0] <- 1
 
 # calculate kinship between strains using the
 # "leave one chromosome out" method
@@ -46,8 +50,8 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # get the phenotype as a log10-transformed fraction...
     phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
-    phen_matrix_frac = as.matrix(log10(phen_df_sub_frac$estimate))
-    #phen_matrix_frac = as.matrix(RankNorm(phen_df_sub_frac$estimate))
+    #phen_matrix_frac = as.matrix(log10(phen_df_sub_frac$estimate))
+    phen_matrix_frac = as.matrix(RankNorm(phen_df_sub_frac$estimate))
     
     phenotype_frac = as.matrix(phen_matrix_frac[,1])
     rownames(phenotype_frac) = phen_df_sub_frac$bxd_strain_conv
@@ -59,7 +63,7 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     rownames(phenotype_rate) = phen_df_sub_rate$bxd_strain_conv
     
     # get covariates to include
-    covariate_cols = c("epoch", "n_intercross_gens")
+    covariate_cols = c("is_ail", "epoch", "n_intercross_gens")
     covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
     rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
     

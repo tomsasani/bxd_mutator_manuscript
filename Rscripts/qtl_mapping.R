@@ -63,15 +63,10 @@ rownames(phenotype_rate) = strain_names
 phen_df_sub_frac$is_ail[phen_df_sub_frac$n_intercross_gens == 0] <- 0
 phen_df_sub_frac$is_ail[phen_df_sub_frac$n_intercross_gens > 0] <- 1
 
-
-#count_covar = subset(phen_df_sub, estimate_type == "count" & base_mut == "C>A")$estimate
-
 # get covariates
 covariate_cols = c("n_intercross_gens", "is_ail", "epoch")
 covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
-#covariate_matrix_with_count = cbind(covariate_matrix, count_covar)
 rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
-#rownames(covariate_matrix_with_count) = phen_df_sub_frac$bxd_strain_conv
 
 Xcovar = get_x_covar(bxd)
 
@@ -82,9 +77,6 @@ out_rate <- scan1(pr, phenotype_rate, kinship=k,
 
 out_frac <- scan1(pr, phenotype_frac, kinship=k, 
                   addcovar=covariate_matrix, Xcovar=Xcovar)
-
-print (dim(phenotype_rate))
-#print (phen_df_sub_rate$bxd_strain_conv)
 
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
@@ -97,14 +89,17 @@ operm_frac <- scan1perm(pr, phenotype_frac, kinship=k,
 lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]
 lod_cutoff_sig_frac = summary(operm_frac, alpha=0.05 / 15)[1]
 
-print (lod_cutoff_sig_rate)
-print (lod_cutoff_sig_frac)
-
+# print Bayes 95% credible intervals
+print ("Bayes 95% CI (fraction)")
 print (bayes_int(out_frac, pmap, lodcolumn=1, chr=4, prob=0.95))
+print ("Bayes 95% CI (rate)")
 print (bayes_int(out_rate, pmap, lodcolumn=1, chr=4, prob=0.95))
 
-print(find_peaks(out_frac, pmap, threshold=lod_cutoff_sig_frac))
-print(find_peaks(out_rate, pmap, threshold=lod_cutoff_sig_rate))
+# print LOD peaks
+print("LOD peak (fraction)")
+print (find_peaks(out_frac, pmap, threshold=lod_cutoff_sig_frac))
+print ("LOD peak (rate)")
+print (find_peaks(out_rate, pmap, threshold=lod_cutoff_sig_rate))
 
 # plot peaks and LOD threshold
 ymx_rate <- maxlod(out_rate)
@@ -138,8 +133,6 @@ abline(h=lod_cutoff_sig_frac, col='slateblue', lwd=2, lty=2)
 abline(h=lod_cutoff_sig_rate, col='green3', lwd=2, lty=2)
 legend("topleft", lwd=2, col=color, c("C>A rate", "C>A fraction"), bg="gray90", lty=c(1,1,2))
 dev.off()
-
-print ('done with plotting QTL')
 
 # find the maximum LOD peak
 max_peak_frac = find_peaks(out_frac, pmap, threshold = lod_cutoff_sig_frac)[1,]

@@ -1,5 +1,5 @@
 # set name of working directory
-WORKDIR = "/Users/tomsasani/harrislab/bxd_mutator_ms/"
+#WORKDIR = "/Users/tomsasani/harrislab/bxd_mutator_ms/"
 
 # set the path to the CONDA YAML
 CONDA_YAML = "/Users/tomsasani/harrislab/bxd_mutator_ms/env.yaml"
@@ -19,6 +19,7 @@ include: "rules/make_supp_figures.smk"
 # pseudo-rule to collect all output figures
 main_figures = ["1a", "1b", "1c", "1d", 
 				   "2a", "2b", "2c", "2d",
+				   #"2d",
 				   "3a", "3b",
 				   "4a", "4bc", "4d"]
 
@@ -37,19 +38,17 @@ rule all:
 
 rule annotate_vars:
 	input: 
-		singleton_vars = expand("data/{chrom}_{{var_type}}_vars.exclude.csv", chrom=chroms),
+		var_list = expand("data/{{var_type}}_vars/{chrom}_{{var_type}}_vars.exclude.csv", chrom=chroms),
 		strain_metadata = "data/bam_names_to_metadata.xlsx",
 		strain_callable_bp = "data/smp2denominator.csv",
 		annotate_py = "scripts/annotate_vars.py",
-		qtl_geno = "Rqtl_data/bxd.geno.new.updated"
+		qtl_geno = "Rqtl_data/bxd.geno.new"
 	output:
-		WORKDIR + "csv/annotated_{var_type}.csv"
-	conda:
-		CONDA_YAML
+		"csv/annotated_{var_type}_vars.csv"
 	shell:
 		"""
 		python {input.annotate_py} \
-			   --singleton_vars {input.singleton_vars} \
+			   --var_list {input.var_list} \
 			   --strain_genotypes {input.qtl_geno} \
 			   --strain_metadata {input.strain_metadata} \
 			   --callable_bp {input.strain_callable_bp} \
@@ -58,7 +57,7 @@ rule annotate_vars:
 
 rule generate_tidy_data:
 	input:
-		annotated_singletons = "csv/annotated_singletons.csv",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		tidy_data_py = "scripts/make_tidy_data.py"
 	output:
 		mut_rates = "csv/tidy_mutation_rates.csv",
@@ -76,7 +75,7 @@ rule make_epoch_sharing_fig:
 		annotated_vars = "csv/annotated_bxd_private.csv",
 		heatmap_py = "scripts/make_epoch_sharing_heatmap.py"
 	output:
-		WORKDIR + "plots/epoch_heatmap.eps"
+		"plots/epoch_heatmap.eps"
 	shell:
 		"""
 		python {input.heatmap_py} --annotated_vars {input.annotated_vars} \

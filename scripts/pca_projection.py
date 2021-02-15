@@ -11,6 +11,7 @@ from sklearn.preprocessing import scale, normalize
 import seaborn as sns
 from matplotlib.patches import Patch
 from matplotlib import gridspec
+from collections import Counter
 
 def clr(X):
     """

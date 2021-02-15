@@ -58,6 +58,10 @@ common = pd.read_csv(args.annotated_fixed)
 singletons['v_type'] = 'singletons'
 common['v_type'] = 'fixed'
 
+ks_stat, ks_p = ss.ks_2samp(singletons['phastCons'].values, 
+                            common['phastCons'].values, alternative='greater')
+print ("K-S test p-value: {}".format(ks_p))
+
 # combine the common and singleton variants
 combined = pd.concat([singletons, common])
 
@@ -88,7 +92,7 @@ for i,lab in enumerate(pd.unique(combined['v_type'])):
     ax.fill_between(x[1:], np.cumsum(ci[0]), np.cumsum(ci[1]), color=cols[i], alpha=0.25)
 
 ax.legend(loc="lower right", title="Variant type", frameon=False)
-ax.set_xlabel('Phastcons score (low {} high conservation)'.format(r'$\to$'))
+ax.set_xlabel('phastCons score (low {} high conservation)'.format(r'$\to$'))
 ax.set_ylabel('Cumulative fraction of variants')
 ax.set_xticks(np.arange(0, 1.1, 0.1))
 

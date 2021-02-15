@@ -60,21 +60,18 @@ rsids = ["rs47460195",
 
 genos_at_markers = genos[genos['marker'].isin(rsids)]
 
+print (genos_at_markers)
+
 # read in the file of variants, containing one BED-format line per variant
 variants = combine_chr_df(args.var_list)
-
-if 'haplotype' not in list(variants):
-    variants['haplotype'] = "D"
-
-# remove very low and very high-depth mutations
-variants = variants.query('dp >= 10 & dp < 100')
 
 # add a column describing the 1-mer mutation type corresponding to all
 # 3-mer "kmers" in the dataframe
 variants['base_mut'] = variants['kmer'].apply(to_base_mut, cpg=True)
 
 # remove any potential variants identified in founder genomes. we're
-# only interested in variantss observed in BXD RILs
+# only interested in variantss observed in BXD RILs. not sure if I've
+# ever seen a singleton in a founder, but better safe than sorry
 founder_samps = ['4512-JFI-0333_C57BL_6J_two_lanes_phased_possorted_bam',
                  '4512-JFI-0334_DBA_2J_three_lanes_phased_possorted_bam']
 
@@ -97,17 +94,19 @@ iso_samps = ['4512-JFI-0348_BXD24_TyJ_Cep290_J_phased_possorted_bam',
 
 variants = variants[~variants['bxd_strain'].isin(iso_samps)]
 
-
 # reformat BXD strain names from BAM notation
 variants['bxd_strain_conv'] = variants['bxd_strain'].apply(lambda x: convert_bxd_name(x))
 
 # add columns to the dataframe with relevant metadata
 variants['epoch'] = variants['bxd_strain'].apply(lambda s: strain2epoch[s])
 variants['n_inbreeding_gens'] = variants['bxd_strain'].apply(lambda s: strain2inbreed_gen[s])
+# remove strains if they have "bad" values in the `n_inbreeding_gens` column,
+# due to them being backcrossed during inbreeding 
 variants = variants[~variants['n_inbreeding_gens'].isin([-1, "NA"])]
 variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2intercross_gens[s])
 variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] \
                                                                 if s in strain2denom else "NA")
-variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, s, rsids))
-variants['haplotype'] = variants['haplotype'].apply(lambda h: "B" if h == 0 else "D")
+variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, 
+                                                                                            s, 
+                                                                                            rsids) if s in list(genos_at_markers) else "NA")
 variants.to_csv(args.out, index=False)
