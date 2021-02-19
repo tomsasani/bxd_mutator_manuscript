@@ -78,7 +78,7 @@ mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in uniq_kmers]
 base_muts = set(list(base_muts))
 
-f, ax = plt.subplots(figsize=(8,8))
+f, ax = plt.subplots(figsize=(6,8))
 
 sns.set_style('ticks')
 
@@ -136,7 +136,7 @@ for mut in mut2idx:
                     textcoords='offset points', zorder=0)
 
 ax.set_xlabel('Fraction of BXD68 singletons', fontsize=18)
-ax.set_ylabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
+ax.set_ylabel('Log-2 ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
 
 sns.despine(ax=ax, top=True, right=True)
 

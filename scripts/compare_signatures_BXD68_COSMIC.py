@@ -77,11 +77,6 @@ cosmic['kmer_idx'] = cosmic['kmer'].apply(lambda k: mut2idx[k] if k in mut2idx e
 
 # remove kmers for which we don't have data in BXD68
 cosmic = cosmic[cosmic['kmer_idx'] != "NA"]
-cosmic = cosmic.sort_values('kmer_idx')
-
-# get the components of the COSMIC mutation signature
-#cosmic = cosmic.sort_values('Type')
-cosmic_components = cosmic[args.sig_name].values
 
 # make figure object
 f, ax = plt.subplots(figsize=(6,8))
@@ -98,7 +93,7 @@ for mut in mut2idx:
     bxd68_sub = singleton_tidy[singleton_tidy['kmer'] == mut]
     x = bxd68_sub['frac'].values[0]    
     
-    y = cosmic_components[idx]
+    y = cosmic[cosmic['kmer'] == mut][args.sig_name].values[0]
 
     nuc_a = mut.split('>')[0][1]
     nuc_b = mut.split('>')[1][1]

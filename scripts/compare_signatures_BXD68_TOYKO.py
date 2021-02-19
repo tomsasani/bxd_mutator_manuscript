@@ -90,7 +90,7 @@ toyko_wide = toyko.groupby('kmer').count().add_suffix('_count').reset_index()
 toyko_total = np.sum(toyko_wide[colname + '_count'])
 toyko_wide['frac'] = toyko_wide[colname + '_count'] / toyko_total
 
-f, ax = plt.subplots(figsize=(8,8))
+f, ax = plt.subplots(figsize=(6,8))
 
 sns.set_style('ticks')
 

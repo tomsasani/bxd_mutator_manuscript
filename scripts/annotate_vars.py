@@ -60,8 +60,6 @@ rsids = ["rs47460195",
 
 genos_at_markers = genos[genos['marker'].isin(rsids)]
 
-print (genos_at_markers)
-
 # read in the file of variants, containing one BED-format line per variant
 variants = combine_chr_df(args.var_list)
 
@@ -76,23 +74,6 @@ founder_samps = ['4512-JFI-0333_C57BL_6J_two_lanes_phased_possorted_bam',
                  '4512-JFI-0334_DBA_2J_three_lanes_phased_possorted_bam']
 
 variants = variants[~variants['bxd_strain'].isin(founder_samps)]
-
-# remove co-isogenic samples
-iso_samps = ['4512-JFI-0348_BXD24_TyJ_Cep290_J_phased_possorted_bam',
-             '4512-JFI-0347_BXD024_TyJ_phased_possorted_bam',
-             '4512-JFI-0345_BXD029_Tlr4_J_phased_possorted_bam',
-             '4512-JFI-0344_BXD29_Ty_phased_possorted_bam',
-             '4512-JFI-0355_BXD152_phased_possorted_bam',
-             '4512-JFI-0362_BXD155_phased_possorted_bam',
-             '4512-JFI-0482_BXD087_RwwJ_phased_possorted_bam',
-             '4512-JFI-0485_BXD194_redo_phased_possorted_bam',
-             '4512-JFI-0382_BXD048a_RwwJ_phased_possorted_bam',
-             '4512-JFI-0387_BXD65a_RwwJ_phased_possorted_bam'
-             '4512-JFI-0388_BXD65b_RwwJ_phased_possorted_bam',
-             '4512-JFI-0439_BXD73a_RwwJ_phased_possorted_bam',
-             '4512-JFI-0440_BXD073b_RwwJ_phased_possorted_bam']
-
-variants = variants[~variants['bxd_strain'].isin(iso_samps)]
 
 # reformat BXD strain names from BAM notation
 variants['bxd_strain_conv'] = variants['bxd_strain'].apply(lambda x: convert_bxd_name(x))
@@ -109,4 +90,9 @@ variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2d
 variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, 
                                                                                             s, 
                                                                                             rsids) if s in list(genos_at_markers) else "NA")
+variants = variants[variants['haplotype_at_qtl'] != "NA"]
+#variants = variants.query('n_inbreeding_gens >= 20')
+
+print ("Total of {} mutations in {} strains".format(variants.shape[0], len(pd.unique(variants['bxd_strain_conv']))))
+
 variants.to_csv(args.out, index=False)

@@ -53,17 +53,22 @@ args = p.parse_args()
 # read in variant types and add a column to each indicating
 # the "type" of variant
 singletons = pd.read_csv(args.annotated_singletons)
-common = pd.read_csv(args.annotated_fixed)
+fixed = pd.read_csv(args.annotated_fixed)
 
 singletons['v_type'] = 'singletons'
-common['v_type'] = 'fixed'
+fixed['v_type'] = 'fixed'
+
+singletons = singletons.query('phastCons != -1')
+fixed = fixed.query('phastCons != -1')
+
+print ("Total of {} singletons and {} fixed variants".format(singletons.shape[0], fixed.shape[0]))
 
 ks_stat, ks_p = ss.ks_2samp(singletons['phastCons'].values, 
-                            common['phastCons'].values, alternative='greater')
+                            fixed['phastCons'].values, alternative='less')
 print ("K-S test p-value: {}".format(ks_p))
 
 # combine the common and singleton variants
-combined = pd.concat([singletons, common])
+combined = pd.concat([singletons, fixed])
 
 f, ax = plt.subplots()
 sns.set_style('ticks')
@@ -79,7 +84,9 @@ for i,lab in enumerate(pd.unique(combined['v_type'])):
     sub_df = combined[combined['v_type'] == lab]
 
     # remove any variants for which phastCons scores weren't available
-    cons = sub_df[sub_df['phastCons'] != -1]["phastCons"].values.astype(np.float64)
+    cons = sub_df["phastCons"].values.astype(np.float64)
+
+    print ("Total of {} {} variants with conservation scores".format(lab, cons.shape[0]))
 
     # get histogram of conservation values
     y, x = np.histogram(cons, bins=99)

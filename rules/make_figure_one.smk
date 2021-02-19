@@ -1,4 +1,3 @@
-
 rule make_figure_one_abd: 
 	input:
 		py_script = "scripts/make_boxplots.py",

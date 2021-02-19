@@ -167,7 +167,7 @@ ax.legend(handles=legend_elements, frameon=False,
             fontsize=16)
 
 ax.set_ylabel('Fraction of COSMIC {} signature'.format(args.sig_name.split('_')[0]), fontsize=18)
-ax.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
+ax.set_xlabel('Log-2 ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
 
 sns.despine(ax=ax, top=True, right=True)
 

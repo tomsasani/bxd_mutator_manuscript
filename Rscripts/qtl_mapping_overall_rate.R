@@ -4,7 +4,6 @@ library(cowplot)
 library(dplyr)
 library(optparse)
 library(tidyr)
-library(RNOmni)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),

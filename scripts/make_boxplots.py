@@ -73,11 +73,23 @@ f_1d, ax_1d = plt.subplots()
 
 #tidy_spectra['base_mut_new'] = tidy_spectra['base_mut'].apply(lambda m: m.replace(">", r'$\to$'))
 
-flierprops = dict(marker='o', markersize=4, markeredgewidth=0, markerfacecolor='lightgrey')
+flierprops = dict(marker='o', markersize=0, markeredgewidth=0, markerfacecolor='lightgrey')
 
-sns.boxplot(x="base_mut", y="estimate", hue="epoch", linewidth=1, 
-                palette="colorblind", flierprops=flierprops, 
+print (tidy_spectra.query('estimate_type == "fraction" & base_mut == "CpG>TpG" & estimate > 0.3'))
+
+sns.boxplot(x="base_mut", y="estimate", linewidth=1, 
+                color='w', fliersize=0, #=flierprops, 
                 data=tidy_spectra.query('estimate_type == "fraction"'), ax=ax_1d)
+sns.stripplot(x="base_mut", y="estimate", linewidth=1, 
+                palette='colorblind', #flierprops=flierprops, 
+                data=tidy_spectra.query('estimate_type == "fraction"'), ax=ax_1d)
+# perform ANOVA to test for differences in spectra across epochs
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+
+tidy_fractions = tidy_spectra.query('estimate_type == "fraction"')
+model = ols('estimate ~ C(base_mut) + C(epoch)', data=tidy_fractions).fit()
+print (sm.stats.anova_lm(model, typ=2))
 
 ax_1d.set_xticklabels(pd.unique(tidy_spectra['base_mut']))
 ax_1d.set_ylabel("Fraction of homozygous singletons")

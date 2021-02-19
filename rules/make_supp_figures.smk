@@ -58,12 +58,24 @@ rule make_supp_figure_three_b:
 									-o {input.outpref} 
 		""" 
 
-rule make_supp_figure_four:
+rule make_supp_figure_four_a:
 	input:
 		py_script = "scripts/mutation_rates_by_haplotype.py",
 		mut_spectra = "csv/tidy_mutation_spectra.csv"
 	output:
-		"plots/supp_figure_4.eps"
+		"plots/supp_figure_4a.eps"
+	shell:
+		"""
+		python {input.py_script} --tidy_spectra {input.mut_spectra} \
+							   --out {output} 
+		"""
+
+rule make_supp_figure_four_b:
+	input:
+		py_script = "scripts/mutation_rates_by_inbreeding_time.py",
+		mut_spectra = "csv/tidy_mutation_spectra.csv"
+	output:
+		"plots/supp_figure_4b.eps"
 	shell:
 		"""
 		python {input.py_script} --tidy_spectra {input.mut_spectra} \
@@ -157,12 +169,14 @@ rule make_supp_figure_six_d:
 
 rule make_supp_figure_seven:
 	input:
-		script_py = "scripts/mutation_rates_by_inbreeding_time.py",
-		mut_spectra = "csv/tidy_mutation_spectra.csv"
+		dumont_xls = "data/SuppTables_concat.xlsx",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		py_script = "scripts/compare_mgp_spectra_3mer.py"
 	output:
 		"plots/supp_figure_7.eps"
 	shell:
 		"""
-		python {input.script_py} --tidy_spectra {input.mut_spectra} \
-							   --out {output} 
+		python {input.py_script} --dumont_xls {input.dumont_xls} \
+								 --annotated_singletons {input.annotated_singletons} \
+									--out {output}
 		"""

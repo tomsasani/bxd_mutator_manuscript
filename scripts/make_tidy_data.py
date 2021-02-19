@@ -66,12 +66,6 @@ df_wide = singleton.groupby(group_cols).count().add_suffix('_count').reset_index
 group_cols.append('chrom_count')
 df_wide = df_wide[group_cols]
 
-# remove any samples without information about callable bp or generation numbers.
-# samples that have been backcrossed at some point during their inbreeding
-# are marked with a "NA" in that column and are removed here.
-df_wide = df_wide[df_wide['n_inbreeding_gens'] != "NA"]
-df_wide = df_wide[df_wide['n_callable_bp'] != "NA"]
-
 df_wide.rename(columns={'chrom_count': 'count'}, inplace=True)
 
 # map samples to their sums of total mutations, so we can calculate
@@ -84,12 +78,19 @@ smp_sums = df_wide.groupby(['bxd_strain_conv',
 
 smp_sums.rename(columns = {'count_sum': 'total_muts'}, inplace=True)
 
+print (smp_sums.groupby('epoch').count().reset_index())
+
+print ("Total of {} mutations in {} strains".format(np.sum(smp_sums['total_muts']), 
+                                                    len(pd.unique(smp_sums['bxd_strain_conv']))))
+
 # calculate overall mutation rates as the sum of singletons divided
 # by the number of generations of inbreeding and the diploid number
 # of base pairs that were "callable" in the strain
 smp_sums['l_n'] = smp_sums['n_inbreeding_gens'].apply(lambda n: calc_new_gens(n))
-smp_sums['rate'] = smp_sums['total_muts'] / smp_sums['l_n'] / smp_sums['n_callable_bp']
+smp_sums['rate'] = smp_sums['total_muts'] / (smp_sums['l_n'] * smp_sums['n_callable_bp'])
 smp2sum = dict(zip(smp_sums['bxd_strain_conv'], smp_sums['total_muts']))
+
+print ("Mean mutation rate across strains is {}".format(np.mean(smp_sums['rate'])))
 
 df_wide['total_muts'] = df_wide['bxd_strain_conv'].apply(lambda s: smp2sum[s])
 
@@ -123,7 +124,7 @@ for s_i,s in enumerate(samps):
 
 # and add a column with the rate of mutation for each mutation type
 df_wide['l_n'] = df_wide['n_inbreeding_gens'].apply(lambda n: calc_new_gens(n))
-df_wide['rate'] = df_wide['count'] / df_wide['l_n'] / df_wide['n_callable_bp']
+df_wide['rate'] = df_wide['count'] / (df_wide['l_n'] * df_wide['n_callable_bp'])
 
 df_wide['clr_fraction'] = df_wide.apply(lambda row: smp2mut2clr[row['bxd_strain_conv']][row['base_mut']], axis=1)
 

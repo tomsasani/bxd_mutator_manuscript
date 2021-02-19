@@ -3,8 +3,7 @@ library(ggplot2)
 library(cowplot)
 library(dplyr)
 library(optparse)
-library(RNOmni)
-library(stringr)
+#library(RNOmni)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
@@ -50,8 +49,8 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # get the phenotype as a log10-transformed fraction...
     phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
-    #phen_matrix_frac = as.matrix(log10(phen_df_sub_frac$estimate))
-    phen_matrix_frac = as.matrix(RankNorm(phen_df_sub_frac$estimate))
+    phen_matrix_frac = as.matrix(log10(phen_df_sub_frac$estimate))
+    #phen_matrix_frac = as.matrix(RankNorm(phen_df_sub_frac$estimate))
     
     phenotype_frac = as.matrix(phen_matrix_frac[,1])
     rownames(phenotype_frac) = phen_df_sub_frac$bxd_strain_conv
@@ -92,7 +91,7 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     ylim_val = max(c(ymx_frac, ymx_rate, lod_cutoff_sig_frac, lod_cutoff_sig_rate))
     
-    formatted_mut_type = str_replace(mut_type, ">", ".")
+    formatted_mut_type = gsub(">", ".", mut_type)
     
     # plot LOD scores genome-wide for fraction phenotype
     setEPS()

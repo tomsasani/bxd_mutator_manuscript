@@ -167,7 +167,7 @@ for mut in mut2idx:
                     textcoords='offset points', zorder=0)
 
 ax.set_ylabel('Fraction of de novo germline\nmutations in TOY-KO mice', fontsize=18)
-ax.set_xlabel(r'$log_{2}$' + ' ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
+ax.set_xlabel('Log-2 ratio of ' + 'rC$\to$A' + ' singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
 
 sns.despine(ax=ax, top=True, right=True)
 

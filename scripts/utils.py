@@ -118,7 +118,7 @@ def find_haplotype(genos: list, sample: str, rsids: []) -> str:
     geno_freq = Counter(genos_in_smp)
     most_freq_geno = "H"
     for g in ["B", "D"]:
-        if geno_freq[g] > (len(rsids) * 0.75): most_freq_geno = g[0]
+        if geno_freq[g] > (len(rsids) * 0.5): most_freq_geno = g[0]
         else: continue
     
     return most_freq_geno

@@ -70,7 +70,7 @@ sns.set_style('ticks')
 
 # do every pairwise comparison of spectra in strains with each
 # configuration of Mutyh mutations
-for cat_i,cat in enumerate([("5/5", "3/5"), ("3/5", "2/5")]):
+for cat_i,cat in enumerate([("5/5", "3/5"), ("3/5", "0/5")]):
 
     a, b = cat
 

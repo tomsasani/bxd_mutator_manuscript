@@ -46,6 +46,8 @@ print (ss.ttest_ind(df_ca.query('haplotype_at_qtl == "B"')['estimate'],
                     equal_var=False))
 print (mean_hap_0, mean_hap_1, mean_hap_1 / mean_hap_0)
 
+
+
 # combine the three dataframes, which now each have a unique
 # "rate_type" value
 combined = pd.concat([df_total, df_no_ca, df_ca])

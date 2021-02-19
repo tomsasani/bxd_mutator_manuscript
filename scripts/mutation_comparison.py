@@ -8,10 +8,11 @@ import numpy as np
 import math
 import argparse
 import glob
+from statsmodels.stats.multitest import multipletests
 from utils import convert_bxd_name
 
-def mutation_comparison(sub_0_counts: np.array(np.int64),
-            sub_1_counts: np.array(np.int64),
+def mutation_comparison(sub_0_counts: np.array(int),
+            sub_1_counts: np.array(int),
             mut2idx: dict(),
             nmer4norm=None,
             title=r"$log_{2}$" + " ratio of singleton fractions\n" +  \
@@ -146,6 +147,9 @@ def mutation_comparison(sub_0_counts: np.array(np.int64),
 
     # find indices where ratio of sub_0:sub_1 is significant
     # at Bonferonni-corrected p-value
+    #flat_pvals = pvals.flatten()
+    #reject, adj_pvals, _, _ =  multipletests(flat_pvals, alpha=0.05, method="fdr_bh")
+    #pvals = adj_pvals.reshape(out_array.shape)
     sig_pvals = np.where(pvals < 0.05 / 96)
     non_sig_pvals = np.where(pvals >= 0.05 / 96)
 
@@ -219,7 +223,7 @@ def mutation_comparison(sub_0_counts: np.array(np.int64),
 
     elif plot_type == "heatmap": 
         f, ax = plt.subplots(figsize=(4,8))
-        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w', vmin=-1, vmax=1)
+        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w')#, vmin=-1, vmax=1)
 
         # plot "dots" in heatmap where the ratio is significant
         for (y,x) in zip(sig_pvals[0], sig_pvals[1]):
@@ -251,57 +255,63 @@ def mutation_comparison(sub_0_counts: np.array(np.int64),
         f.tight_layout()
         f.savefig(outname, bbox_inches='tight')
 
-p = argparse.ArgumentParser()
-p.add_argument("--annotated_singletons", required=True, 
-                    help="""annotated singleton variants in extended BED format.""")
-p.add_argument("--out", required=True,
-                    help="""name of output plot""")
-p.add_argument("-nmers_for_normalization", nargs="*",
-                    help="""list of paths to files containing numbers of every possible
-                            3-mer nucleotide in B or D haplotypes in each BXD strain""")
-p.add_argument("-subset_key", default="haplotype_at_qtl",
-                    help="""name of the column in `annotated_singletons` by which you \
-                            want to subset strains. this column must take on only one \
-                            of two possible values.""")
-p.add_argument("-plot_type", default="heatmap", required=False,
-                    help="""plot type to generate. [heatmap, scatter]""")
-args = p.parse_args()
+if __name__ == "__main__":
 
-# read in singletons
-singleton = pd.read_csv(args.annotated_singletons)
+    p = argparse.ArgumentParser()
+    p.add_argument("--annotated_singletons", required=True, 
+                        help="""annotated singleton variants in extended BED format.""")
+    p.add_argument("--out", required=True,
+                        help="""name of output plot""")
+    p.add_argument("-nmers_for_normalization", nargs="*",
+                        help="""list of paths to files containing numbers of every possible
+                                3-mer nucleotide in B or D haplotypes in each BXD strain""")
+    p.add_argument("-subset_key", default="haplotype_at_qtl",
+                        help="""name of the column in `annotated_singletons` by which you \
+                                want to subset strains. this column must take on only one \
+                                of two possible values.""")
+    p.add_argument("-plot_type", default="heatmap", required=False,
+                        help="""plot type to generate. [heatmap, scatter]""")
+    args = p.parse_args()
 
-group_cols = ['kmer', args.subset_key]
+    # read in singletons
+    singleton = pd.read_csv(args.annotated_singletons)
 
-# convert to wide-form dataframe, grouped by kmer
-df_wide = singleton.groupby(group_cols).count().add_suffix('_count').reset_index()
+    group_cols = ['kmer', args.subset_key]
 
-# subset dataframe to relevant columns
-group_cols.append('chrom_count')
-df_wide = df_wide[group_cols]
+    # convert to wide-form dataframe, grouped by kmer
+    df_wide = singleton.groupby(group_cols).count().add_suffix('_count').reset_index()
 
-# generate subsets of variants in each of two categories, defined
-# by the two unique values that the `subset_key` column can take on
-subset_0 = df_wide[df_wide[args.subset_key] == "B"]['chrom_count'].values
-subset_1 = df_wide[df_wide[args.subset_key] == "D"]['chrom_count'].values
+    # subset dataframe to relevant columns
+    group_cols.append('chrom_count')
+    df_wide = df_wide[group_cols]
 
-# get a mapping of each mutation type to a corresponding index
-uniq_kmers = list(pd.unique(df_wide['kmer']))
-mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
+    # generate subsets of variants in each of two categories, defined
+    # by the two unique values that the `subset_key` column can take on
+    subset_0 = df_wide[df_wide[args.subset_key] == "B"]['chrom_count'].values
+    subset_1 = df_wide[df_wide[args.subset_key] == "D"]['chrom_count'].values
 
-# if we want to normalize, create a 2d numpy array containing sums of 3-mer
-# nucleotides contained in B or D haplotypes across the dataset
-nmer4norm = None
-if args.nmers_for_normalization:
-    for fh in args.nmers_for_normalization:
-        sample = '_'.join(fh.split('/')[-1].split('_')[:2])
-        sample_conv = convert_bxd_name(sample)
-        df = pd.read_csv(fh, names=["haplotype", "nmer", "count"])
-        df['sample'] = sample_conv
-        if nmer4norm is None: nmer4norm = df
-        else: nmer4norm = pd.concat([nmer4norm, df])
+    print ("Using the key: {}, there are {} mutations in subset 0 and {} in subset 1".format(args.subset_key,
+                                                                                            np.sum(subset_0),
+                                                                                            np.sum(subset_1)))
 
-    # sum the numbers of 3-mer nucleotides in B or D haplotypes
-    nmer4norm = nmer4norm.groupby(["haplotype", "nmer"]).sum().add_suffix("_sum").reset_index()
+    # get a mapping of each mutation type to a corresponding index
+    uniq_kmers = list(pd.unique(df_wide['kmer']))
+    mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 
-mutation_comparison(subset_1, subset_0, mut2idx=mut2idx, 
-            outname=args.out, nmer4norm=nmer4norm, plot_type=args.plot_type)
+    # if we want to normalize, create a 2d numpy array containing sums of 3-mer
+    # nucleotides contained in B or D haplotypes across the dataset
+    nmer4norm = None
+    if args.nmers_for_normalization:
+        for fh in args.nmers_for_normalization:
+            sample = '_'.join(fh.split('/')[-1].split('_')[:2])
+            sample_conv = convert_bxd_name(sample)
+            df = pd.read_csv(fh, names=["haplotype", "nmer", "count"])
+            df['sample'] = sample_conv
+            if nmer4norm is None: nmer4norm = df
+            else: nmer4norm = pd.concat([nmer4norm, df])
+
+        # sum the numbers of 3-mer nucleotides in B or D haplotypes
+        nmer4norm = nmer4norm.groupby(["haplotype", "nmer"]).sum().add_suffix("_sum").reset_index()
+
+    mutation_comparison(subset_1, subset_0, mut2idx=mut2idx, 
+                outname=args.out, nmer4norm=nmer4norm, plot_type=args.plot_type)

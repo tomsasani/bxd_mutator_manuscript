@@ -4,7 +4,7 @@ library(cowplot)
 library(dplyr)
 library(optparse)
 library(tidyr)
-library(RNOmni)
+#library(RNOmni)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
@@ -41,10 +41,10 @@ k = calc_kinship(pr, 'loco')
 Xcovar <- get_x_covar(bxd)
 
 # get the phenotype as a log10-transformed fraction...
-phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
-phen_matrix_frac = as.matrix(log2(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
-#phen_matrix_frac = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
-phen_matrix_frac = as.matrix(RankNorm(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
+phen_df_sub_frac = subset(phen_df_sub, estimate_type == "clr_fraction")
+#phen_matrix_frac = as.matrix(log10(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
+phen_matrix_frac = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
+#phen_matrix_frac = as.matrix(RankNorm(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
 
 phenotype_frac = as.matrix(phen_matrix_frac[,1])
 strain_names = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
@@ -53,7 +53,7 @@ rownames(phenotype_frac) = strain_names
 # and as a rate
 phen_df_sub_rate = subset(phen_df_sub, estimate_type == "rate")
 phen_matrix_rate = as.matrix(subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
-phen_matrix_rate = as.matrix(RankNorm(subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
+#phen_matrix_rate = as.matrix(log10(subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
 
 strain_names = subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
 phenotype_rate = as.matrix(phen_matrix_rate[,1])
@@ -131,7 +131,7 @@ plot(out_rate, pmap$`4`, lodcolumn=1, col=color[1], ylim=c(0, ymx_frac*1.05))
 plot(out_frac, pmap$`4`, lodcolumn=1, col=color[2], ylim=c(0, ymx_frac*1.05), add=T)
 abline(h=lod_cutoff_sig_frac, col='slateblue', lwd=2, lty=2)
 abline(h=lod_cutoff_sig_rate, col='green3', lwd=2, lty=2)
-legend("topleft", lwd=2, col=color, c("C>A rate", "C>A fraction"), bg="gray90", lty=c(1,1,2))
+#legend("topleft", lwd=2, col=color, c("C>A rate", "C>A fraction"), bg="gray90", lty=c(1,1,2))
 dev.off()
 
 # find the maximum LOD peak
@@ -147,6 +147,8 @@ g_frac = setNames(stack(g_frac)[2:1], c('strain','haplotype'))
 g_frac = g_frac %>% replace_na(list(haplotype = "H"))
 
 vars_to_include = c("bxd_strain_conv", "estimate")
+
+phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
 
 p_frac = phen_df_sub_frac[vars_to_include]
 colnames(p_frac) <- c("strain", "fraction")
