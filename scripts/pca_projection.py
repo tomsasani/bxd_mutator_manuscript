@@ -44,7 +44,6 @@ dumont_filtered = dumont.query('Fraction_genome_in_IBD_Block >= 0.25')
 dumont_filtered = dumont_filtered[['Strain', 
                           'C>A.2', 'C>G.2', 'C>T.2', 'T>A.2', 'T>C.2', 'T>G.2']]
 
-
 ## rename columns
 colnames = ['strain', 'C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G']
 dumont_filtered.columns = colnames
@@ -65,8 +64,10 @@ novar = ['C57BL_10J', 'C57BL_6NJ', 'C57BR_cdJ', 'C57L_J', 'C58_J', 'KK_HiJ',
          'NZB_B1NJ', 'NZO_HILtJ', 'NZW_LacJ', 'SEA_GnJ']
 
 def dumont_strain_to_group(strain):
-    if strain in withvar_all: return 'DBA_2J_like'
-    elif strain in novar: return 'C57BL_6NJ_like'
+    #if strain in withvar_all: return 'DBA_2J_like'
+    #elif strain in novar: return 'C57BL_6NJ_like'
+    if strain == "C57BL_6NJ": return strain
+    elif strain == "DBA_2J": return strain
     else: return 'intermediate'
 
 ## format strain names to be more readable
@@ -103,13 +104,14 @@ wide_fracs = wide_fracs[new_colnames]
 combined = pd.concat([wide_fracs, dumont_filtered]).reset_index()
 combined = combined.fillna(value=0)
 
-combined = combined[combined['strain'].isin(['D', 'B', 'DBA_2J_like', 'C57BL_6NJ_like', 'intermediate'])]
+combined = combined[combined['strain'].isin(['D', 'B', 'DBA_2J', 'C57BL_6NJ'])]
 
 muts = ['C>A', 'C>T', 'C>G', 'A>T', 'A>C', 'A>G']
 
 X = combined[muts].values
 y = combined['strain'].values
 
+combined.to_csv("csv/pca.csv", index=False)
 # get rid of any strains that have no mutation data
 row_zero = np.unique(np.where(X == 0)[0])
 
@@ -127,9 +129,9 @@ X_new = pca.fit_transform(X)
 
 strains = set(y)
 strain2color = {"D": "slateblue",
-                "DBA_2J_like": "slateblue",
+                "DBA_2J": "slateblue",
                 "B": "lightgreen",
-                "C57BL_6NJ_like": "lightgreen",
+                "C57BL_6NJ": "lightgreen",
                 "intermediate": "cornflowerblue"}
 
 labels = [r'C$\to$A', r'C$\to$T', r'C$\to$G', r'A$\to$T', r'A$\to$C', r'A$\to$G']
@@ -146,14 +148,9 @@ y_vals = X_new[:,1]
 
 colors = [strain2color[s] for s in y]
 
-for idx in np.arange(x_vals.shape[0]):
-    s = combined['sample_name'].values[idx]
-    if combined['strain'].values[idx] in ("B", "D"): continue
-    if x_vals[idx] > 0: print (s)
-
 # plot each BXD and founder on PC plot
 
-for strain_name in ["D", "DBA_2J_like", "B", "C57BL_6NJ_like", "intermediate"]:
+for strain_name in ["D", "DBA_2J", "B", "C57BL_6NJ"]:
     idxs = np.where(y == strain_name)[0]
     if strain_name in ["D", "B"]: marker = 'x'
     else: marker = 'o'

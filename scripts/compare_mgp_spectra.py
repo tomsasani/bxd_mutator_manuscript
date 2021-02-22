@@ -62,7 +62,8 @@ novar = ['C57BL_10J', 'C57BL_6NJ', 'C57BR_cdJ', 'C57L_J', 'C58_J', 'KK_HiJ',
          'NZB_B1NJ', 'NZO_HILtJ', 'NZW_LacJ', 'SEA_GnJ']
 
 # map strains to the "category" of Mutyh mutations they belong to
-cat2strain = {'5/5': withvar_all, '3/5': withvar_some, '2/5': loner, '0/5': novar}
+cat2strain = {'DBA-like': withvar_all, 'intermediate': withvar_some, 
+                'I_LnJ': loner, 'C57-like': novar}
 
 f, axarr = plt.subplots(1,2, sharey=True, figsize=(14, 4))
 
@@ -70,7 +71,7 @@ sns.set_style('ticks')
 
 # do every pairwise comparison of spectra in strains with each
 # configuration of Mutyh mutations
-for cat_i,cat in enumerate([("5/5", "3/5"), ("3/5", "0/5")]):
+for cat_i,cat in enumerate([("DBA-like", "intermediate"), ("intermediate", "C57-like")]):
 
     a, b = cat
 
@@ -158,7 +159,9 @@ for cat_i,cat in enumerate([("5/5", "3/5"), ("3/5", "0/5")]):
 
     _,p,_,_ = ss.chi2_contingency([[a_fore, b_fore], [a_back, b_back]])
 
-    axarr[cat_i].legend(frameon=False, fontsize=16)
+    axarr[cat_i].legend(frameon=False)
+    leg = axarr[cat_i].legend()
+    leg.set_title("MGP strains", prop={"size": 16})
     if cat_i == 0:
         axarr[cat_i].set_ylabel('Fraction of singletons', fontsize=16)
     

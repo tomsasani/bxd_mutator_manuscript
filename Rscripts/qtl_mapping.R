@@ -4,7 +4,6 @@ library(cowplot)
 library(dplyr)
 library(optparse)
 library(tidyr)
-#library(RNOmni)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
@@ -59,7 +58,7 @@ strain_names = subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$bx
 phenotype_rate = as.matrix(phen_matrix_rate[,1])
 rownames(phenotype_rate) = strain_names
 
-# get covariates to include
+# make sure the `is_ail` covariate is numeric
 phen_df_sub_frac$is_ail[phen_df_sub_frac$n_intercross_gens == 0] <- 0
 phen_df_sub_frac$is_ail[phen_df_sub_frac$n_intercross_gens > 0] <- 1
 
@@ -68,7 +67,6 @@ covariate_cols = c("n_intercross_gens", "is_ail", "epoch")
 covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
 rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
 
-Xcovar = get_x_covar(bxd)
 
 # perform a genome scan, accounting for kinship and
 # epoch as an additive covarirate
@@ -105,7 +103,7 @@ print (find_peaks(out_rate, pmap, threshold=lod_cutoff_sig_rate))
 ymx_rate <- maxlod(out_rate)
 ymx_frac <- maxlod(out_frac)
 
-# plot LOD scores genome-wide for fraction phenotype
+# plot LOD scores genome-wide
 setEPS()
 fname = "figure_2a.eps"
 outfile = sprintf("%s/%s", opt$out_prefix, fname)
@@ -121,6 +119,7 @@ legend("topright", lwd=2, col=color, c("C>A rate", "C>A fraction"), bg="gray90",
 
 dev.off()
 
+# plot a zoomed in version of the LOD peaks on chr4
 setEPS()
 fname = "figure_2b.eps"
 outfile = sprintf("%s/%s", opt$out_prefix, fname)
@@ -131,7 +130,6 @@ plot(out_rate, pmap$`4`, lodcolumn=1, col=color[1], ylim=c(0, ymx_frac*1.05))
 plot(out_frac, pmap$`4`, lodcolumn=1, col=color[2], ylim=c(0, ymx_frac*1.05), add=T)
 abline(h=lod_cutoff_sig_frac, col='slateblue', lwd=2, lty=2)
 abline(h=lod_cutoff_sig_rate, col='green3', lwd=2, lty=2)
-#legend("topleft", lwd=2, col=color, c("C>A rate", "C>A fraction"), bg="gray90", lty=c(1,1,2))
 dev.off()
 
 # find the maximum LOD peak

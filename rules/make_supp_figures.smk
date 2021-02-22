@@ -1,5 +1,8 @@
 samples, = glob_wildcards("data/nucleotide_composition/{sample}_nucleotide_composition.csv")
 
+chroms = list(map(str, range(1, 20)))
+chroms = ['chr' + c for c in chroms]
+
 rule make_supp_figure_two:
 	input:
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
@@ -178,5 +181,17 @@ rule make_supp_figure_seven:
 		"""
 		python {input.py_script} --dumont_xls {input.dumont_xls} \
 								 --annotated_singletons {input.annotated_singletons} \
+									--out {output}
+		"""
+
+rule make_supp_figure_eight:
+	input:
+		wild_singletons = expand("data/wild_singleton_vars/{chrom}_singleton_spectrum.csv", chrom=chroms),
+		py_script = "scripts/pca_projection.wild_mice.py"
+	output:
+		"plots/supp_figure_8.eps"
+	shell:
+		"""
+		python {input.py_script}  --wild_singleton_vars {input.wild_singletons} \
 									--out {output}
 		"""

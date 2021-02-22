@@ -48,8 +48,8 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     phen_df_sub = subset(phen_df, base_mut == mut_type)
     
     # get the phenotype as a log10-transformed fraction...
-    phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
-    phen_matrix_frac = as.matrix(log10(phen_df_sub_frac$estimate))
+    phen_df_sub_frac = subset(phen_df_sub, estimate_type == "clr_fraction")
+    phen_matrix_frac = as.matrix(phen_df_sub_frac$estimate)
     #phen_matrix_frac = as.matrix(RankNorm(phen_df_sub_frac$estimate))
     
     phenotype_frac = as.matrix(phen_matrix_frac[,1])
@@ -66,8 +66,7 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
     rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
     
-    # perform a genome scan, accounting for kinship and
-    # epoch as an additive covarirate
+    # perform a genome scan
     out_rate <- scan1(pr, phenotype_rate, kinship=k, 
                       addcovar=covariate_matrix, Xcovar = Xcovar)
     
@@ -93,7 +92,7 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     formatted_mut_type = gsub(">", ".", mut_type)
     
-    # plot LOD scores genome-wide for fraction phenotype
+    # plot LOD scores genome-wide 
     setEPS()
     suff = ".eps"
     outfile = sprintf("%s/supp_figure_3_%s%s", opt$out_prefix, formatted_mut_type, suff)

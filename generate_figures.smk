@@ -12,7 +12,7 @@ include: "rules/make_supp_figures.smk"
 
 # pseudo-rule to collect all output figures
 main_figures = ["1a", "1b", "1c", "1d", 
-				   #"2a", "2b", "2c", 
+				   "2a", "2b", "2c", 
 				   "2d",
 				   "3a", "3b",
 				   "4a", "4bc", "4d"]

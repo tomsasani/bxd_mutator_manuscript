@@ -30,25 +30,26 @@ def find_groups(a):
     return groups
 
 p = argparse.ArgumentParser()
-p.add_argument("--annotated_vars")
-p.add_argument("--out")
+p.add_argument("--annotated_vars", required=True,
+                help="""annotated variants in extended BED format""")
+p.add_argument("--out", required=True,
+                help="""name of output file""")
 args = p.parse_args()
 
 variants = pd.read_csv(args.annotated_vars)
 
 # get a mapping of each strain to a corresponding index
-strains = list(pd.unique(variants['bxd_strain_conv']))
-smp2idx = dict(zip(strains, range(len(strains))))
+smps = list(pd.unique(variants['bxd_strain_conv']))
+smp2idx = dict(zip(smps, range(len(smps))))
 idx2smp = {v:k for k,v in smp2idx.items()}
 
 # get a mapping of each strain to its epoch of origin
 smp2epoch = defaultdict()
-for smp in strains:
+for smp in smps:
     if smp in smp2epoch: continue
     epoch = pd.unique(variants[variants['bxd_strain_conv'] == smp]['epoch'])[0]
     smp2epoch[smp] = epoch
 
-smps = [idx2smp[i] for i in np.arange(len(strains))]
 epochs = [smp2epoch[s] for s in smps]
 
 # make a single column representing the VCF site
@@ -113,9 +114,8 @@ for s1_idx in np.arange(n_samps):
 # convert the pairwise numbers of shared sites to fractions by dividing each 
 # pair's number of shared variants by the total number of unique variants that
 # those two samples shared with all other samples
-pairwise_sharing_frac = np.nan_to_num(smp_by_smp / sharing_index)
+#pairwise_sharing_frac = np.nan_to_num(smp_by_smp / sharing_index)
 pairwise_sharing_frac = smp_by_smp / sharing_index
-
 
 # sort strains by the epoch from which they were derived
 sorted_epoch_idxs = np.argsort(epochs)
@@ -150,6 +150,7 @@ for xy in epoch_idxs:
     ax_ticks.append((y + x) / 2)
     ax_labels.append(e)
 
+# figure formatting
 ax.set_yticks(ax_ticks)
 ax.set_yticklabels(ax_labels)
 

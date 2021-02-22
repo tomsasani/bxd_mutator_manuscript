@@ -36,7 +36,7 @@ k = calc_kinship(pr, 'loco')
 # get special covariates for the X
 Xcovar <- get_x_covar(bxd)
 
-# get the phenotype as a log10-transformed fraction...
+# get the phenotype data
 phen_matrix_rate = as.matrix(phen_df$rate)
 
 phenotype_rate = as.matrix(phen_matrix_rate[,1])
@@ -52,14 +52,13 @@ covariate_cols = c("n_intercross_gens", "is_ail", "epoch")
 covariate_matrix = as.matrix(phen_df[covariate_cols])
 rownames(covariate_matrix) = phen_df$bxd_strain_conv
 
-# perform a genome scan, accounting for kinship and
-# epoch as an additive covarirate
+# perform a genome scan
 out <- scan1(pr, phenotype_rate, kinship=k, 
-             addcovar=covariate_matrix)
+             addcovar=covariate_matrix, Xcovar=Xcovar)
 
 # perform a permutation test to assess significance
 operm <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, n_perm=100)
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig = summary(operm, alpha=0.05 / 15)[1]
@@ -67,7 +66,7 @@ lod_cutoff_sig = summary(operm, alpha=0.05 / 15)[1]
 # plot peaks and LOD threshold
 ymx <- max(c(maxlod(out), lod_cutoff_sig))
 
-# plot LOD scores genome-wide for fraction phenotype
+# plot LOD scores genome-wide 
 setEPS()
 fname = "supp_figure_3a.eps"
 outfile = sprintf("%s/%s", opt$out_prefix, fname)

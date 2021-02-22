@@ -35,7 +35,7 @@ f_1a, ax_1a = plt.subplots()
 
 sns.boxplot(x="epoch", y="total_muts", color='white', linewidth=1.5, 
                 fliersize=0, data=tidy_rates, ax=ax_1a)
-sns.swarmplot(x="epoch", y="total_muts", palette='colorblind', linewidth=1, 
+sns.stripplot(x="epoch", y="total_muts", palette='colorblind', linewidth=1, 
                 edgecolor='k', data=tidy_rates, ax=ax_1a)
 
 ax_1a.set_xticklabels(list(map(str, pd.unique(tidy_rates['epoch']))))
@@ -54,7 +54,7 @@ f_1b, ax_1b = plt.subplots()
 
 sns.boxplot(x="epoch", y="rate", color='white', linewidth=1.5, 
                 fliersize=0, data=tidy_rates, ax=ax_1b)
-sns.swarmplot(x="epoch", y="rate", palette='colorblind', linewidth=1, 
+sns.stripplot(x="epoch", y="rate", palette='colorblind', linewidth=1, 
                 edgecolor='k', data=tidy_rates, ax=ax_1b)
 
 ax_1a.set_xticklabels(list(map(str, pd.unique(tidy_rates['epoch']))))
@@ -94,8 +94,6 @@ print (sm.stats.anova_lm(model, typ=2))
 ax_1d.set_xticklabels(pd.unique(tidy_spectra['base_mut']))
 ax_1d.set_ylabel("Fraction of homozygous singletons")
 ax_1d.set_xlabel("Mutation type")
-
-ax_1d.legend(frameon=False, title="Epoch of origin", loc="upper left", fontsize=10)
 
 sns.despine(ax=ax_1d, right=True, top=True)
 f_1d.savefig(args.outdir + 'figure_1d.eps', bbox_inches='tight')

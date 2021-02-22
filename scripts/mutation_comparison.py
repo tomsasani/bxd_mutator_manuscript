@@ -223,7 +223,7 @@ def mutation_comparison(sub_0_counts: np.array(int),
 
     elif plot_type == "heatmap": 
         f, ax = plt.subplots(figsize=(4,8))
-        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w')#, vmin=-1, vmax=1)
+        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w', vmin=-1, vmax=1)
 
         # plot "dots" in heatmap where the ratio is significant
         for (y,x) in zip(sig_pvals[0], sig_pvals[1]):

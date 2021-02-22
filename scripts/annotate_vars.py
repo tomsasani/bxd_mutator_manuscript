@@ -1,6 +1,10 @@
 import pandas as pd
 import argparse
+import doctest
 from utils import *
+
+doctest.testmod()
+
 
 p = argparse.ArgumentParser()
 p.add_argument("--strain_metadata", required=True, 
@@ -88,8 +92,7 @@ variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2in
 variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] \
                                                                 if s in strain2denom else "NA")
 variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, 
-                                                                                            s, 
-                                                                                            rsids) if s in list(genos_at_markers) else "NA")
+                                                                                            s) if s in list(genos_at_markers) else "NA")
 variants = variants[variants['haplotype_at_qtl'] != "NA"]
 #variants = variants.query('n_inbreeding_gens >= 20')
 
