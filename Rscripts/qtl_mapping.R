@@ -130,6 +130,7 @@ plot(out_rate, pmap$`4`, lodcolumn=1, col=color[1], ylim=c(0, ymx_frac*1.05))
 plot(out_frac, pmap$`4`, lodcolumn=1, col=color[2], ylim=c(0, ymx_frac*1.05), add=T)
 abline(h=lod_cutoff_sig_frac, col='slateblue', lwd=2, lty=2)
 abline(h=lod_cutoff_sig_rate, col='green3', lwd=2, lty=2)
+title(xlab="Position on chr4 (Mbp)")
 dev.off()
 
 # find the maximum LOD peak

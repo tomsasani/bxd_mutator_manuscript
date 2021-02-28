@@ -52,6 +52,7 @@ singleton = pd.read_csv(args.annotated_singletons)
 
 # columns to group the singletons by
 group_cols = ["bxd_strain_conv", 
+              "bxd_strain",
               "epoch", 
               "n_inbreeding_gens", 
               "haplotype_at_qtl",
@@ -72,6 +73,7 @@ df_wide.rename(columns={'chrom_count': 'count'}, inplace=True)
 # relative fractions of each mutation type
 smp_sums = df_wide.groupby(['bxd_strain_conv', 
                             'n_callable_bp', 
+                            'bxd_strain',
                             'n_inbreeding_gens', 
                             'n_intercross_gens', 
                             'epoch']).sum().add_suffix('_sum').reset_index()
@@ -145,6 +147,7 @@ df_tidy.to_csv(args.out_pref + "tidy_mutation_spectra.csv", index=False)
 smp_sums[['bxd_strain_conv',
           'n_callable_bp',
           'n_inbreeding_gens',
+          'bxd_strain',
           'l_n',
           'n_intercross_gens',
           'epoch',

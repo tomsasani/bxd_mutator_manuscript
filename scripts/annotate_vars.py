@@ -44,8 +44,8 @@ strain2intercross_gens = dict(zip(summary['bam_name'],
                                   summary['n_advanced_intercross_gens']))
 
 # map strain names to callable base pairs (referred to as "denominators")
-denominators = pd.read_csv(args.callable_bp, names=['samp', 'denominator'])
-strain2denom = dict(zip(denominators['samp'], denominators['denominator']))
+denominators = pd.read_csv(args.callable_bp)
+strain2denom = dict(zip(denominators['sample'], denominators['autosomal_callable_bp']))
 
 # read in the genotypes of every strain at each QTL marker,
 # and subset to the rsids that correspond to the length of the 
@@ -89,12 +89,12 @@ variants['n_inbreeding_gens'] = variants['bxd_strain'].apply(lambda s: strain2in
 # due to them being backcrossed during inbreeding 
 variants = variants[~variants['n_inbreeding_gens'].isin([-1, "NA"])]
 variants['n_intercross_gens'] = variants['bxd_strain'].apply(lambda s: strain2intercross_gens[s])
-variants['n_callable_bp'] = variants['bxd_strain_conv'].apply(lambda s: strain2denom[s] \
+variants['n_callable_bp'] = variants['bxd_strain'].apply(lambda s: strain2denom[s] \
                                                                 if s in strain2denom else "NA")
 variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(lambda s: find_haplotype(genos_at_markers, 
                                                                                             s) if s in list(genos_at_markers) else "NA")
 variants = variants[variants['haplotype_at_qtl'] != "NA"]
-#variants = variants.query('n_inbreeding_gens >= 20')
+variants = variants.query('n_inbreeding_gens >= 20')
 
 print ("Total of {} mutations in {} strains".format(variants.shape[0], len(pd.unique(variants['bxd_strain_conv']))))
 

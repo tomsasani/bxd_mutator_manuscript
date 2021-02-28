@@ -223,7 +223,7 @@ def mutation_comparison(sub_0_counts: np.array(int),
 
     elif plot_type == "heatmap": 
         f, ax = plt.subplots(figsize=(4,8))
-        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w', vmin=-1, vmax=1)
+        sns.heatmap(out_array, cmap='coolwarm', edgecolor='w', vmin=-0.5, vmax=0.5)
 
         # plot "dots" in heatmap where the ratio is significant
         for (y,x) in zip(sig_pvals[0], sig_pvals[1]):
@@ -313,5 +313,5 @@ if __name__ == "__main__":
         # sum the numbers of 3-mer nucleotides in B or D haplotypes
         nmer4norm = nmer4norm.groupby(["haplotype", "nmer"]).sum().add_suffix("_sum").reset_index()
 
-    mutation_comparison(subset_1, subset_0, mut2idx=mut2idx, 
+    mutation_comparison(subset_1, subset_0, mut2idx=mut2idx, title=None, 
                 outname=args.out, nmer4norm=nmer4norm, plot_type=args.plot_type)

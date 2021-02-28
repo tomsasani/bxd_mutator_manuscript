@@ -3,20 +3,18 @@ samples, = glob_wildcards("data/nucleotide_composition/{sample}_nucleotide_compo
 chroms = list(map(str, range(1, 20)))
 chroms = ['chr' + c for c in chroms]
 
-rule make_supp_figure_two:
+rule make_supp_figure_two: 
 	input:
+		py_script = "scripts/plot_conservation.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		py_script = "scripts/mutation_comparison.py",
-		nuc_comp = expand("data/nucleotide_composition/{sample}_nucleotide_composition.csv", sample=samples)
+		annotated_fixed = "csv/annotated_fixed_vars.csv",
 	output:
 		"plots/supp_figure_2.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-							   --out {output} \
-							   -nmers_for_normalization {input.nuc_comp} \
-							   -subset_key haplotype \
-							   -plot_type scatter
+							   --annotated_fixed {input.annotated_fixed} \
+							   --out {output} 
 		"""
 
 rule make_supp_figure_three_a:
@@ -84,42 +82,30 @@ rule make_supp_figure_four_b:
 		python {input.py_script} --tidy_spectra {input.mut_spectra} \
 							   --out {output} 
 		"""
+tissues = ["amygdala", "hematopoietic_stem_cells", "kidney",
+		   "liver", "retina", "spleen"]
 
-rule make_supp_figure_five_a:
+rule make_supp_figure_five:
 	input:
-		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
-		py_script = "scripts/compare_signatures_OR_COSMIC.py"
+		py_script = "scripts/mutyh_expression_in_tissues.py",
+		strain_metadata = "data/bam_names_to_metadata.xlsx",
+		mut_spectra = "csv/tidy_mutation_spectra.csv",
+		expression_data = expand("data/gene_network_expression/{tissue}_rnaseq.csv", tissue=tissues)
 	output:
-		"plots/supp_figure_5a.eps"
+		"plots/supp_figure_5.eps"
 	shell:
 		"""
-		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output} \
-							   --sig_name SBS36_mm10
+		python {input.py_script} --strain_metadata {input.strain_metadata} \
+								 --tidy_spectra {input.mut_spectra} \
+								 --out {output}
 		"""
 
-rule make_supp_figure_five_b:
-	input:
-		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
-		py_script = "scripts/compare_signatures_OR_COSMIC.py"
-	output:
-		"plots/supp_figure_5b.eps"
-	shell:
-		"""
-		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output} \
-							   --sig_name SBS18_mm10
-		"""
 
 rule make_supp_figure_six_a:
 	input:
-		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
+		py_script = "scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_6a.eps"
 	shell:
@@ -128,13 +114,13 @@ rule make_supp_figure_six_a:
 						 	   --cosmic_signature {input.cosmic_sig} \
 							   --out {output} \
 							   --sig_name SBS36_mm10
-
 		"""
+
 rule make_supp_figure_six_b:
 	input:
-		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
+		py_script = "scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_6b.eps"
 	shell:
@@ -145,53 +131,71 @@ rule make_supp_figure_six_b:
 							   --sig_name SBS18_mm10
 		"""
 
-rule make_supp_figure_six_c:
+rule make_supp_figure_seven_a:
+	input:
+		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
+	output:
+		"plots/supp_figure_7a.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS36_mm10
+
+		"""
+rule make_supp_figure_seven_b:
+	input:
+		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
+	output:
+		"plots/supp_figure_7b.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS18_mm10
+		"""
+
+rule make_supp_figure_seven_c:
 	input:
 		py_script = "scripts/compare_signatures_BXD68_TOYKO.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
 	output:
-		"plots/supp_figure_6c.eps"
+		"plots/supp_figure_7c.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 						 	   --ohno_data {input.ohno_data} \
 							   --out {output} 
 		"""
-rule make_supp_figure_six_d:
+rule make_supp_figure_seven_d:
 	input:
 		py_script = "scripts/compare_signatures_BXD68_OR.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 	output:
-		"plots/supp_figure_6d.eps"
+		"plots/supp_figure_7d.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 							   --out {output}
 		"""
 
-rule make_supp_figure_seven:
+rule make_supp_figure_eight:
 	input:
 		dumont_xls = "data/SuppTables_concat.xlsx",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		py_script = "scripts/compare_mgp_spectra_3mer.py"
 	output:
-		"plots/supp_figure_7.eps"
+		"plots/supp_figure_8.eps"
 	shell:
 		"""
 		python {input.py_script} --dumont_xls {input.dumont_xls} \
 								 --annotated_singletons {input.annotated_singletons} \
-									--out {output}
-		"""
-
-rule make_supp_figure_eight:
-	input:
-		wild_singletons = expand("data/wild_singleton_vars/{chrom}_singleton_spectrum.csv", chrom=chroms),
-		py_script = "scripts/pca_projection.wild_mice.py"
-	output:
-		"plots/supp_figure_8.eps"
-	shell:
-		"""
-		python {input.py_script}  --wild_singleton_vars {input.wild_singletons} \
 									--out {output}
 		"""

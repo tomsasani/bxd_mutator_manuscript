@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+plt.rc('font', size=14)
+
 p = argparse.ArgumentParser()
 p.add_argument("--dumont_xls", required=True,
                     help="""strain-private substitution data from Dumont et al. (2019) \
@@ -65,19 +67,49 @@ novar = ['C57BL_10J', 'C57BL_6NJ', 'C57BR_cdJ', 'C57L_J', 'C58_J', 'KK_HiJ',
 cat2strain = {'DBA-like': withvar_all, 'intermediate': withvar_some, 
                 'I_LnJ': loner, 'C57-like': novar}
 
-f, axarr = plt.subplots(1,2, sharey=True, figsize=(14, 4))
+f, ax = plt.subplots(figsize=(8, 4))
 
 sns.set_style('ticks')
 
-# do every pairwise comparison of spectra in strains with each
-# configuration of Mutyh mutations
-for cat_i,cat in enumerate([("DBA-like", "intermediate"), ("intermediate", "C57-like")]):
+colors = sns.color_palette('colorblind', 3)
+
+# plot mutation fractions in each of the three categories
+x_adj = -0.25
+for cat_i,cat in enumerate(("DBA-like", "intermediate", "C57-like")):
+
+    idxs = np.array([smp2idx[s] for s in cat2strain[cat] if s in smp2idx])
+
+    # get counts of mutations in this category of strains
+    cat_counts = counts[idxs, :]
+    total_counts = np.sum(cat_counts, axis=0)
+
+    mutation_fractions = total_counts / np.sum(total_counts)
+
+    ind = np.arange(len(muts))
+    ax.bar(ind + x_adj, mutation_fractions, 0.25, 
+                     label=cat, color=colors[cat_i], edgecolor='k')
+    x_adj += 0.25
+
+ax.legend()
+leg = ax.legend(frameon=False)
+leg.set_title("MGP strains", prop={"size": 16})
+ax.set_ylabel('Fraction of strain-private mutations', fontsize=16)
+
+ax.set_xticks(np.arange(6))
+ax.set_xticklabels([m.replace('>', r'$\to$') for m in mut2idx], fontsize=16)
+
+sns.despine(ax=ax, top=True, right=True)
+
+# compare spectra between strains with different
+# configurations of Mutyh mutations
+for cat in [("DBA-like", "intermediate"), ("intermediate", "C57-like"), ("DBA-like", "C57-like")]:
 
     a, b = cat
 
+    # sample indices in each category
     a_idx = np.array([smp2idx[s] for s in cat2strain[a] if s in smp2idx])
     b_idx = np.array([smp2idx[s] for s in cat2strain[b] if s in smp2idx])
-    
+
     # subsets of mutation counts for strains in each
     # mutation "category"
     subset_0 = counts[a_idx, :]
@@ -101,8 +133,6 @@ for cat_i,cat in enumerate([("DBA-like", "intermediate"), ("intermediate", "C57-
     nuc2denom = {'A':0, 'C':1, 'G':2, 'T':3}
 
     nuc2comp = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
-
-    ind = np.arange(len(muts))
 
     a_adj, b_adj = [], []
 
@@ -146,28 +176,9 @@ for cat_i,cat in enumerate([("DBA-like", "intermediate"), ("intermediate", "C57-
     a_back = sum(a_adj) - a_fore
     b_fore = b_adj[mut_i]
     b_back = sum(b_adj) - b_fore
-    
-    a_adj_fracs = np.array(a_adj) / sum(a_adj)
-    b_adj_fracs = np.array(b_adj) / sum(b_adj)
-    
-    ind = np.arange(len(mut2idx))
-
-    axarr[cat_i].bar(ind - 0.2, a_adj_fracs, 0.4, 
-                     label=cat[0], color='cornflowerblue', edgecolor='k')
-    axarr[cat_i].bar(ind + 0.2, b_adj_fracs, 0.4, 
-                     label=cat[1], color='tomato', edgecolor='k')
 
     _,p,_,_ = ss.chi2_contingency([[a_fore, b_fore], [a_back, b_back]])
 
-    axarr[cat_i].legend(frameon=False)
-    leg = axarr[cat_i].legend()
-    leg.set_title("MGP strains", prop={"size": 16})
-    if cat_i == 0:
-        axarr[cat_i].set_ylabel('Fraction of singletons', fontsize=16)
-    
-    axarr[cat_i].set_xticks(np.arange(6))
-    axarr[cat_i].set_xticklabels([m.replace('>', r'$\to$') for m in mut2idx], fontsize=16)
-
-    sns.despine(ax=axarr[cat_i], top=True, right=True)
+    print (cat, p)
         
 f.savefig(args.out, bbox_inches='tight')

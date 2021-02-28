@@ -94,7 +94,7 @@ log_ratios = np.log2(ratios)
 mut2idx = dict(zip(muts_0, range(len(muts_0))))
 
 # get a list of the 6 "base" mutation types in the signature
-base_muts = list(set(['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in muts_0]))
+base_muts = list(sorted(set(['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in muts_0])))
 
 # read in the COSMIC signature
 cosmic = pd.read_csv(args.cosmic_signature)

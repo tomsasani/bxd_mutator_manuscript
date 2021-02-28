@@ -102,9 +102,9 @@ for mut in mut2idx:
 
     # manual adjustments so that text annotations look OK
     mut2format = {"TCT>TAT": (10, 30),
-                  "TCA>TAA": (-40, 40),
+                  "TCA>TAA": (0, 40),
                   "TCC>TAC": (-40, 20),
-                  "GCA>GAA": (-42, 30),
+                  "GCA>GAA": (-10, 40),
                   "GCT>GAT": (5, 50),
                   "CCA>CAA": (-100, -60),
                   "CCT>CAT": (-125, 35)}

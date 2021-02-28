@@ -63,7 +63,7 @@ mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
 
 # get a list of the 6 "base" mutation types in the signature
 base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in uniq_kmers]
-base_muts = list(set(base_muts))
+base_muts = list(sorted(set(base_muts)))
 
 # read in the COSMIC signature
 cosmic = pd.read_csv(args.cosmic_signature)
@@ -108,7 +108,7 @@ for mut in mut2idx:
                   "TCA>TAA": (-40, 20),
                   "TCC>TAC": (-40, 20),
                   "GCA>GAA": (-42, 50),
-                  "GCT>GAT": (5, 20),
+                  "GCT>GAT": (-100, 45),
                   "CCA>CAA": (-40, -60),
                   "CCT>CAT": (5, -35)}
 

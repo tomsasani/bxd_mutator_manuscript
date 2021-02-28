@@ -2,7 +2,10 @@ import doctest
 import pandas as pd
 import re
 import glob
-from collections import Counter
+from collections import Counter, defaultdict
+from quicksect import IntervalTree
+import gzip
+import csv
 
 def to_base_mut(k: str, cpg=False) -> str:
     """
@@ -107,7 +110,7 @@ def get_generation(gen: str) -> int:
 
     return int(cur_gen)
 
-def find_haplotype(genos: list, sample: str, rsids: []) -> str:
+def find_haplotype(genos: list, sample: str) -> str:
     """
     figure out whether each strain has a B or D haplotype,
     or is heterozygous, at the genotype marker at the peak
@@ -116,12 +119,30 @@ def find_haplotype(genos: list, sample: str, rsids: []) -> str:
     
     genos_in_smp = genos[sample].values
     geno_freq = Counter(genos_in_smp)
+    total = sum([i[1] for i in geno_freq.items()]) 
     most_freq_geno = "H"
     for g in ["B", "D"]:
-        if geno_freq[g] > (len(rsids) * 0.5): most_freq_geno = g[0]
+        if geno_freq[g] > (total * 0.5): most_freq_geno = g[0]
         else: continue
     
     return most_freq_geno
+
+def make_interval_tree(path: str, datacol=False, delim='\t') -> defaultdict(IntervalTree):
+    """
+    generate an interval tree from a simple BED
+    file with format chr:start:end
+    """
+
+    tree = defaultdict(IntervalTree)
+    added = defaultdict(int)
+    f = gzip.open(path, 'rt') if path.endswith('.gz') else open(path, 'r')
+    fh = csv.reader(f, delimiter=delim)
+    for i, line in enumerate(fh):
+        if datacol:
+            tree[line[0]].add(int(line[1]), int(line[2]), other=line[3])
+        else: tree[line[0]].add(int(line[1]), int(line[2]))
+
+    return tree
 
 def revcomp(seq):
     """

@@ -36,7 +36,7 @@ intervals = pd.unique(df['interval'])
 if wild:
     species = [s.split('_')[0] for s in samps]
 else:
-    species = ["MGP strains" for s in samps]
+    species = ["Mouse Genome Project strains" for s in samps]
 
 # keep track of unique species in dataset
 uniq_sp = []
@@ -104,10 +104,13 @@ cmap = ['gainsboro', 'lightsteelblue', 'royalblue']
 p_i = 0
 
 if wild:
-    f, axarr = plt.subplots(1, 4, sharey=True, figsize=(20, 7), 
+    f, axarr = plt.subplots(1, 4, sharey=True, figsize=(20, 4.5), 
                             gridspec_kw={'width_ratios': [4, 6.5, 0.75, 0.75]})
 else:
     f, axarr = plt.subplots(1, 1, figsize=(20, 3))
+
+# define colors for MGP groups
+colors = sns.color_palette('colorblind', 3)
 
 # for every "group" of samples in a subspecies, generate a heatmap
 for s, e, sp in zip(starts, ends, uniq_sp):
@@ -121,35 +124,45 @@ for s, e, sp in zip(starts, ends, uniq_sp):
 
     # set plotting variables, which will be different
     # if we're making grids for the wild vs. MGP mice
+    # set plotting variables, which will be different
+    # if we're making grids for the wild vs. MGP mice
     grid_vals = values
     hap_sums = np.sum(grid_vals, axis=0)
     sorted_haps = np.argsort(hap_sums)[::-1]
     grid_vals = grid_vals[:,sorted_haps]
 
     ax2use = axarr
+    cmap = ['gainsboro', 'royalblue']
+
     lw = 2
     xticks = np.arange(values.shape[1]) + 0.5
     xlabs = [l.replace('_', '/') for l in samps[sorted_haps]]
     xlab_rotation = 90
-    title = sp
-    title_rotation = 0
     if wild: 
+        cmap = ['gainsboro', 'lightsteelblue', 'royalblue']
+
         ax2use = axarr[p_i]
         grid_vals = unique_haps[:,sorted_idxs]
         lw = 3
         xticks = np.arange(unique_haps.shape[1]) + 0.5
         xlabs = counts[sorted_idxs]
         xlab_rotation = 0
-        title = "$\it{}$".format(sp2fullname[sp])
         title_rotation = 20
-    
+
     sns.heatmap(grid_vals, ax=ax2use, cmap=cmap, 
-            linecolor='k', linewidth=lw, cbar=False)
+        linecolor='k', linewidth=lw, cbar=False)
 
     ax2use.set_xticks(xticks)
     ax2use.set_xticklabels(xlabs, rotation=xlab_rotation)
     
-    ax2use.set_title(title, rotation=title_rotation)
+    if not wild:
+        for tick_i, ticklabel in enumerate(ax2use.get_xticklabels()):
+            if np.sum(grid_vals[:,tick_i]) == 10: ticklabel.set_color(colors[0])
+            elif np.sum(grid_vals[:,tick_i]) == 6: ticklabel.set_color(colors[1])
+            elif np.sum(grid_vals[:,tick_i]) == 0: ticklabel.set_color(colors[2])
+            else: continue
+
+    #ax2use.set_title(title, rotation=title_rotation)
     p_i += 1
 
 # separate formatting for wild vs. MGP plots
@@ -161,7 +174,7 @@ else:
     axarr.set_yticks(np.arange(len(intervals)) + 0.5)
     axarr.set_yticklabels([interval2mut[it] for it in intervals], rotation=0)
 
-f.tight_layout()
+#f.tight_layout()
 f.savefig(args.out, bbox_inches='tight')
 
 

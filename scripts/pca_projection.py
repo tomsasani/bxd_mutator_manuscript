@@ -119,7 +119,7 @@ X = np.delete(X, row_zero, axis=0)
 y = np.delete(y, row_zero)
 
 # perform centered log ratio transform on fraction data
-#X = clr(X)
+X = clr(X)
 
 # perform PCA on data
 #scaler = StandardScaler()
@@ -186,7 +186,7 @@ ax2.set_xlabel("PC1 ({}%)".format(round(100 * exp_var[0]), 4), fontsize=18)
 ax2.set_ylabel("PC2 ({}%)".format(round(100 * exp_var[1]), 3), fontsize=18)
 
 #ax1.legend(handles=legend_elements, fontsize=12)
-ax1.legend(fontsize=12)
+ax1.legend(fontsize=12, frameon=False)
 
 f.tight_layout()
 

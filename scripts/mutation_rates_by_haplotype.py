@@ -44,9 +44,17 @@ mean_hap_1 = np.mean(df_ca.query('haplotype_at_qtl == "D"')['estimate'])
 print (ss.ttest_ind(df_ca.query('haplotype_at_qtl == "B"')['estimate'], 
                     df_ca.query('haplotype_at_qtl == "D"')['estimate'],
                     equal_var=False))
-print (mean_hap_0, mean_hap_1, mean_hap_1 / mean_hap_0)
+print ("C>A mutation rate in strains with B haplotypes: {}\nD haplotypes: {}\nratio:{}".format(mean_hap_0, 
+mean_hap_1, mean_hap_1 / mean_hap_0))
 
+mean_overall_hap_0 = np.mean(df_total.query('haplotype_at_qtl == "B"')['estimate'])
+mean_overall_hap_1 = np.mean(df_total.query('haplotype_at_qtl == "D"')['estimate'])
 
+print (ss.ttest_ind(df_total.query('haplotype_at_qtl == "B"')['estimate'], 
+                    df_total.query('haplotype_at_qtl == "D"')['estimate'],
+                    equal_var=False))
+print ("Overall mutation rate in strains with B haplotypes: {}\nD haplotypes: {}\nratio:{}".format(mean_overall_hap_0, 
+mean_overall_hap_1, mean_overall_hap_1 / mean_overall_hap_0))
 
 # combine the three dataframes, which now each have a unique
 # "rate_type" value
@@ -71,7 +79,7 @@ handles, labels = ax.get_legend_handles_labels()
 
 # When creating the legend, only use the first two elements
 # to effectively remove the last two.
-ax.legend(handles[3:], labels[3:], frameon=False, title="Haplotype at QTL")
+ax.legend(handles[2:], labels[2:], frameon=False, title="Haplotype at QTL")
 
 sns.despine(ax=ax, top=True, right=True)
 
