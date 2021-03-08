@@ -110,18 +110,16 @@ This will produce plots from every main and supplementary figure in the manuscri
 
 1) Download mm10 reference assembly.
 2) Download phastCons 60-way placental mammal WIG files for each chromosome, and convert to BED format.
-3) Use an HMM to identify D2 and B6 haplotype tracts in each BXD.
-4) Determine the 3-mer nucleotide composition of D2 and B6 haplotypes in each BXD.
-5) Identify singletons in each BXD.
-6) Identify "fixed" variants in D2 that we'll use for conservation score comparisons.
+3) Identify singletons in each BXD.
+4) Identify "fixed" variants in D2 that we'll use for conservation score comparisons.
 
-To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 100 Gbp of free space in the working directory.**
+To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 20 Gb of free space in the working directory.**
 
-Step #4 above is by far the most time-consuming -- the method I've written to get 3-mer nucleotide compositions in each haplotype in each sample is very slow. Since the `data/` directory already contains precomputed versions of these files, I've removed the Snakemake rule that generates the files from `identify_singletons.smk`. If you want to recreate these files, just uncomment the part of the `rule all:` input that generates the nucleotide composition files and re-run the pipeline.
+**The pipeline below also assumes that you've downloaded the BXD VCF (about 70 Gb).**
 
 ```
 # enter a directory of your choice (make sure
-# you have at least 100 Gbp of free space here)
+# you have at least 20 Gb of free space here)
 cd $WORKDIR
 
 # clone the BXD analysis GitHub repository
@@ -138,7 +136,9 @@ conda activate singleton_calling
 # before running the pipeline, use your text editor of choice
 # and make sure that the WORKDIR variable at the top of 
 # `identify_singletons.smk` points to the current directory you
-# `cd`'ed into at the beginning of these steps
+# `cd`'ed into at the beginning of these steps, and that all of
+# the other paths at the top of the pipeline point to the right
+# binaries and directories on your machine.
 # ---
 
 # run the pipeline

@@ -3,7 +3,7 @@ chroms = ['chr' + c for c in chroms]
 
 rule make_figure_five:
     input:
-        py_script = "scripts/compare_spectra_wild.py",
+        py_script = "py_scripts/compare_spectra_wild.py",
         singleton_vars = expand("data/singleton_vars/{chrom}_singleton_vars.wild_mice.exclude.csv", chrom=chroms),
     output:
         "plots/figure_5a.eps",

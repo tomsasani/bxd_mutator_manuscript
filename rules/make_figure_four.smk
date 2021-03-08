@@ -1,7 +1,7 @@
 rule make_figure_four_a:
 	input:
 		mgp_mutyh_vars ="data/mgp.mutyh_genotypes.csv",
-		py_script = "scripts/make_mutyh_grid.py"
+		py_script = "py_scripts/make_mutyh_grid.py"
 	output:
 		"plots/figure_4a.eps"
 	shell:
@@ -13,7 +13,7 @@ rule make_figure_four_a:
 rule make_figure_four_bc:
 	input:
 		dumont_xls = "data/SuppTables_concat.xlsx",
-		py_script = "scripts/compare_mgp_spectra.py"
+		py_script = "py_scripts/compare_mgp_spectra.py"
 	output:
 		"plots/figure_4bc.eps"
 	shell:
@@ -24,7 +24,7 @@ rule make_figure_four_bc:
 rule make_figure_four_d:
 	input:
 		wild_mutyh_vars = "data/wild.mutyh_genotypes.csv",
-		py_script = "scripts/make_mutyh_grid.py"
+		py_script = "py_scripts/make_mutyh_grid.py"
 	output:
 		"plots/figure_4d.eps",
 	shell:

@@ -3,7 +3,7 @@ chroms = ['chr' + c for c in chroms]
 
 rule make_supp_figure_two: 
 	input:
-		py_script = "scripts/plot_conservation.py",
+		py_script = "py_scripts/plot_conservation.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		annotated_fixed = "csv/annotated_fixed_vars.csv",
 	output:
@@ -59,7 +59,7 @@ rule make_supp_figure_three_b:
 
 rule make_supp_figure_four_a:
 	input:
-		py_script = "scripts/mutation_rates_by_haplotype.py",
+		py_script = "py_scripts/mutation_rates_by_haplotype.py",
 		mut_spectra = "csv/tidy_mutation_spectra.csv"
 	output:
 		"plots/supp_figure_4a.eps"
@@ -71,7 +71,7 @@ rule make_supp_figure_four_a:
 
 rule make_supp_figure_four_b:
 	input:
-		py_script = "scripts/mutation_rates_by_inbreeding_time.py",
+		py_script = "py_scripts/mutation_rates_by_inbreeding_time.py",
 		mut_spectra = "csv/tidy_mutation_spectra.csv"
 	output:
 		"plots/supp_figure_4b.eps"
@@ -85,7 +85,7 @@ tissues = ["amygdala", "hematopoietic_stem_cells", "kidney",
 
 rule make_supp_figure_five:
 	input:
-		py_script = "scripts/mutyh_expression_in_tissues.py",
+		py_script = "py_scripts/mutyh_expression_in_tissues.py",
 		strain_metadata = "data/bam_names_to_metadata.xlsx",
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		expression_data = expand("data/gene_network_expression/{tissue}_rnaseq.csv", tissue=tissues)
@@ -103,7 +103,7 @@ rule make_supp_figure_six_a:
 	input:
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
-		py_script = "scripts/compare_signatures_OR_COSMIC.py"
+		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_6a.eps"
 	shell:
@@ -118,7 +118,7 @@ rule make_supp_figure_six_b:
 	input:
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
-		py_script = "scripts/compare_signatures_OR_COSMIC.py"
+		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_6b.eps"
 	shell:
@@ -131,7 +131,7 @@ rule make_supp_figure_six_b:
 
 rule make_supp_figure_seven_a:
 	input:
-		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
+		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
 	output:
@@ -146,7 +146,7 @@ rule make_supp_figure_seven_a:
 		"""
 rule make_supp_figure_seven_b:
 	input:
-		py_script = "scripts/compare_signatures_BXD68_COSMIC.py",
+		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
 	output:
@@ -161,7 +161,7 @@ rule make_supp_figure_seven_b:
 
 rule make_supp_figure_seven_c:
 	input:
-		py_script = "scripts/compare_signatures_BXD68_TOYKO.py",
+		py_script = "py_scripts/compare_signatures_BXD68_TOYKO.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
 	output:
@@ -174,7 +174,7 @@ rule make_supp_figure_seven_c:
 		"""
 rule make_supp_figure_seven_d:
 	input:
-		py_script = "scripts/compare_signatures_BXD68_OR.py",
+		py_script = "py_scripts/compare_signatures_BXD68_OR.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 	output:
 		"plots/supp_figure_7d.eps"
@@ -188,7 +188,7 @@ rule make_supp_figure_eight:
 	input:
 		dumont_xls = "data/SuppTables_concat.xlsx",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		py_script = "scripts/compare_mgp_spectra_3mer.py"
+		py_script = "py_scripts/compare_mgp_spectra_3mer.py"
 	output:
 		"plots/supp_figure_8.eps"
 	shell:

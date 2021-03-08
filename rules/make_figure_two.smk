@@ -2,7 +2,7 @@ rule make_geno_file:
 	input:
 		strain_metadata = "data/bam_names_to_metadata.xlsx",
 		geno = "Rqtl_data/bxd.geno",
-		py_script = "scripts/orig_to_new_geno.py"
+		py_script = "py_scripts/orig_to_new_geno.py"
 	output:
 		"Rqtl_data/bxd.geno.new"
 	shell:
@@ -11,8 +11,6 @@ rule make_geno_file:
 								 --strain_metadata {input.strain_metadata} \
 								 --out {output}
 		"""
-
-
 
 rule make_figure_two_ab: 
 	input:
@@ -36,7 +34,7 @@ rule make_figure_two_ab:
 
 rule make_figure_two_d:
 	input:
-		py_script = "scripts/pca_projection.py",
+		py_script = "py_scripts/pca_projection.py",
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		dumont_xls = "data/SuppTables_concat.xlsx"
 	output:
