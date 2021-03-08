@@ -3,9 +3,6 @@ import argparse
 import doctest
 from utils import *
 
-doctest.testmod()
-
-
 p = argparse.ArgumentParser()
 p.add_argument("--strain_metadata", required=True, 
                     help="""metadata about strains in Excel format.""")
@@ -61,6 +58,8 @@ rsids = ["rs47460195",
          "rs28272806",
          "rs28256540",
          "rs27509845"]
+
+rsids = ["rs52263933"]
 
 genos_at_markers = genos[genos['marker'].isin(rsids)]
 

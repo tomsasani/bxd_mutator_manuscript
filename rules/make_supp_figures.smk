@@ -1,5 +1,3 @@
-samples, = glob_wildcards("data/nucleotide_composition/{sample}_nucleotide_composition.csv")
-
 chroms = list(map(str, range(1, 20)))
 chroms = ['chr' + c for c in chroms]
 

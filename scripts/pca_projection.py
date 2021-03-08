@@ -111,7 +111,6 @@ muts = ['C>A', 'C>T', 'C>G', 'A>T', 'A>C', 'A>G']
 X = combined[muts].values
 y = combined['strain'].values
 
-combined.to_csv("csv/pca.csv", index=False)
 # get rid of any strains that have no mutation data
 row_zero = np.unique(np.where(X == 0)[0])
 

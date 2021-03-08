@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import glob
 import argparse
+import scipy.stats as ss
 
 p = argparse.ArgumentParser()
 p.add_argument("--tidy_spectra", required=True,
@@ -59,6 +60,12 @@ for cell_type, x, y in zip(cell_types, x_coord, y_coord):
                     color='white', data=spectra, fliersize=0)
     sns.stripplot(x="haplotype_at_qtl", y="expression", ax=axarr[x, y], 
                         palette="colorblind", s=5, data=spectra)
+
+    a_vals = spectra.query('haplotype_at_qtl == "D"')['expression'].values
+    b_vals = spectra.query('haplotype_at_qtl == "B"')['expression'].values
+
+    stat, p = ss.ttest_ind(a_vals, b_vals, equal_var=False)
+
     if y == 0:
         axarr[x, y].set_ylabel("Mutyh expression")
     else: axarr[x, y].set_ylabel(None)
@@ -70,8 +77,12 @@ for cell_type, x, y in zip(cell_types, x_coord, y_coord):
         axarr[x, y].set_xticks([])
         axarr[x, y].set_xticklabels([])
 
-    title = ' '.join(cell_type.split('_'))
-    axarr[x, y].set_title(title.capitalize())
+    title = ' '.join(cell_type.split('_')).capitalize()
+    if p > 0.01:
+        title += '\n(Welch t-test p = {})'.format(round(p, 2))
+    else:
+        title += '\n(Welch t-test p = {:0.2e})'.format(p)
+    axarr[x, y].set_title(title)
 
     sns.despine(ax=axarr[x, y])
 

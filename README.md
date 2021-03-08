@@ -68,7 +68,7 @@ If you'd rather not spend the time (and compute) needed to generate all of the s
 3) Perform QTL scans for phenotypes related to the mutation rate.
 4) Make plots that constitute all figures.
 
-In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **Before moving on to the command-line instructions below, first obtain these third-party datasets as follows:** 
+In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **I've included the files below in the `data/` directory, but here are instructions for downloading if necessary:** 
 
 * singleton data from [Dumont 2019](https://academic.oup.com/mbe/article/36/5/865/5315518)
     * download ZIP file from [Supplementary data](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/mbe/36/5/10.1093_molbev_msz026/2/msz026_supp.zip?Expires=1616302324&Signature=u8neUFiV~0aBABDNG-ZPeMwd~usDZPmIO5TVjLHqKVcjHXrUWBm7MnR1ZJpSkMmDmQhMGrcdK~G7hySKLp79xgpQnj-SCFD09Hj7e9uCi9oYvVT-guMav1JY6qEMzSCubzlChpHfItUKJt15lXbxmuT2FxTibIs2gSrXvHCexmwGLxQYCoIAZJHY1nOjOfSDDlIejE-aGrPFozB86PXTZz~uM9JuAnmfZ5wmARxwuEzOHMfYZWh7WnWzeXEaNwKqYzrYHYDhej5sq~LSOfsQTzSPI-nrtn~KOV7x9ckk0RzqJ0kIhmF0uBLMkF8grDXTTRTHEjYV1dBALvxO1ZMVmA__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) associated with the manuscript
