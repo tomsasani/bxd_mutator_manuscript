@@ -1,7 +1,7 @@
 import numpy as np
 import argparse
 from cyvcf2 import VCF
-from utils import get_good_idxs
+from singleton_calling_utils import get_good_idxs
 
 def run(args):
 

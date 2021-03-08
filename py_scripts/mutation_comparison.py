@@ -9,7 +9,7 @@ import math
 import argparse
 import glob
 from statsmodels.stats.multitest import multipletests
-from utils import convert_bxd_name
+from figure_gen_utils import convert_bxd_name
 
 def mutation_comparison(sub_0_counts: np.array(int),
             sub_1_counts: np.array(int),

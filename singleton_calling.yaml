@@ -8,4 +8,5 @@ dependencies:
     - quicksect=0.2.2
     - pytabix=0.1
     - cyvcf2=0.20.9
-    - snakemake=5.25.0
+    - snakemake=6.0.2
+    - pomegranate=0.14.*

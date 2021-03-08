@@ -1,6 +1,6 @@
 import csv
 import argparse
-from utils import make_interval_tree
+from figure_gen_utils import make_interval_tree
 
 p = argparse.ArgumentParser()
 p.add_argument('--coverage_files', required=True, nargs="*",

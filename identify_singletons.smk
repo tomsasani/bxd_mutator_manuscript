@@ -18,7 +18,6 @@ VCFFILE = "/net/harris/vol1/project/bxd_mutators/bxd.2020_10.snp_eff.GRCm38.86.v
 # ---
 WIG2BED = "/net/harris/vol1/home/sasanit/bin/wig2bed"
 
-
 # make a list of chromosomes
 chroms = list(map(str, range(1, 20)))
 chroms = ['chr' + c for c in chroms]
@@ -60,7 +59,7 @@ rule unzip_reference:
 rule download_conservation:
 	input:
 	output:
-		WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.wigFix.gz"
+		temp(WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.wigFix.gz")
 	shell:
 		"""
 		wget http://hgdownload.cse.ucsc.edu/goldenpath/mm10/phastCons60way/placental/{wildcards.chrom}.phastCons60way.placental.wigFix.gz \
@@ -71,7 +70,7 @@ rule unzip_conservation:
 	input:
 		WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.wigFix.gz"
 	output:
-		WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.wigFix"
+		temp(WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.wigFix")
 	shell:
 		"""
 		gunzip {input}
@@ -82,7 +81,7 @@ rule convert_cons_to_bed:
 		wig2bed_binary = WIG2BED,
 		wig = WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.wigFix",
 	output:
-		WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.bed"
+		temp(WORKDIR + "data/conservation_scores/{chrom}.phastCons60way.placental.bed")
 	shell:
 		"""
 		{input.wig2bed_binary} --zero-indexed < {input.wig} > {output}
@@ -180,6 +179,40 @@ rule identify_singletons_wild_mice:
 								 -nmer 3 \
 								 -exclude {input.exclude}
 		"""
+
+rule find_inf_sites:
+    input:
+        vcf = VCFFILE,
+        exclude = EXCLUDE,
+        py_script = WORKDIR + "py_scripts/catalog_inf_sites.py"
+    output:
+        fh_a = WORKDIR + "data/inf_sites_for_hmm/{chrom}_inf_site_positions.csv",
+        fh_b = WORKDIR + "data/inf_sites_for_hmm/{chrom}_inf_site_states.csv"
+    shell:
+        """
+        python {input.py_script} --vcf {input.vcf} \
+                                  --chrom {wildcards.chrom} \
+                                  --fh_a {output.fh_a} \
+                                  --fh_b {output.fh_b} \
+                                  -exclude {input.exclude}
+        """
+
+rule extract_haplotypes:
+    input:
+        inf_site_positions = expand(WORKDIR + "data/inf_sites_for_hmm/{chrom}_inf_site_positions.csv", chrom=chroms),
+        inf_site_states = expand(WORKDIR + "data/inf_sites_for_hmm/{chrom}_inf_site_states.csv", chrom=chroms),
+        py_script = WORKDIR + "py_scripts/extract_haplotypes.py"
+    output:
+        haps = WORKDIR + 'data/haplotypes/{sample}_haplotypes.csv'
+    shell:
+        """
+        python {input.py_script} \
+                --inf_site_positions {input.inf_site_positions} \
+                --inf_site_states {input.inf_site_states} \
+                --sample {wildcards.sample} \
+                --out {output}
+        """
+
 
 rule get_wild_mutyh_alleles:
 	input:

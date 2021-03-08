@@ -6,7 +6,7 @@ import argparse
 from cyvcf2 import VCF
 from mutyper.ancestor import Ancestor
 import doctest
-from utils import *
+from singleton_calling_utils import *
 
 def get_singleton_idx(gts: np.array(int), 
 					  ad: np.array(int), 

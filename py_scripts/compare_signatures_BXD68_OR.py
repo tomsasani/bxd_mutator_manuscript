@@ -5,7 +5,7 @@ from matplotlib.patches import Patch
 import seaborn as sns
 import numpy as np
 import argparse
-from utils import revcomp
+from figure_gen_utils import revcomp
 
 plt.rc('font', size=16)
 

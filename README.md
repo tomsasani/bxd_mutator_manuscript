@@ -1,4 +1,4 @@
-# Discovery of a quantitative trait locus for the germline mutation rate in mice
+# A wild-derived antimutator drives germline mutation spectrum differences among laboratory mouse strains
 
 *Thomas A. Sasani, David G. Ashbrook, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
 
@@ -132,6 +132,9 @@ conda env create --name singleton_calling --file singleton_calling.yaml
 # activate the new environment
 conda activate singleton_calling
 
+# install mutyper
+pip install mutyper==0.5.0
+
 # ---
 # before running the pipeline, use your text editor of choice
 # and make sure that the WORKDIR variable at the top of 
@@ -162,7 +165,8 @@ snakemake \
                         -l h_rt={cluster.time} \
                         -l s_rt={cluster.time} \
                         -o {cluster.erroutdir} \
-                        -e {cluster.erroutdir}"
+                        -e {cluster.erroutdir}" \
+        --latency-wait 30
 ```
 
 After generating raw data, you can run the figure generation pipeline as described above. 

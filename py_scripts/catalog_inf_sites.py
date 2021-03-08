@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 import os
 import sys
-from utils import get_good_idxs, make_interval_tree
+from singleton_calling_utils import get_good_idxs, make_interval_tree
 
 def make_output(fh):
 	fh = open(fh, 'w')

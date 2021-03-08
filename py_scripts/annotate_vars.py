@@ -1,7 +1,7 @@
 import pandas as pd
 import argparse
 import doctest
-from utils import *
+from figure_gen_utils import *
 
 p = argparse.ArgumentParser()
 p.add_argument("--strain_metadata", required=True, 

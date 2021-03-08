@@ -8,7 +8,7 @@ from mutyper.ancestor import Ancestor
 import itertools
 import doctest
 import pandas as pd
-from utils import *
+from singleton_calling_utils import *
 
 def revcomp(seq):
 	"""

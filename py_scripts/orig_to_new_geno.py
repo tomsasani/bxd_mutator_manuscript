@@ -2,7 +2,7 @@ import csv
 import argparse
 import pandas as pd
 from collections import defaultdict
-from utils import convert_bxd_name
+from figure_gen_utils import convert_bxd_name
 
 p = argparse.ArgumentParser()
 p.add_argument("--geno", required=True, 
