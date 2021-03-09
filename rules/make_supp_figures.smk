@@ -23,14 +23,12 @@ rule make_supp_figure_three_a:
 		qtl_json = "Rqtl_data/bxd.json",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
-		outpref = "plots/"
 	output:
 		"plots/supp_figure_3a.eps"
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
-									-p {input.mut_rates} \
-									-o {input.outpref} 
+									-p {input.mut_rates} 
 		""" 
 
 rule make_supp_figure_three_b:
@@ -41,7 +39,6 @@ rule make_supp_figure_three_b:
 		qtl_json = "Rqtl_data/bxd.json",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
-		outpref = "plots/all_qtl_maps"
 	output:
 		"plots/all_qtl_maps/supp_figure_3_C.T.eps",
         "plots/all_qtl_maps/supp_figure_3_C.A.eps",
@@ -53,8 +50,7 @@ rule make_supp_figure_three_b:
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
-									-p {input.mut_spectra} \
-									-o {input.outpref} 
+									-p {input.mut_spectra}
 		""" 
 
 rule make_supp_figure_four_a:
@@ -83,14 +79,14 @@ rule make_supp_figure_four_b:
 tissues = ["amygdala", "hematopoietic_stem_cells", "kidney",
 		   "liver", "retina", "spleen"]
 
-rule make_supp_figure_five:
+rule make_supp_figure_four:
 	input:
 		py_script = "py_scripts/mutyh_expression_in_tissues.py",
 		strain_metadata = "data/bam_names_to_metadata.xlsx",
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		expression_data = expand("data/gene_network_expression/{tissue}_rnaseq.csv", tissue=tissues)
 	output:
-		"plots/supp_figure_5.eps"
+		"plots/supp_figure_4.eps"
 	shell:
 		"""
 		python {input.py_script} --strain_metadata {input.strain_metadata} \
@@ -99,13 +95,13 @@ rule make_supp_figure_five:
 		"""
 
 
-rule make_supp_figure_six_a:
+rule make_supp_figure_five_a:
 	input:
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
 		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
 	output:
-		"plots/supp_figure_6a.eps"
+		"plots/supp_figure_5a.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
@@ -114,11 +110,41 @@ rule make_supp_figure_six_a:
 							   --sig_name SBS36_mm10
 		"""
 
-rule make_supp_figure_six_b:
+rule make_supp_figure_five_b:
 	input:
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
 		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
+	output:
+		"plots/supp_figure_5b.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS18_mm10
+		"""
+
+rule make_supp_figure_six_a:
+	input:
+		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
+	output:
+		"plots/supp_figure_6a.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS36_mm10
+
+		"""
+rule make_supp_figure_six_b:
+	input:
+		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
 	output:
 		"plots/supp_figure_6b.eps"
 	shell:
@@ -129,37 +155,7 @@ rule make_supp_figure_six_b:
 							   --sig_name SBS18_mm10
 		"""
 
-rule make_supp_figure_seven_a:
-	input:
-		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
-		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
-	output:
-		"plots/supp_figure_7a.eps"
-	shell:
-		"""
-		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output} \
-							   --sig_name SBS36_mm10
-
-		"""
-rule make_supp_figure_seven_b:
-	input:
-		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
-		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
-	output:
-		"plots/supp_figure_7b.eps"
-	shell:
-		"""
-		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output} \
-							   --sig_name SBS18_mm10
-		"""
-
-rule make_supp_figure_seven_c:
+rule make_supp_figure_six_c:
 	input:
 		py_script = "py_scripts/compare_signatures_BXD68_TOYKO.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
@@ -172,7 +168,7 @@ rule make_supp_figure_seven_c:
 						 	   --ohno_data {input.ohno_data} \
 							   --out {output} 
 		"""
-rule make_supp_figure_seven_d:
+rule make_supp_figure_six_d:
 	input:
 		py_script = "py_scripts/compare_signatures_BXD68_OR.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
@@ -184,13 +180,13 @@ rule make_supp_figure_seven_d:
 							   --out {output}
 		"""
 
-rule make_supp_figure_eight:
+rule make_supp_figure_seven:
 	input:
 		dumont_xls = "data/SuppTables_concat.xlsx",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		py_script = "py_scripts/compare_mgp_spectra_3mer.py"
 	output:
-		"plots/supp_figure_8.eps"
+		"plots/supp_figure_7.eps"
 	shell:
 		"""
 		python {input.py_script} --dumont_xls {input.dumont_xls} \

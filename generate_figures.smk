@@ -25,9 +25,9 @@ main_figures = ["1a", "1b",
 				   "5a", "5b", "5c"]
 
 supp_figures = ["2", 
-"3a", 
-"4a", "4b", "5", "6a", "6b",
-				"7a", "7b", "7c", "7d", "8"]
+"3a", "4"
+"5a", "5b",
+				"6a", "6b", "6c", "6d"]
 
 rule all:
 	input:

@@ -20,7 +20,6 @@ rule make_figure_two_ab:
 		qtl_json = "Rqtl_data/bxd.json",
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
-		outpref = "plots"
 	output:
 		"plots/figure_2a.eps",
 		"plots/figure_2b.eps",
@@ -28,8 +27,7 @@ rule make_figure_two_ab:
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
-									-p {input.mut_spectra} \
-									-o {input.outpref} 
+									-p {input.mut_spectra}
 		"""
 
 rule make_figure_two_d:

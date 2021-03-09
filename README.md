@@ -13,7 +13,7 @@ simply generate the figures in the manuscript (step #2 below), since step #1 req
 
 **IMPORTANT NOTE:**
 
->I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system. The `identify_singletons.smk` pipeline involves downloading the BXD VCF (~70 Gb), the mm10 reference genome (~1 Gb), and many Gbs of phastCons scores. It also involves hundreds of individual steps, so it will finish much more quickly if those steps are run in parallel.
+>I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system. The `identify_singletons.smk` pipeline involves downloading the BXD VCF (~50 Gb), the mm10 reference genome (~1 Gb), and many Gbs of phastCons scores. It also involves hundreds of individual steps, so it will finish much more quickly if those steps are run in parallel.
 
 >Depending on the particular steps of the pipeline you want to run, some of these downloads can be avoided by commenting out the relevant output files in the `rule: all` input section. 
 
@@ -114,7 +114,7 @@ This will produce plots from every main and supplementary figure in the manuscri
 
 To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 20 Gb of free space in the working directory.**
 
-**The pipeline below also assumes that you've downloaded the BXD VCF (about 70 Gb).**
+**The pipeline below also assumes that you've downloaded the BXD VCF (about 50 Gb).**
 
 ```
 # enter a directory of your choice (make sure

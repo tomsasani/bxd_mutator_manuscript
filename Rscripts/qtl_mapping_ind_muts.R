@@ -7,8 +7,7 @@ library(optparse)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
-  make_option(c("-p", "--phenotype_file"), type="character", default=NULL),
-  make_option(c("-o", "--out_prefix"), type="character", default=NULL))
+  make_option(c("-p", "--phenotype_file"), type="character", default=NULL))
 
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
@@ -94,11 +93,9 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # plot LOD scores genome-wide 
     setEPS()
-    suff = ".eps"
-    outfile = sprintf("%s/supp_figure_3_%s%s", opt$out_prefix, formatted_mut_type, suff)
-    print (outfile)
+    fname = sprintf("plots/all_qtl_maps/supp_figure_3_%s.eps", formatted_mut_type)
     
-    postscript(outfile, width=10, height=5)
+    postscript(fname, width=10, height=5)
     par(mar=c(4.1, 4.1, 1.6, 1.1))
     color <- c("green3", "slateblue")
     plot(out_rate, pmap, lodcolumn=1, col=color[1], ylim=c(0, ylim_val*1.15))

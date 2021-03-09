@@ -7,8 +7,7 @@ library(tidyr)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
-  make_option(c("-p", "--phenotype_file"), type="character", default=NULL),
-  make_option(c("-o", "--out_prefix"), type="character", default=NULL))
+  make_option(c("-p", "--phenotype_file"), type="character", default=NULL))
       
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
@@ -68,9 +67,8 @@ ymx <- max(c(maxlod(out), lod_cutoff_sig))
 
 # plot LOD scores genome-wide 
 setEPS()
-fname = "supp_figure_3a.eps"
-outfile = sprintf("%s/%s", opt$out_prefix, fname)
-postscript(outfile, width=7, height=4)
+fname = "plots/supp_figure_3a.eps"
+postscript(fname, width=7, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- "green3"
 plot(out, pmap, lodcolumn=1, col=color, ylim=c(0, ymx*1.05))

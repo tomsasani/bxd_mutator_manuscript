@@ -7,8 +7,7 @@ library(tidyr)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
-  make_option(c("-p", "--phenotype_file"), type="character", default=NULL),
-  make_option(c("-o", "--out_prefix"), type="character", default=NULL))
+  make_option(c("-p", "--phenotype_file"), type="character", default=NULL))
       
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
@@ -105,9 +104,8 @@ ymx_frac <- maxlod(out_frac)
 
 # plot LOD scores genome-wide
 setEPS()
-fname = "figure_2a.eps"
-outfile = sprintf("%s/%s", opt$out_prefix, fname)
-postscript(outfile, width=7, height=4)
+fname = "plots/figure_2a.eps"
+postscript(fname, width=7, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- c("green3", "slateblue")
 plot(out_rate, pmap, lodcolumn=1, col=color[1], ylim=c(0, ymx_frac*1.05))
@@ -121,9 +119,8 @@ dev.off()
 
 # plot a zoomed in version of the LOD peaks on chr4
 setEPS()
-fname = "figure_2b.eps"
-outfile = sprintf("%s/%s", opt$out_prefix, fname)
-postscript(outfile, width=4, height=4)
+fname = "plots/figure_2b.eps"
+postscript(fname, width=4, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- c("green3", "slateblue")
 plot(out_rate, pmap$`4`, lodcolumn=1, col=color[1], ylim=c(0, ymx_frac*1.05))
@@ -159,9 +156,8 @@ p_new_frac = inner_join(p_frac, g_frac)$fraction
 names(p_new_frac) = inner_join(p_frac, g_frac)$strain
 
 setEPS()
-fname = "figure_2c.eps"
-outfile = sprintf("%s/%s", opt$out_prefix, fname)
-postscript(outfile, width=4, height=4)
+fname = "plots/figure_2c.eps"
+postscript(fname, width=4, height=4)
 plot_pxg(g_new_frac, p_new_frac, SEmult=2, 
          ylab="C>A singleton mutation fraction",
          xlab="Founder haplotype background")
