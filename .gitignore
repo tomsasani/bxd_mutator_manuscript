@@ -1,8 +1,4 @@
 plots/*
-data/SuppTables_concat.xlsx
-data/41598_2014_BFsrep04689_MOESM2_ESM.xls
-data/sigProfiler_SBS_signatures_SBS36.csv
-data/sigProfiler_SBS_signatures_SBS18.csv
 data/bxd_private/*
 csv/*
 __pycache__/*

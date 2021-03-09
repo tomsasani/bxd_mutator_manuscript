@@ -17,7 +17,7 @@ simply generate the figures in the manuscript (step #2 below), since step #1 req
 
 >Depending on the particular steps of the pipeline you want to run, some of these downloads can be avoided by commenting out the relevant output files in the `rule: all` input section. 
 
->If you want to generate all raw data from scratch, see the section entitled [Usage for generating all raw data](#usage-data). 
+>If you want to generate all raw data from scratch, see the section entitled [Usage for generating all raw data](#usage-for-generating-all-raw-data). 
 
 **For these reasons, the `data/` directory already contains the files output by the `identify_singletons.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.**
 
@@ -30,7 +30,7 @@ simply generate the figures in the manuscript (step #2 below), since step #1 req
 5. [How to generate raw data on a HPC](#how-to-generate-raw-data-on-a-hpc)
 
 ## Dependencies
-Make sure that these are installed and in your system `$PATH`! Version in parentheses are the versions I used at the time of manuscript posting, but other versions may work just fine.
+Make sure that these are installed and in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting.
 
 ### Required for all pipelines
 * [conda (v4.9.2)](https://docs.conda.io/en/latest/)
@@ -72,18 +72,17 @@ In a number of analyses, we compare mutation spectra between the BXD singletons 
 
 * singleton data from [Dumont 2019](https://academic.oup.com/mbe/article/36/5/865/5315518)
     * download ZIP file from [Supplementary data](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/mbe/36/5/10.1093_molbev_msz026/2/msz026_supp.zip?Expires=1616302324&Signature=u8neUFiV~0aBABDNG-ZPeMwd~usDZPmIO5TVjLHqKVcjHXrUWBm7MnR1ZJpSkMmDmQhMGrcdK~G7hySKLp79xgpQnj-SCFD09Hj7e9uCi9oYvVT-guMav1JY6qEMzSCubzlChpHfItUKJt15lXbxmuT2FxTibIs2gSrXvHCexmwGLxQYCoIAZJHY1nOjOfSDDlIejE-aGrPFozB86PXTZz~uM9JuAnmfZ5wmARxwuEzOHMfYZWh7WnWzeXEaNwKqYzrYHYDhej5sq~LSOfsQTzSPI-nrtn~KOV7x9ckk0RzqJ0kIhmF0uBLMkF8grDXTTRTHEjYV1dBALvxO1ZMVmA__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) associated with the manuscript
-    * uncompress file and move `SuppTables_concat.xlsx` into the `data` directory of the cloned version of this repository
+    * uncompress file and move `SuppTables_concat.xlsx` into the `data` directory of this repository
 * *de novo* germline mutation data from [Ohno et al. 2014](https://www.nature.com/articles/srep04689)
     * download [Supplementary Data 1](https://static-content.springer.com/esm/art%3A10.1038%2Fsrep04689/MediaObjects/41598_2014_BFsrep04689_MOESM2_ESM.xls)
-    * move `41598_2014_BFsrep04689_MOESM2_ESM.xls` into the `data` directory of the cloned version of this repository
+    * move `41598_2014_BFsrep04689_MOESM2_ESM.xls` into the `data` directory of this repository
 * mutation signatures from [COSMIC](https://cancer.sanger.ac.uk/cosmic)
     * download [SBS36](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS36.csv)
     * download [SBS18](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS18.csv)
-    * move these two files (`sigProfiler_SBS_signatures_SBS36.csv` and `sigProfiler_SBS_signatures_SBS18.csv`) into the `data` directory of the cloned version of this repository
+    * move these two files (`sigProfiler_SBS_signatures_SBS36.csv` and `sigProfiler_SBS_signatures_SBS18.csv`) into the `data` directory of this repository
 
 ```
-# enter a directory of your choice (make sure
-# you have at least 1 Gbp of free space here)
+# enter a directory of your choice
 cd $WORKDIR
 
 # clone the BXD analysis GitHub repository
