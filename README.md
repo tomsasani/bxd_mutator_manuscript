@@ -2,20 +2,21 @@
 
 *Thomas A. Sasani, David G. Ashbrook, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
 
-The code in this repository is sufficient to reproduce the entire manuscript from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to
-simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
+:mouse: :dna: :mouse: :dna:
+
+The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce the entire manuscript from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
 
 **The basic outline of the pipeline is as follows:**
 
 1) Identify high-quality singleton mutations from the BXD VCF using `identify_singletons.smk`.
 
-2) Annotate singleton calls and generate figures using `generate_figures.smk`.
+2) Annotate singleton mutations and generate figures using `generate_figures.smk`.
 
 **IMPORTANT NOTE:**
 
->I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system. The `identify_singletons.smk` pipeline involves downloading the BXD VCF (~50 Gb), the mm10 reference genome (~1 Gb), and many Gbs of phastCons scores. It also involves hundreds of individual steps, so it will finish much more quickly if those steps are run in parallel.
+>I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system or cluster. The `identify_singletons.smk` pipeline assumes you've downloaded the BXD VCF (~50 Gb), and the hundreds of individual steps in the pipeline include downloading the mm10 reference genome (~1 Gb) and many Gbs of phastCons scores.
 
->Depending on the particular steps of the pipeline you want to run, some of these downloads can be avoided by commenting out the relevant output files in the `rule: all` input section. 
+>Depending on the particular steps of the pipeline you want to run, some of these steps/downloads can be avoided by editing the `identify_singletons.smk` pipeline directly. For example, if you don't want to get singleton data from the wild mouse genomes, simply comment out those output files in `rule: all`. Or if you already have a copy of the mm10 reference, just add it to the `data/ref` directory.
 
 >If you want to generate all raw data from scratch, see the section entitled [Usage for generating all raw data](#usage-for-generating-all-raw-data). 
 
@@ -46,27 +47,27 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 ## Directory structure
 ```
 .
-|__rules                        # individual `snakemake` "rule files" that are imported by the main pipelines
-|__py_scripts                   # all of the `python` scripts called by `snakemake` rules
-|__R_scripts                    # all of the `R` scripts called by `snakemake` rules
-|__Rqtl_data                    # data used by R/qtl2 for QTL mapping
-|__data                         # raw data files output by the `identify_singletons.smk` pipeline
-|__misc                         # miscellaneous data files needed to count or annotate singletons
-|__figure_generation.yaml       # YAML file containing all of the dependencies required to generate figures
-|__singleton_calling.yaml       # YAML file containing all of the dependencies required to call singletons
-|__generate_figures.smk         # main `snakemake` pipeline that generates main and supplementary figures
-|__identify_singletons.smk      # main `snakemake` pipeline that identifies singletons using the BXD VCF
+|__rules                                # individual `snakemake` "rule files" that are imported by the main pipelines
+|__py_scripts                           # all of the `python` scripts called by `snakemake` rules
+|__R_scripts                            # all of the `R` scripts called by `snakemake` rules
+|__Rqtl_data                            # data used by R/qtl2 for QTL mapping
+|__data                                 # raw data files output by the `identify_singletons.smk` pipeline
+|__figure_generation.yaml               # YAML file containing all of the dependencies required to generate figures
+|__singleton_calling.yaml               # YAML file containing all of the dependencies required to call singletons
+|__generate_figures.smk                 # main `snakemake` pipeline that generates main and supplementary figures
+|__identify_singletons.smk              # main `snakemake` pipeline that identifies singletons using the BXD VCF
+|__singleton_calling_hpc_config.json    # JSON config file template for running pipelines on cluster like SGE 
 ```
 ## Usage for generating manuscript figures using precomputed data
 
-If you'd rather not spend the time (and compute) needed to generate all of the singleton data from scratch, I've included the output of `identify_singletons.smk` in the `data/` directory. These files include raw singleton calls and HMM-derived haplotype tracts in each BXD, among others. The command-line instructions below will reproduce every figure in the manuscript using these data.
+If you'd rather not spend the time (and compute) needed to generate all of the singleton data from scratch, I've included the output of `identify_singletons.smk` in the `data/` directory. The command-line instructions below will reproduce all but one or two figures in the manuscript (like Supp. Fig. 1), which were created by hand in Illustrator.
 
 #### What steps are involved?
 
 1) Annotate singletons and fixed variants with various metadata.
 2) Construct "tidy" dataframes containing summary information about mutation rates and spectra in each BXD.
 3) Perform QTL scans for phenotypes related to the mutation rate.
-4) Make plots that constitute all figures.
+4) Make plots.
 
 In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **I've included the files below in the `data/` directory, but here are instructions for downloading if necessary:** 
 
@@ -86,7 +87,10 @@ In a number of analyses, we compare mutation spectra between the BXD singletons 
 cd $WORKDIR
 
 # clone the BXD analysis GitHub repository
-git clone $name
+git clone https://github.com/tomsasani/bxd_mutator_manuscript.git
+
+# enter the directory
+cd bxd_mutator_manuscript
 
 # create a new conda environment with all of the dependencies
 # required for running the pipeline
@@ -114,7 +118,7 @@ This will produce plots from every main and supplementary figure in the manuscri
 
 To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 20 Gb of free space in the working directory.**
 
-**The pipeline below also assumes that you've downloaded the BXD VCF (about 50 Gb).**
+**The pipeline below also assumes that you've downloaded the BXD VCF (about 50 Gb). The path to this VCF must be edited in the Snakemake file.**
 
 ```
 # enter a directory of your choice (make sure
@@ -122,7 +126,10 @@ To generate all of the **raw data in the manuscript**, it's highly recommended t
 cd $WORKDIR
 
 # clone the BXD analysis GitHub repository
-git clone $name
+git clone https://github.com/tomsasani/bxd_mutator_manuscript.git
+
+# enter the directory
+cd bxd_mutator_manuscript
 
 # create a new conda environment with all of the dependencies
 # required for running the pipeline
@@ -137,15 +144,15 @@ pip install mutyper==0.5.0
 # ---
 # before running the pipeline, use your text editor of choice
 # and make sure that the WORKDIR variable at the top of 
-# `identify_singletons.smk` points to the current directory you
-# `cd`'ed into at the beginning of these steps, and that all of
+# `identify_singletons.smk` is the absolute path to the directory
+# that you're currently in, and that all of
 # the other paths at the top of the pipeline point to the right
 # binaries and directories on your machine.
 # ---
 
 # run the pipeline
 snakemake \
-        -j 20 \ # number of simultaneous jobs to run
+        -j 20 \ # number of simultaneous jobs to run (change if you want)
         -s identify_singletons.smk # name of the snakemake pipeline
 ```
 
@@ -166,6 +173,7 @@ snakemake \
                         -o {cluster.erroutdir} \
                         -e {cluster.erroutdir}" \
         --latency-wait 30
+        --rerun-incomplete
 ```
 
 After generating raw data, you can run the figure generation pipeline as described above. 
