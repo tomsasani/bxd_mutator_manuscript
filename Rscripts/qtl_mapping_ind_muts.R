@@ -46,10 +46,8 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
   {
     phen_df_sub = subset(phen_df, base_mut == mut_type)
     
-    # get the phenotype as a log10-transformed fraction...
     phen_df_sub_frac = subset(phen_df_sub, estimate_type == "clr_fraction")
     phen_matrix_frac = as.matrix(phen_df_sub_frac$estimate)
-    #phen_matrix_frac = as.matrix(RankNorm(phen_df_sub_frac$estimate))
     
     phenotype_frac = as.matrix(phen_matrix_frac[,1])
     rownames(phenotype_frac) = phen_df_sub_frac$bxd_strain_conv

@@ -38,11 +38,9 @@ k = calc_kinship(pr, 'loco')
 # get special covariates for the X
 Xcovar <- get_x_covar(bxd)
 
-# get the phenotype as a log10-transformed fraction...
+# get the phenotype as a CLR fraction
 phen_df_sub_frac = subset(phen_df_sub, estimate_type == "clr_fraction")
-#phen_matrix_frac = as.matrix(log10(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
 phen_matrix_frac = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
-#phen_matrix_frac = as.matrix(RankNorm(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
 
 phenotype_frac = as.matrix(phen_matrix_frac[,1])
 strain_names = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
@@ -51,7 +49,6 @@ rownames(phenotype_frac) = strain_names
 # and as a rate
 phen_df_sub_rate = subset(phen_df_sub, estimate_type == "rate")
 phen_matrix_rate = as.matrix(subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
-#phen_matrix_rate = as.matrix(log10(subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
 
 strain_names = subset(phen_df_sub_rate, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
 phenotype_rate = as.matrix(phen_matrix_rate[,1])

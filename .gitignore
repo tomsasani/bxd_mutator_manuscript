@@ -9,7 +9,6 @@ Rscripts/.*
 *.eps
 *.ipynb
 py_scripts/adj_pvalues.py 
-py_scripts/compare_mgp_spectra_3mer.py
 py_scripts/fixed_var_spectrum.py
 py_scripts/identify_shared_vars.py
 py_scripts/local_haplotype_matching.mgp.py
