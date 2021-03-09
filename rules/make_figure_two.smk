@@ -12,7 +12,7 @@ rule make_geno_file:
 								 --out {output}
 		"""
 
-rule make_figure_two_ab: 
+rule make_figure_two_abc: 
 	input:
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		qtl_rscript = "Rscripts/qtl_mapping.R",
