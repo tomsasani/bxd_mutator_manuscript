@@ -147,8 +147,6 @@ def run(args):
 		
 		# check if the current variant is in the exclude file
 		if exclude and len(exclude[v.CHROM].search(v.start, v.end)) > 0: continue
-		# limit to passing SNVs
-		if v.FILTER not in (None, "PASS"): continue
 		if v.var_type != "snp": continue
 		if '*' in v.ALT: continue
 		if len(v.REF) > 1: continue

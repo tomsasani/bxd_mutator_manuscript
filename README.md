@@ -1,12 +1,12 @@
 # A wild-derived antimutator drives germline mutation spectrum differences among laboratory mouse strains
 
-*Thomas A. Sasani, David G. Ashbrook, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
+*Thomas A. Sasani, David G. Ashbrook, Lu Lu, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
 
 :mouse: --> :dna: --> :bar_chart:
 
 The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce the entire manuscript from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
 
-**The basic outline of the pipeline is as follows:**
+**The basic outline of the pipelines is as follows:**
 
 1) Identify high-quality singleton mutations from the BXD VCF using `identify_singletons.smk`.
 

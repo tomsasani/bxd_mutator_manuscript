@@ -92,8 +92,6 @@ def run(args):
 			for i,v in enumerate(vcf(ival)):
 				# check if the current variant is in the exclude file
 				if exclude and len(exclude[v.CHROM].search(v.start, v.end)) > 0: continue
-				# limit to passing SNVs and indels
-				if v.FILTER not in (None, "PASS"): continue
 				if '*' in v.ALT: continue
 				# limit to SNPs
 				if v.var_type != "snp": continue
