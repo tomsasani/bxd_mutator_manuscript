@@ -90,7 +90,6 @@ for i,v in enumerate(vcf_h):
 	
 	# limit to passing SNVs
 	if v.var_type != "snp": continue
-	if v.FILTER not in (None, "PASS"): continue
 	if len(v.ALT) > 1: continue
 	if v.call_rate < 1: continue
 
@@ -107,31 +106,34 @@ for i,v in enumerate(vcf_h):
 	d2_gt = gts[d2_idx]
 
 	gq = v.gt_quals
+	rd, ad = v.gt_ref_depths, v.gt_alt_depths
+	td = rd + ad
 
 	# get a list of indices corresponding to sites
 	# that are not UNK and pass GQ/DP filters
-	non_unk = np.where(gts != UNK)
-	hi_qual = np.where(gq >= 30) 
+	good_idxs = get_good_idxs(gts, gq, td)
 
-	good_sites = np.intersect1d(non_unk, hi_qual)
-
-	if b6_idx not in good_sites: continue
-	if d2_idx not in good_sites: continue
+	if b6_idx not in good_idxs: continue
+	if d2_idx not in good_idxs: continue
 
 	out_array = np.ones(len(vcf.samples), dtype=np.int8)
 
 	smp_idx = np.arange(len(vcf.samples))
 
-	good_idx = np.intersect1d(smp_idx, good_sites)
-	good_idx_bxd = good_idx[(good_idx != b6_idx) & (good_idx != d2_idx)]
+	# get the indices of good BXDs (excluding founders)
+	good_idxs_bxd = good_idxs[(good_idxs != b6_idx) & (good_idxs != d2_idx)]
 
-	good_gt_bxd = gts[good_idx_bxd]
+	# get genotypes of good BXDs
+	good_gt_bxd = gts[good_idxs_bxd]
 
+	# boolean arrays of indices where each BXD
+	# matches the genotype of either B6 or D2
 	match_b6 = good_gt_bxd == b6_gt
 	match_d2 = good_gt_bxd == d2_gt
 
-	match_b6_loc = good_idx_bxd[match_b6]
-	match_d2_loc = good_idx_bxd[match_d2]
+	# and the actual indices of those matches
+	match_b6_loc = good_idxs_bxd[match_b6]
+	match_d2_loc = good_idxs_bxd[match_d2]
 
 	out_array[match_b6_loc] = 0
 	out_array[match_d2_loc] = 2
