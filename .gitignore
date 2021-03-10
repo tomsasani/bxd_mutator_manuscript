@@ -25,6 +25,7 @@ py_scripts/make_tidy_data.by_haplotype.py
 py_scripts/make_epoch_sharing_heatmap.py
 py_scripts/wild_mice.segregating_alleles.py
 py_scripts/__pycache__/*
+data/gene_network_phenotypes/
 
 
 
