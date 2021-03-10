@@ -12,15 +12,13 @@ The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en
 
 2) Annotate singleton mutations and generate figures using `generate_figures.smk`.
 
+**If you just want to generate all of the manuscript figures, skip to the section entitled [Usage for generating manuscript figures using precomputed data](#usage-for-generating-manuscript-figures-using-precomputed-data).**
+
 **IMPORTANT NOTE:**
 
 >I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system or cluster. The `identify_singletons.smk` pipeline assumes you've downloaded the BXD VCF (~50 Gb), and the hundreds of individual steps in the pipeline include downloading the mm10 reference genome (~1 Gb) and many Gbs of phastCons scores.
 
 >Depending on the particular steps of the pipeline you want to run, some of these steps/downloads can be avoided by editing the `identify_singletons.smk` pipeline directly. For example, if you don't want to get singleton data from the wild mouse genomes, simply comment out those output files in `rule: all`. Or if you already have a copy of the mm10 reference, just add it to the `data/ref` directory.
-
->If you want to generate all raw data from scratch, see the section entitled [Usage for generating all raw data](#usage-for-generating-all-raw-data). 
-
-**For these reasons, the `data/` directory already contains the files output by the `identify_singletons.smk` pipeline for those users that cannot or don't want to run all of the steps in that first pipeline.**
 
 ## Table of Contents
 
@@ -31,7 +29,7 @@ The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en
 5. [How to generate raw data on a HPC](#how-to-generate-raw-data-on-a-hpc)
 
 ## Dependencies
-Make sure that these are installed and in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting.
+Make sure that these are installed and in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting. I haven't experimented with other versions, so YMMV.
 
 ### Required for all pipelines
 * [conda (v4.9.2)](https://docs.conda.io/en/latest/)
@@ -42,7 +40,7 @@ Make sure that these are installed and in your system `$PATH`! Versions in paren
 * [tabix (v1.10.2-125-g4162046)](http://www.htslib.org/doc/tabix.html)
 * [mutyper (v0.5.0)](https://harrispopgen.github.io/mutyper/install.html)
 
-All other `python` dependencies will be handled by `conda` when a pipeline is executed. 
+All other `python` and `R` dependencies will be handled by `conda` before executing a pipeline. 
 
 ## Directory structure
 ```
@@ -51,7 +49,7 @@ All other `python` dependencies will be handled by `conda` when a pipeline is ex
 |__py_scripts                           # all of the `python` scripts called by `snakemake` rules
 |__R_scripts                            # all of the `R` scripts called by `snakemake` rules
 |__Rqtl_data                            # data used by R/qtl2 for QTL mapping
-|__data                                 # raw data files output by the `identify_singletons.smk` pipeline
+|__data                                 # raw data files output by the `identify_singletons.smk` pipeline, plus third-party datasets
 |__figure_generation.yaml               # YAML file containing all of the dependencies required to generate figures
 |__singleton_calling.yaml               # YAML file containing all of the dependencies required to call singletons
 |__generate_figures.smk                 # main `snakemake` pipeline that generates main and supplementary figures
@@ -87,7 +85,7 @@ In a number of analyses, we compare mutation spectra between the BXD singletons 
 cd $WORKDIR
 
 # clone the BXD analysis GitHub repository
-git clone https://github.com/tomsasani/bxd_mutator_manuscript.git
+git clone https://github.com/harrispopgen/bxd_mutator_manuscript.git
 
 # enter the directory
 cd bxd_mutator_manuscript
@@ -126,7 +124,7 @@ To generate all of the **raw data in the manuscript**, it's highly recommended t
 cd $WORKDIR
 
 # clone the BXD analysis GitHub repository
-git clone https://github.com/tomsasani/bxd_mutator_manuscript.git
+git clone https://github.com/harrispopgen/bxd_mutator_manuscript.git
 
 # enter the directory
 cd bxd_mutator_manuscript
@@ -172,7 +170,7 @@ snakemake \
                         -l s_rt={cluster.time} \
                         -o {cluster.erroutdir} \
                         -e {cluster.erroutdir}" \
-        --latency-wait 30
+        --latency-wait 30 \
         --rerun-incomplete
 ```
 
