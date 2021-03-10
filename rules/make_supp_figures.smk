@@ -161,7 +161,7 @@ rule make_supp_figure_six_c:
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
 	output:
-		"plots/supp_figure_7c.eps"
+		"plots/supp_figure_6c.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
@@ -173,7 +173,7 @@ rule make_supp_figure_six_d:
 		py_script = "py_scripts/compare_signatures_BXD68_OR.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 	output:
-		"plots/supp_figure_7d.eps"
+		"plots/supp_figure_6d.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \

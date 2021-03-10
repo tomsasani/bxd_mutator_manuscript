@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from utils import revcomp, combine_chr_df
+from figure_gen_utils import revcomp, combine_chr_df
 from mutation_comparison import mutation_comparison
 import glob
 
