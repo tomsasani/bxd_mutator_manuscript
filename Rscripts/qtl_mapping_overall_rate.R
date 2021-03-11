@@ -57,7 +57,7 @@ out <- scan1(pr, phenotype_rate, kinship=k,
 
 # perform a permutation test to assess significance
 operm <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig = summary(operm, alpha=0.05 / 15)[1]

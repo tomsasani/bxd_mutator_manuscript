@@ -65,7 +65,8 @@ def run(args):
 				td = ad + rd
 
 			# get a list of sample indices that meet quality thresholds 
-			good_idxs = get_good_idxs(gts, gq, td)
+			# lenient thresholds get applied here
+			good_idxs = get_good_idxs(gts, gq, td, min_dp=5, min_gq=1)
 
 			if good_idxs.shape[0] == 0: continue
 

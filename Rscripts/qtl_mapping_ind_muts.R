@@ -72,10 +72,10 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # perform a permutation test to assess significance
     operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
-                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
     
     operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
-                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
     
     # get the LOD threshold for a < 0.05
     lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]

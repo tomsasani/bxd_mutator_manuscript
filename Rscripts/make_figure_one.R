@@ -27,22 +27,22 @@ names(tidy_spectra)[names(tidy_spectra) == 'epoch'] <- 'Epoch'
 # of inbreeding time
 m = glm(total_muts ~ n_inbreeding_gens, family=poisson(link="identity"), data=tidy_rates)
 
-summary(m)
+print (summary(m))
 
 # use model to predict Y values given X
 preds = predict(m, type='response', se.fit=TRUE)
 
 # manually get 95% confidence bands around slope
 # use (1.96 * SEM)
-tidy_rates$ci_lo = preds$fit - 1.96 * preds$se.fit
-tidy_rates$ci_hi = preds$fit + 1.96 * preds$se.fit
+tidy_rates$ci_lo = preds$fit - (1.96 * preds$se.fit)
+tidy_rates$ci_hi = preds$fit + (1.96 * preds$se.fit)
 
 # make figure 1a
 f1a <- ggplot(tidy_rates) +
     # plot regression line
     geom_line(data=cbind(tidy_rates, pred=preds$fit), aes(x=n_inbreeding_gens, y=pred), col='black') +
     # plot confidence bands
-    geom_ribbon(aes(x=n_inbreeding_gens, ymin=ci_lo, ymax=ci_hi), alpha=0.5, fill='grey') +
+    geom_ribbon(aes(x=n_inbreeding_gens, ymin=ci_lo, ymax=ci_hi), alpha=1, fill='grey') +
     geom_point(aes(x=n_inbreeding_gens, y=total_muts, fill=Epoch), pch=21, col='black', size=3) +
     theme_cowplot() +
     labs(x="Number of generations of inbreeding",
