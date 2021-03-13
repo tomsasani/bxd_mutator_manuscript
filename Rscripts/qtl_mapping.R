@@ -60,8 +60,8 @@ phen_df_sub_frac$is_ail[phen_df_sub_frac$n_intercross_gens > 0] <- 1
 
 # get covariates
 covariate_cols = c("n_intercross_gens", "is_ail", "epoch")
-covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
-rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
+covariate_matrix = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")[covariate_cols])
+rownames(covariate_matrix) = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
 
 
 # perform a genome scan, accounting for kinship and
@@ -74,10 +74,10 @@ out_frac <- scan1(pr, phenotype_frac, kinship=k,
 
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, n_perm=1000)
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
 
 operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
-                        addcovar=covariate_matrix, n_perm=1000)
+                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]

@@ -60,8 +60,8 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # get covariates to include
     covariate_cols = c("is_ail", "epoch", "n_intercross_gens")
-    covariate_matrix = as.matrix(phen_df_sub_frac[covariate_cols])
-    rownames(covariate_matrix) = phen_df_sub_frac$bxd_strain_conv
+    covariate_matrix = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")[covariate_cols])
+    rownames(covariate_matrix) = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
     
     # perform a genome scan
     out_rate <- scan1(pr, phenotype_rate, kinship=k, 

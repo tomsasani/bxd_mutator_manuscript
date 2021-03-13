@@ -51,8 +51,8 @@ phen_df$is_ail[phen_df$n_intercross_gens > 0] <- 1
 
 # get covariates
 covariate_cols = c("n_intercross_gens", "is_ail", "epoch")
-covariate_matrix = as.matrix(phen_df[covariate_cols])
-rownames(covariate_matrix) = phen_df$bxd_strain_conv
+covariate_matrix = as.matrix(subset(phen_df, bxd_strain_conv != "BXD68_RwwJ_0462")[covariate_cols])
+rownames(covariate_matrix) = subset(phen_df, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
 
 # perform a genome scan
 out <- scan1(pr, phenotype_rate, kinship=k, 
