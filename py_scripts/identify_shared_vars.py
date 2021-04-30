@@ -1,4 +1,6 @@
 import tabix
+import os
+import sys
 import numpy as np
 import gzip
 import csv
@@ -115,6 +117,7 @@ def run(args):
 
 			# reformat genotypes
 			gts_reformatted = reformat_genotypes(gts, alt_gt=alt_gt)
+			
 
 			# the index of the reference allele is always 0
 			ref_idx = 0
@@ -143,36 +146,49 @@ def run(args):
 
 			# make sure both founders are HOM_REF
 			if np.sum(gts_reformatted[founder_idxs]) != 0: continue
+			
+			n_mice_with_var = np.sum((gts_reformatted[good_idxs] == 2) | (gts_reformatted[good_idxs] == 1))
+
+			if n_mice_with_var < 2: continue
 
 			# get the mutation context for this sites using mutyper if it's a SNP
 			# otherwise, we'll just report the kmer is an "indel"
 			kmer = ancestor.mutation_type(v.CHROM, v.start, ref_allele, alt_allele)
 			if None in kmer: kmer = "N>N"
 			else: kmer = '>'.join(list(kmer))
-		
-			# number of BXDs that share a variant at this site
-			n_samps_sharing = good_idxs.shape[0]	
-		
+			
 			# annotate variant with phastCons score
 			con_score = -1
 			records = tb.query(v.CHROM, v.POS, v.POS + 1)
 			for r in records:
 				con_score = float(r[-1])
-			
+
+			outvals = []
+
 			# output samples with variants
 			for idx in good_idxs:
-				bxd_line = idx2smp[idx]
+				mouse = idx2smp[idx]
 				founder_hap = None
-				for haplotype_fh in args.haplotypes:
-					if mouse not in haplotype_fh: continue
-					hap_tree = make_interval_tree(haplotype_fh, datacol=True, delim=',')
-					founder_hap = hap_tree[str(v.CHROM)].search(v.start, v.end)
-				if founder_hap is None or len(founder_hap) == 0: continue
-				
-				outvals = [v.CHROM, v.start, v.end, bxd_line, kmer, founder_hap, 
-							gts_reformatted[idx], td[idx], ab[idx], con_score]
+				hap_fh_pref = '/'.join(args.haplotypes[0].split('/')[:-1]) + '/'
+				mouse_hap_fh = hap_fh_pref + '{}_haplotypes.csv'.format(mouse)
+				if not os.path.isfile(mouse_hap_fh): continue
+				hap_tree = make_interval_tree(mouse_hap_fh, datacol=True, delim=',')
+				founder_hap = hap_tree[str(v.CHROM)].search(v.start, v.end)
 
-				print (','.join(list(map(str, outvals))), file=out_csv_fh)
+				if founder_hap is None or len(founder_hap) == 0: founder_hap = 'U'
+				else: founder_hap = str(founder_hap[0].data)
+
+				m_genotype = gts_reformatted[idx]
+				
+				if m_genotype == 0: continue
+				if ab[idx] < 0.9: continue
+
+				outvals.append([v.CHROM, v.start, v.end, mouse, kmer, founder_hap, 
+							gts_reformatted[idx], td[idx], ab[idx], con_score])
+			if len(outvals) < 2: continue
+				
+			for ov in outvals:
+				print (','.join(list(map(str, ov))), file=outcsvfh)
 			
 if __name__ == "__main__":
 	doctest.testmod()
