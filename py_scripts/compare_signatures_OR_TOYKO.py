@@ -124,6 +124,8 @@ colors = sns.color_palette('colorblind', n_sig)
 
 sig_counted = 0
 
+a, b = [], []
+
 for mut in mut2idx:
     toyko_sub = toyko_wide[toyko_wide['kmer'] == mut]
     if toyko_sub.shape[0] == 0: continue
@@ -142,6 +144,9 @@ for mut in mut2idx:
 
     x = log_ratios[mut2idx[mut]]
     y = toyko_frac
+
+    a.append(x)
+    b.append(y)
 
     edgecolor = "w"
     label = None
@@ -171,6 +176,8 @@ ax.set_ylabel('Fraction of de novo germline\nmutations in TOY-KO mice', fontsize
 ax.set_xlabel('Log-2 ratio of ' + r'C$\to$A' + ' singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
 
 sns.despine(ax=ax, top=True, right=True)
-
+print (ss.spearmanr(a, b))
+slope, intercept, r_value, p_value, std_err = ss.linregress(a, b)
+print (p_value)
 f.savefig(args.out, bbox_inches='tight')
 
