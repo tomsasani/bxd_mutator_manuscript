@@ -32,12 +32,15 @@ supp_figures = ["2",
 "5a", "5b",
 				"6a", "6b", "6c", "6d", "7"]
 
+
 rule all:
 	input:
 		# generate all of the main and supplementary figures
 		expand("plots/figure_{fig_num}.eps", fig_num=main_figures),
 		expand("plots/supp_figure_{fig_num}.eps", fig_num=supp_figures),
-		"plots/epoch_sharing_heatmap.eps"
+		"plots/ashbrook/epoch_sharing_heatmap.eps",
+		"plots/ashbrook/figure_1a.eps",
+		"plots/ashbrook/figure_1b.eps",
 		# we generate supplementary figure 3 a little differently, since it
 		# comprises a sub-panel for every mutation type
 		expand("plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", 

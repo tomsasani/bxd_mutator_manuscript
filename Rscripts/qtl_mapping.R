@@ -4,6 +4,7 @@ library(cowplot)
 library(dplyr)
 library(optparse)
 library(tidyr)
+library(RNOmni)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
@@ -40,7 +41,15 @@ Xcovar <- get_x_covar(bxd)
 
 # get the phenotype as a CLR fraction
 phen_df_sub_frac = subset(phen_df_sub, estimate_type == "clr_fraction")
-phen_matrix_frac = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
+phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
+
+# calculate variance explained
+m = lm(estimate ~ haplotype_at_qtl, data=subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462"))
+af <- anova(m)
+afss <- af$"Sum Sq"
+print(cbind(af,PctExp=afss/sum(afss)*100))
+
+phen_matrix_frac = as.matrix(RankNorm(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
 
 phenotype_frac = as.matrix(phen_matrix_frac[,1])
 strain_names = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
@@ -72,12 +81,14 @@ out_rate <- scan1(pr, phenotype_rate, kinship=k,
 out_frac <- scan1(pr, phenotype_frac, kinship=k, 
                   addcovar=covariate_matrix, Xcovar=Xcovar)
 
+write.csv(out_frac, 'out.csv')
+
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
 
 operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
-                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
+                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]

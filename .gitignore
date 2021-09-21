@@ -10,7 +10,6 @@ Rscripts/.*
 *.ipynb
 py_scripts/adj_pvalues.py 
 py_scripts/fixed_var_spectrum.py
-py_scripts/identify_shared_vars.py
 py_scripts/local_haplotype_matching.mgp.py
 py_scripts/local_haplotype_matching.py
 py_scripts/make_boxplots.py
@@ -22,10 +21,10 @@ py_scripts/pca_projection.by_haplotype.py
 py_scripts/pca_projection.wild_mice.py
 py_scripts/pairwise_mutation_distances.py
 py_scripts/make_tidy_data.by_haplotype.py
-py_scripts/make_epoch_sharing_heatmap.py
 py_scripts/wild_mice.segregating_alleles.py
 py_scripts/__pycache__/*
 data/gene_network_phenotypes/
+sigprofoutdir/*
 
 
 

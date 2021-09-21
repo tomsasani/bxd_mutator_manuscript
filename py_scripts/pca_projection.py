@@ -81,6 +81,8 @@ tidy_spectra = pd.read_csv(args.tidy_spectra)
 tidy_fracs = tidy_spectra.query('estimate_type == "fraction"')
 tidy_fracs = tidy_fracs[['bxd_strain_conv', 'haplotype_at_qtl', 'base_mut', 'estimate']]
 
+tidy_fracs_3mer = tidy_fracs[['bxd_strain_conv', 'haplotype_at_qtl', 'base_mut', 'estimate']]
+
 # convert tidy to wide dataframe
 wide_fracs = tidy_fracs.pivot(index=['bxd_strain_conv', 'haplotype_at_qtl'], 
                                 columns='base_mut', values='estimate').reset_index()
@@ -99,6 +101,8 @@ muts = ['C>A', 'C>T', 'C>G', 'A>T', 'A>C', 'A>G']
 new_colnames = muts
 new_colnames.extend(['strain', 'sample_name'])
 wide_fracs = wide_fracs[new_colnames]
+
+wide_fracs.to_csv("csv/mutation_fractions_in_each_bxd.csv", index=False)
 
 # combine the dumont and BXD data into a single dataframe
 combined = pd.concat([wide_fracs, dumont_filtered]).reset_index()
