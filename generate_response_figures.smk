@@ -9,7 +9,7 @@ rule all:
 
 rule make_figure_one_two:
 	input: 
-		strain_metadata = "data/bam_names_to_metadata_new.xlsx",
+		strain_metadata = "data/bam_names_to_metadata.xlsx",
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		py_script = "py_scripts/bxd_generation_times.py"
 	output:
