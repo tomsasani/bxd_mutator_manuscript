@@ -34,11 +34,18 @@ Make sure that these are installed and in your system `$PATH`! Versions in paren
 ### Required for all pipelines
 * [conda (v4.9.2)](https://docs.conda.io/en/latest/)
 
-### Required only if you want to generate singleton data from scratch
+### Additional requirements if you want to generate singleton data from scratch
 * [bedtools (v2.29.2)](https://bedtools.readthedocs.io/en/latest/)
 * [bedops (v2.4.38)](https://bedops.readthedocs.io/en/latest/)
 * [tabix (v1.10.2-125-g4162046)](http://www.htslib.org/doc/tabix.html)
 * [mutyper (v0.5.0)](https://harrispopgen.github.io/mutyper/install.html)
+
+### Additional requirements if you want to generate manuscript figures
+* [perl (v5.32.1)](https://www.perl.org)
+* [pal2nal (v14)](http://www.bork.embl.de/pal2nal/#Download)
+
+### Additional requirements if you want to perform analyses done for manuscript revisions
+* [SigProfilerExtractor (v1.1.3)](https://github.com/AlexandrovLab/SigProfilerExtractor)
 
 All other `python` and `R` dependencies will be handled by `conda` before executing a pipeline. 
 
