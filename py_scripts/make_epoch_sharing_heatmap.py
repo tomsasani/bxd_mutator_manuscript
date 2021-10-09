@@ -6,6 +6,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import seaborn as sns
+import matplotlib
+
+font = {'size'   : 16}
+
+matplotlib.rc('font', **font)
 
 def find_groups(a):
     """
@@ -127,7 +132,7 @@ pairwise_sharing_sorted = pairwise_sharing_frac[sorted_epoch_idxs][:,sorted_epoc
 f, ax = plt.subplots(figsize=(12, 9))
 
 # plot the heatmap of pairwise sharing
-sns.heatmap(pairwise_sharing_sorted, ax=ax, vmin=0, vmax=0.5)
+sns.heatmap(pairwise_sharing_sorted, ax=ax, vmin=0, vmax=0.5)#, cmap="bwr")
 
 # find the sample indexes that correspond to the ends
 # of epoch groups
