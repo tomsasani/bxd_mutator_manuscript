@@ -13,6 +13,7 @@ include: "rules/make_figure_one.smk"
 include: "rules/make_figure_two.smk"
 include: "rules/make_figure_three.smk"
 include: "rules/make_figure_four.smk"
+include: "rules/make_figure_four_b.smk"
 include: "rules/make_figure_five.smk"
 include: "rules/make_supp_figures.smk"
 include: "rules/make_main_bxd_paper_figs.smk"
@@ -23,14 +24,14 @@ main_figures = ["1a", "1b",
 				   "2a", "2b", "2c", 
 				   "2d",
 				   "3a", "3b",
-				   "4a", "4bc", "4d",
+				   "4a", "4c", "4d",
 				   "5a", "5b", "5c"]
 
 supp_figures = ["2", 
 "3a", 
 "4",
 "5a", "5b",
-				"6a", "6b", "6c", "6d", "7"]
+				"6a", "6b", "6c", "6d", "7",]
 
 
 rule all:
@@ -41,6 +42,7 @@ rule all:
 		"plots/ashbrook/epoch_sharing_heatmap.eps",
 		"plots/ashbrook/figure_1a.eps",
 		"plots/ashbrook/figure_1b.eps",
+		"plots/figure_4b.pdf",
 		# we generate supplementary figure 3 a little differently, since it
 		# comprises a sub-panel for every mutation type
 		expand("plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", 
