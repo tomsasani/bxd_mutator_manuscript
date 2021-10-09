@@ -24,7 +24,23 @@ py_scripts/make_tidy_data.by_haplotype.py
 py_scripts/wild_mice.segregating_alleles.py
 py_scripts/__pycache__/*
 data/gene_network_phenotypes/
+data/sigprofiler_outdir/
 sigprofoutdir/*
+*.vcf.gz
+*.tbi
+*.vcf
+*.bed
+*.snakemake.log
+.snakemake/
+*.html
+.vscode/
+data/test.numbers
+data/ref/
+data/ete3_data/protein.reformatted.aln
+data/ete3_data/refseq.codon_aligned.fa
+data/ete3_data/refseq.codon_aligned.trimmed.fa
+data/ete3_data/refseq.fa
+data/ete3_data/tree.formatted.nwk
 
 
 
