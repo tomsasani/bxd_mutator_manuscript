@@ -24,7 +24,7 @@ y_coord = [0, 1, 2, 0, 1, 2]
 x_coord = [0, 0, 0, 1, 1, 1]
 
 cell_types = ["spleen", "hematopoietic_stem_cells", "liver",
-              "retina", "kidney", "amygdala"]
+              "retina", "kidney", "gastrointestinal"]
 
 for cell_type, x, y in zip(cell_types, x_coord, y_coord):
 

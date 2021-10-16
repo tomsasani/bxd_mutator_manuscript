@@ -132,7 +132,6 @@ a, b = [], []
 for mut in ca_mut2idx:
     toyko_sub = toyko_wide[toyko_wide['kmer'] == mut]
     if toyko_sub.shape[0] == 0: 
-        print (mut)
         toyko_frac = 0.
     else: toyko_frac = toyko_sub['frac'].values[0]
 

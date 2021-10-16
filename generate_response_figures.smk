@@ -72,12 +72,10 @@ rule run_sigprofiler:
 								 --outdir {output}
 		"""
 
-VCFFILE = "vcf/wild.100.120.vcf.gz"
 EXCLUDE = "data/mm10.seg_dups.simple_repeats.merged.bed.gz"
 
 rule count_windowed_ca_wild_mice:
 	input:
-		vcf = VCFFILE,
 		exclude = EXCLUDE,
 		ref = "data/ref/mm10.fa",
 		py_script = "py_scripts/identify_windowed_ca.wild_mice.py",
@@ -85,8 +83,7 @@ rule count_windowed_ca_wild_mice:
 		"csv/wild.windowed_singletons.csv"
 	shell:
 		"""
-        python {input.py_script} --vcf {input.vcf} \
-                                --ref {input.ref} \
+        python {input.py_script} --ref {input.ref} \
                                 --region chr4:110000000-120000000 \
                                 --out {output} \
                                 -exclude {input.exclude} \
@@ -106,3 +103,5 @@ rule make_figure_four:
 		python {input.py_script} --windowed_vars {input.csv} \
                                  --out {output} 
 		"""
+
+rule 

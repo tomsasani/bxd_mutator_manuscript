@@ -10,6 +10,7 @@ from collections import Counter
 p = argparse.ArgumentParser()
 p.add_argument("--msa")
 p.add_argument("-gap_frac", default=0.5, type=float)
+p.add_argument("-only_plot_mutyh", action="store_true")
 args = p.parse_args()
 
 align = TabularMSA.read(args.msa, constructor=DNA, format="fasta" )
@@ -24,6 +25,9 @@ for aa in aa_positions_to_keep:
 
 bl6_seq_idx = 1
 bl6_seq = str(align[bl6_seq_idx])
+
+if not args.only_plot_mutyh:
+    nuc_positions_to_keep = range(len(bl6_seq))
 
 good_nucs = []
 

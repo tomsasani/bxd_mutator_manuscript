@@ -50,7 +50,7 @@ for i, mut in enumerate(df.kmer.unique()):
         conting = []
         # get the total counts of the focal mutation and the other
         # mutation types in each "genotype class"
-        for genotype, genotype_df in window_df.groupby('species'):
+        for genotype, genotype_df in window_df.groupby('cast_dom'):
             fore = np.sum(genotype_df.query("kmer == @mut")["count"])
             back = np.sum(genotype_df.query("kmer != @mut")["count"])
             # add each genotype's "foreground" and "background" counts

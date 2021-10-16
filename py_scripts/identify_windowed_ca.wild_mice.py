@@ -97,8 +97,8 @@ def run(args):
     # -----------
     # read in VCF
     # -----------
-    #WILD_VCFFILE = "http://wwwuser.gwdg.de/~evolbio/evolgen/wildmouse/vcf/AllMouse.vcf_90_recalibrated_snps_raw_indels_reheader_PopSorted.PASS.vcf.gz"
-    vcf = VCF(args.vcf, gts012=True)
+    WILD_VCFFILE = "http://wwwuser.gwdg.de/~evolbio/evolgen/wildmouse/vcf/AllMouse.vcf_90_recalibrated_snps_raw_indels_reheader_PopSorted.PASS.vcf.gz"
+    vcf = VCF(WILD_VCFFILE, gts012=True)
 
     # ------------
     # define some global variables that will come in handy
@@ -148,7 +148,7 @@ def run(args):
     region_s, region_e = args.region.split(':')[-1].split('-')
     region_s, region_e = int(region_s), int(region_e)
 
-    window_size = 1e5
+    window_size = 500000
     windows = np.arange(region_s, region_e, window_size)
 
     out_df = []
