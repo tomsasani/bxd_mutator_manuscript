@@ -1,18 +1,12 @@
 PAL2NAL = "/Users/tomsasani/src/pal2nal.v14/pal2nal.pl"
 
-FASTA = "data/ete3_data/multi_organism_mutyh_cds.simple.fa"
-PROTEIN = "data/ete3_data/protein.aln"
-TREE = "data/ete3_data/tree.nwk"
-
-# rule all:
-# 	input:
-# 		"data/ete3_data/refseq.codon_aligned.trimmed.fa",
-# 		"data/ete3_data/tree.formatted.nwk",
-# 		"plots/figure_4b.eps"
+FASTA = "data/ete3_data/multi_organism_mutyh_cds.fa"
+PROTEIN = "data/ete3_data/multi_organism_mutyh_protein_alignment.fa"
+TREE = "data/ete3_data/multi_organism_mutyh_tree.nwk"
 
 rule format_tree:
 	input: TREE
-	output: "data/ete3_data/tree.formatted.nwk"
+	output: "data/ete3_data/multi_organism_mutyh_tree.formatted.nwk"
 	shell:
 		"""
 		sed -e 's/[0-9]*//g' {input} | sed -e 's/rodents//g' | \
@@ -23,39 +17,45 @@ rule format_tree:
 									   sed -e 's/_and_//g' | \
 									   sed -e "s/\.//g" | sed -e "s/://g" | sed -e "s/e-//g" > {output}
 		"""
+		
 rule format_protein_alignment:
 	input: 
 		protein = PROTEIN,
 		script = "py_scripts/reformat_protein_alignment.py"
-	output: "data/ete3_data/protein.reformatted.aln"
+	output: 
+		temp("data/ete3_data/multi_organism_mutyh_protein_alignment.reformatted.aln")
 	shell:
 		"""
 		python {input.script} --msa {input.protein} -split_mmd > {output}
 		"""
+
 rule format_msa:
 	input: 
 		fasta = FASTA,
 		script = "py_scripts/reformat_msa.py"
-	output: "data/ete3_data/refseq.fa"
+	output: 
+		temp("data/ete3_data/multi_organism_mutyh_cds.reformatted.fa")
 	shell:
 		"""
 		python {input.script} --fa {input.fasta} -split_mmd > {output}
 		"""
+
 rule codon_aware_aln:
 	input: 
-		protein = "data/ete3_data/protein.reformatted.aln",
-		msa = "data/ete3_data/refseq.fa",
+		protein = "data/ete3_data/multi_organism_mutyh_protein_alignment.reformatted.aln",
+		msa = "data/ete3_data/multi_organism_mutyh_cds.reformatted.fa",
 		pal2nal = PAL2NAL
-	output: "data/ete3_data/refseq.codon_aligned.fa"
+	output: "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.fa"
 	shell:
 		"""
 		perl {input.pal2nal} -output fasta {input.protein} {input.msa} > {output} 
 		"""
+
 rule trim_aln:
 	input: 
-		msa = "data/ete3_data/refseq.codon_aligned.fa",
+		msa = "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.fa",
 		script = "py_scripts/trim_sequences.py"
-	output: "data/ete3_data/refseq.codon_aligned.trimmed.fa"
+	output: "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.trimmed.fa"
 	shell:
 		"""
 		python {input.script} --msa {input.msa} > {output} 
@@ -63,8 +63,8 @@ rule trim_aln:
 
 rule visualize_phylo:
 	input:
-		msa = "data/ete3_data/refseq.codon_aligned.trimmed.fa",
-		tree = "data/ete3_data/tree.formatted.separate_mus.nwk"
+		msa = "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.trimmed.fa",
+		tree = "data/ete3_data/multi_organism_mutyh_tree.formatted.separate_mus.nwk"
 	output:
 		"plots/figure_4b.pdf"
 	run:
