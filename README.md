@@ -39,12 +39,12 @@ Make sure that these are installed and in your system `$PATH`! Versions in paren
 * [bedops (v2.4.38)](https://bedops.readthedocs.io/en/latest/)
 * [tabix (v1.10.2-125-g4162046)](http://www.htslib.org/doc/tabix.html)
 * [mutyper (v0.5.0)](https://harrispopgen.github.io/mutyper/install.html)
+* [bcftools (v1.12)](https://samtools.github.io/bcftools/bcftools.html)
+* [bgzip (v1.12)](http://www.htslib.org/doc/bgzip.html)
 
-### Additional requirements if you want to generate manuscript figures
+### Additional requirements if you want to reproduce manuscript figures + analysis
 * [perl (v5.32.1)](https://www.perl.org)
 * [pal2nal (v14)](http://www.bork.embl.de/pal2nal/#Download)
-
-### Additional requirements if you want to perform analyses done for manuscript revisions
 * [SigProfilerExtractor (v1.1.3)](https://github.com/AlexandrovLab/SigProfilerExtractor)
 
 All other `python` and `R` dependencies will be handled by `conda` before executing a pipeline. 
