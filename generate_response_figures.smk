@@ -104,4 +104,15 @@ rule make_figure_four:
                                  --out {output} 
 		"""
 
-rule 
+rule intersect_fixed_svs:
+	input:
+		svs = "data/sv_files/structural_variants.fixed_d2_b6_differences.mgp.bed",
+		gtf = "data/sv_files/gencode.mm10.genes.gtf"
+	output:
+		"data/sv_files/exons_overlapping_svs.bed"
+	shell:
+		"""
+		grep exon {input.gtf} | \
+		bedtools intersect -a - -b {input.svs} | \
+		cut -f 9 | cut -d ';' -f 2 | cut -d '"' -f 2 > {output}
+		"""

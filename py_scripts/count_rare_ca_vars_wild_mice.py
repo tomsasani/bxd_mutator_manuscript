@@ -169,7 +169,7 @@ def run(args):
         if len(v.REF) > 1: continue
         if len(v.ALT) > 1: continue
         # require all samples to have a callable genotype
-        if v.call_rate < 1: continue
+        #if v.call_rate < 1: continue
 
         d2_allele, b6_allele = None, None
 
@@ -234,7 +234,6 @@ def run(args):
             if kmer == "N>N": continue
             kmer_idx = mut2idx[kmer]
 
-
             if d2_allele is not None and b6_allele is not None:
                 b6_match = np.where(gts_reformatted == b6_allele)
                 d2_match = np.where(gts_reformatted == d2_allele)
@@ -246,7 +245,7 @@ def run(args):
 
             # skip this site if more than five samples
             # have a variant
-            if np.sum(gts_reformatted) > 5: continue
+            if np.sum(gts_reformatted > 0) > 5: continue
 
             out_a[good_smps_with_mut, kmer_idx] += 1
 

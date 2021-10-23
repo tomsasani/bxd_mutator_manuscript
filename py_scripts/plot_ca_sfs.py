@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 
 p = argparse.ArgumentParser()
-p.add_argument("--wild_sfs")
+p.add_argument("--wild_sfs", nargs="*")
 p.add_argument("--out")
 args = p.parse_args()
 
@@ -16,10 +16,11 @@ f, ax = plt.subplots()
 
 colors = sns.color_palette('colorblind', len(args.wild_sfs))
 
-for species_name in species:
+for si, species_name in enumerate(species):
     out_a = None
     mut2idx = None
     af = None
+    ac = None
     for sfs_i, sfs in enumerate(args.wild_sfs):
         if sfs.split('.')[-2] != species_name: continue
         df = pd.read_csv(sfs, sep='\t')
@@ -37,8 +38,8 @@ for species_name in species:
     ax.plot(
         af,
         mut_fracs[:, mut2idx["C>A"]],
-        label=species,
-        color=colors[sfs_i],
+        label=species_name,
+        color=colors[si],
         lw=2,
     )
 

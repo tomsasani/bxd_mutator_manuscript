@@ -24,7 +24,7 @@ def calculate_years_per_gen(row):
     gens = row['gen_at_seq']
     if gens == -1 or gens == "NA": return -1
     else:
-        years_of_breeding = 2021.5 - int(row['Year breeding started'])
+        years_of_breeding = 2017 - int(row['Year breeding started'])
         years_per_gen = years_of_breeding / int(gens)
         return years_per_gen
 
@@ -78,7 +78,7 @@ sns.regplot(
     scatter_kws={"edgecolor": "k"},
 )
 
-ax.set_xlim(0.25, 0.75)
+ax.set_xlim(0.15, 0.75)
 
 ax.set_xlabel("Generation time (years)")
 ax.set_ylabel("C" + r"$\rightarrow$" + "A singleton fraction")

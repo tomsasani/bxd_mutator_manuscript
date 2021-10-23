@@ -58,7 +58,7 @@ rule trim_aln:
 	output: "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.trimmed.fa"
 	shell:
 		"""
-		python {input.script} --msa {input.msa} > {output} 
+		python {input.script} --msa {input.msa} -only_plot_mutyh > {output} 
 		"""
 
 rule visualize_phylo:

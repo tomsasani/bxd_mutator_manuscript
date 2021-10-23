@@ -27,11 +27,7 @@ main_figures = ["1a", "1b",
 				   "4a", "4c", "4d",
 				   "5a", "5b", "5c"]
 
-supp_figures = ["2", 
-"3a", 
-"4",
-"5a", "5b",
-				"6a", "6b", "6c", "6d", "7", "8b"]#, "8b",]
+supp_figures = ["2", "3a", "4","5a", "5b","6a", "6b", "6c", "6d", "7", "8"]
 
 
 rule all:
@@ -47,8 +43,6 @@ rule all:
 		# comprises a sub-panel for every mutation type
 		expand("plots/all_qtl_maps/supp_figure_3_{mut_type}.eps", 
 						mut_type = [m.replace('>', '.') for m in muts]),
-		"data/mutyper_output/ksfs.txt"
-
 		
 
 rule annotate_vars:

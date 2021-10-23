@@ -7,7 +7,7 @@ p.add_argument("--out")
 p.add_argument("--species")
 args = p.parse_args()
 
-vcfh = "http://wwwuser.gwdg.de/~evolbio/evolgen/wildmouse/vcf/AllMouse.vcf_90_recalibrated_snps_raw_indels_reheader_PopSorted.PASS.vcf.gz"
+vcfh = "https://wwwuser.gwdg.de/~evolbio/evolgen/wildmouse/vcf/AllMouse.vcf_90_recalibrated_snps_raw_indels_reheader_PopSorted.PASS.vcf.gz"
 
 vcf = VCF(vcfh, gts012=True)
 
