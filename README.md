@@ -31,10 +31,10 @@ The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en
 ## Dependencies
 Make sure that these are installed and in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting. I haven't experimented with other versions, so YMMV.
 
-### Required for all pipelines
+### Common requirements for all pipelines
 * [conda (v4.9.2)](https://docs.conda.io/en/latest/)
 
-### Additional requirements if you want to generate singleton data from scratch
+### Requirements if you want to generate singleton data from scratch
 * [bedtools (v2.29.2)](https://bedtools.readthedocs.io/en/latest/)
 * [bedops (v2.4.38)](https://bedops.readthedocs.io/en/latest/)
 * [tabix (v1.10.2-125-g4162046)](http://www.htslib.org/doc/tabix.html)
@@ -42,10 +42,12 @@ Make sure that these are installed and in your system `$PATH`! Versions in paren
 * [bcftools (v1.12)](https://samtools.github.io/bcftools/bcftools.html)
 * [bgzip (v1.12)](http://www.htslib.org/doc/bgzip.html)
 
-### Additional requirements if you want to reproduce manuscript figures + analysis
+### Requirements if you want to reproduce manuscript figures + analysis
 * [perl (v5.32.1)](https://www.perl.org)
 * [pal2nal (v14)](http://www.bork.embl.de/pal2nal/#Download)
 * [SigProfilerExtractor (v1.1.3)](https://github.com/AlexandrovLab/SigProfilerExtractor)
+* [codeml](http://abacus.gene.ucl.ac.uk/software/paml.html)
+    * `codeml` is used by `ete3` for the PAML selection scans. Rather than installing `codeml` directly, I recommend using `ete3 upgrade-external-tools` to install, followed by copying the `codeml` binary from `/Users/your_username/.etetoolkit/ext_apps-latest/bin/codeml` (the default installation directory for `ete3 upgrade-external-tools`) into `/Users/your_username/opt/anaconda3/envs/figure_generation/bin/` (i.e., the `bin` directory of the `conda` installation directory created after initializing an environment below).
 
 All other `python` and `R` dependencies will be handled by `conda` before executing a pipeline. 
 

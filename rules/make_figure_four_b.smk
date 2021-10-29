@@ -45,7 +45,7 @@ rule codon_aware_aln:
 		protein = "data/ete3_data/multi_organism_mutyh_protein_alignment.reformatted.aln",
 		msa = "data/ete3_data/multi_organism_mutyh_cds.reformatted.fa",
 		pal2nal = PAL2NAL
-	output: "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.fa"
+	output: temp("data/ete3_data/multi_organism_mutyh_cds.codon_aligned.fa")
 	shell:
 		"""
 		perl {input.pal2nal} -output fasta {input.protein} {input.msa} > {output} 
@@ -55,7 +55,7 @@ rule trim_aln:
 	input: 
 		msa = "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.fa",
 		script = "py_scripts/trim_sequences.py"
-	output: "data/ete3_data/multi_organism_mutyh_cds.codon_aligned.trimmed.fa"
+	output: temp("data/ete3_data/multi_organism_mutyh_cds.codon_aligned.trimmed.fa")
 	shell:
 		"""
 		python {input.script} --msa {input.msa} -only_plot_mutyh > {output} 
