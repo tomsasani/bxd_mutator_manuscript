@@ -200,7 +200,7 @@ rule make_wild_popfiles:
 
 rule mask_ancestral_genome:
 	input:
-		ancestral_ref = "data/ref/mm10.ancestral.{chrom}.fa",
+		ancestral_ref = "data/ref/mm10.ancestral.{chrom}.fa.gz",
 		exclude = "data/unpolarizable_sites.mm10.wild.bed.gz"
 	output:
 		"data/ref/mm10.ancestral.{chrom}.ambig_polarized_masked.fa"
@@ -310,11 +310,11 @@ rule count_windowed_ca_wild_mice:
 		ref = "data/ref/mm10.fa",
 		py_script = "py_scripts/identify_windowed_ca.wild_mice.py",
 	output:
-		"csv/wild.windowed_singletons.csv"
+		"data/wild.windowed_singletons.csv"
 	shell:
 		"""
 		python {input.py_script} --ref {input.ref} \
-								--region chr4:115800000-117300000 \
+								--region chr4:114800000-118300000 \
 								--out {output} \
 								-exclude {input.exclude} \
 								-nmer 1 \
@@ -338,7 +338,7 @@ rule make_supp_figure_ten:
 rule make_supp_figure_eleven:
 	input:
 		py_script = "py_scripts/quantify_variability_cast_dom.py",
-		csv = "csv/wild.windowed_singletons.csv"
+		csv = "data/wild.windowed_singletons.csv"
 	output:
 		"plots/supp_figure_11.eps"
 	shell:
