@@ -70,7 +70,7 @@ ymx <- max(c(maxlod(out), lod_cutoff_sig))
 
 # plot LOD scores genome-wide 
 setEPS()
-fname = "plots/supp_figure_3a.eps"
+fname = "plots/supp_figure_4a.eps"
 postscript(fname, width=7, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- "green3"

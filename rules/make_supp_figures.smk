@@ -1,13 +1,30 @@
 chroms = list(map(str, range(1, 20)))
 chroms = ['chr' + c for c in chroms]
 
-rule make_supp_figure_two: 
+EXCLUDE = "data/mm10.seg_dups.simple_repeats.merged.bed.gz"
+
+rule make_supp_figure_two:
+	input: 
+		strain_metadata = "data/bam_names_to_metadata.xlsx",
+		mut_spectra = "csv/tidy_mutation_spectra.csv",
+		py_script = "py_scripts/bxd_generation_times.py"
+	output:
+		"plots/supp_figure_2a.eps",
+		"plots/supp_figure_2b.eps"
+	shell:
+		"""
+		python {input.py_script} \
+			   --strain_metadata {input.strain_metadata} \
+			   --tidy_spectra {input.mut_spectra} \
+		"""
+
+rule make_supp_figure_three: 
 	input:
 		py_script = "py_scripts/plot_conservation.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		annotated_fixed = "csv/annotated_fixed_vars.csv",
 	output:
-		"plots/supp_figure_2.eps"
+		"plots/supp_figure_3.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
@@ -15,7 +32,7 @@ rule make_supp_figure_two:
 							   --out {output} 
 		"""
 
-rule make_supp_figure_three_a:
+rule make_supp_figure_four_a:
 	input:
 		mut_rates = "csv/tidy_mutation_rates.csv",
 		qtl_rscript = "Rscripts/qtl_mapping_overall_rate.R",
@@ -24,14 +41,14 @@ rule make_supp_figure_three_a:
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 	output:
-		"plots/supp_figure_3a.eps"
+		"plots/supp_figure_4a.eps"
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
 									-p {input.mut_rates} 
 		""" 
 
-rule make_supp_figure_three_b:
+rule make_supp_figure_four_b:
 	input:
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		qtl_rscript = "Rscripts/qtl_mapping_ind_muts.R",
@@ -40,53 +57,30 @@ rule make_supp_figure_three_b:
 		qtl_gmap = "Rqtl_data/bxd.gmap",
 		qtl_pmap = "Rqtl_data/bxd.pmap",
 	output:
-		"plots/all_qtl_maps/supp_figure_3_C.T.eps",
-        "plots/all_qtl_maps/supp_figure_3_C.A.eps",
-		"plots/all_qtl_maps/supp_figure_3_C.G.eps",
-		"plots/all_qtl_maps/supp_figure_3_A.T.eps",
-		"plots/all_qtl_maps/supp_figure_3_A.G.eps",
-		"plots/all_qtl_maps/supp_figure_3_A.C.eps",
-		"plots/all_qtl_maps/supp_figure_3_CpG.TpG.eps" 
+		"plots/all_qtl_maps/supp_figure_4_C.T.eps",
+		"plots/all_qtl_maps/supp_figure_4_C.A.eps",
+		"plots/all_qtl_maps/supp_figure_4_C.G.eps",
+		"plots/all_qtl_maps/supp_figure_4_A.T.eps",
+		"plots/all_qtl_maps/supp_figure_4_A.G.eps",
+		"plots/all_qtl_maps/supp_figure_4_A.C.eps",
+		"plots/all_qtl_maps/supp_figure_4_CpG.TpG.eps" 
 	shell:
 		"""
 		Rscript {input.qtl_rscript} -j {input.qtl_json} \
 									-p {input.mut_spectra}
 		""" 
 
-rule make_supp_figure_four_a:
-	input:
-		py_script = "py_scripts/mutation_rates_by_haplotype.py",
-		mut_spectra = "csv/tidy_mutation_spectra.csv"
-	output:
-		"plots/supp_figure_4a.eps"
-	shell:
-		"""
-		python {input.py_script} --tidy_spectra {input.mut_spectra} \
-							   --out {output} 
-		"""
-
-rule make_supp_figure_four_b:
-	input:
-		py_script = "py_scripts/mutation_rates_by_inbreeding_time.py",
-		mut_spectra = "csv/tidy_mutation_spectra.csv"
-	output:
-		"plots/supp_figure_4b.eps"
-	shell:
-		"""
-		python {input.py_script} --tidy_spectra {input.mut_spectra} \
-							   --out {output} 
-		"""
 tissues = ["amygdala", "hematopoietic_stem_cells", "kidney",
-		   "liver", "retina", "spleen"]
+		   "liver", "retina", "gastrointestinal"]
 
-rule make_supp_figure_four:
+rule make_supp_figure_five:
 	input:
 		py_script = "py_scripts/mutyh_expression_in_tissues.py",
 		strain_metadata = "data/bam_names_to_metadata.xlsx",
 		mut_spectra = "csv/tidy_mutation_spectra.csv",
 		expression_data = expand("data/gene_network_expression/{tissue}_rnaseq.csv", tissue=tissues)
 	output:
-		"plots/supp_figure_4.eps"
+		"plots/supp_figure_5.eps"
 	shell:
 		"""
 		python {input.py_script} --strain_metadata {input.strain_metadata} \
@@ -95,41 +89,11 @@ rule make_supp_figure_four:
 		"""
 
 
-rule make_supp_figure_five_a:
-	input:
-		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
-		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
-	output:
-		"plots/supp_figure_5a.eps"
-	shell:
-		"""
-		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output} \
-							   --sig_name SBS36_mm10
-		"""
-
-rule make_supp_figure_five_b:
-	input:
-		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
-		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
-	output:
-		"plots/supp_figure_5b.eps"
-	shell:
-		"""
-		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
-						 	   --cosmic_signature {input.cosmic_sig} \
-							   --out {output} \
-							   --sig_name SBS18_mm10
-		"""
-
 rule make_supp_figure_six_a:
 	input:
-		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
+		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_6a.eps"
 	shell:
@@ -138,13 +102,13 @@ rule make_supp_figure_six_a:
 						 	   --cosmic_signature {input.cosmic_sig} \
 							   --out {output} \
 							   --sig_name SBS36_mm10
-
 		"""
+
 rule make_supp_figure_six_b:
 	input:
-		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
+		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
 	output:
 		"plots/supp_figure_6b.eps"
 	shell:
@@ -155,38 +119,68 @@ rule make_supp_figure_six_b:
 							   --sig_name SBS18_mm10
 		"""
 
-rule make_supp_figure_six_c:
+rule make_supp_figure_seven_a:
+	input:
+		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS36.csv",
+	output:
+		"plots/supp_figure_7a.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS36_mm10
+
+		"""
+rule make_supp_figure_seven_b:
+	input:
+		py_script = "py_scripts/compare_signatures_BXD68_COSMIC.py",
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
+	output:
+		"plots/supp_figure_7b.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS18_mm10
+		"""
+
+rule make_supp_figure_seven_c:
 	input:
 		py_script = "py_scripts/compare_signatures_BXD68_TOYKO.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		ohno_data = "data/41598_2014_BFsrep04689_MOESM2_ESM.xls",
 	output:
-		"plots/supp_figure_6c.eps"
+		"plots/supp_figure_7c.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 						 	   --ohno_data {input.ohno_data} \
 							   --out {output} 
 		"""
-rule make_supp_figure_six_d:
+rule make_supp_figure_seven_d:
 	input:
 		py_script = "py_scripts/compare_signatures_BXD68_OR.py",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 	output:
-		"plots/supp_figure_6d.eps"
+		"plots/supp_figure_7d.eps"
 	shell:
 		"""
 		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
 							   --out {output}
 		"""
 
-rule make_supp_figure_seven:
+rule make_supp_figure_eight:
 	input:
 		dumont_xls = "data/SuppTables_concat.xlsx",
 		annotated_singletons = "csv/annotated_singleton_vars.csv",
 		py_script = "py_scripts/compare_mgp_spectra_3mer.py"
 	output:
-		"plots/supp_figure_7.eps"
+		"plots/supp_figure_8.eps"
 	shell:
 		"""
 		python {input.py_script} --dumont_xls {input.dumont_xls} \
@@ -207,7 +201,7 @@ rule make_wild_popfiles:
 rule mask_ancestral_genome:
 	input:
 		ancestral_ref = "data/ref/mm10.ancestral.{chrom}.fa",
-		exclude = "data/BEDFILEOFEXCLUDEDSITES.amibiguousPolarizing.0based.bed.gz"
+		exclude = "data/unpolarizable_sites.mm10.wild.bed.gz"
 	output:
 		"data/ref/mm10.ancestral.{chrom}.ambig_polarized_masked.fa"
 	shell:
@@ -264,74 +258,104 @@ rule generate_mutyper_sfs:
 		 """
 
 
-rule plot_wild_sfs:
+rule make_supp_figure_nine:
 	input:
 		py_script = "py_scripts/plot_ca_sfs.py",
 		ksfs_files = expand("data/mutyper_output/ksfs.{chrom}.{species}.txt", 
 							species=["Mmd", "Ms", "Mmm", "Mmc",], chrom=["chr4"],)
 	output:
-		"plots/supp_figure_8.eps"
+		"plots/supp_figure_9.eps"
 	shell:
 		"""
 		python {input.py_script} --wild_sfs {input.ksfs_files} --out {output}
 		"""
 
-
-rule identify_fixed_differences:
+rule get_sigprofiler_spectra:
 	input:
-		exclude = "data/mm10.seg_dups.simple_repeats.merged.bed.gz",
-		py_script = "py_scripts/identify_fixed_diffs_b6_d2.py",
-		ref = "data/ref/mm10.fa"
+		py_script = "py_scripts/make_spectra_file_for_sig_profiler.py",
+		singleton_vars = "csv/annotated_singleton_vars.csv",
 	output:
-		"csv/fixed_diffs/fixed_differences_d2_b6_{chrom}.csv"
+		"csv/matrix4sigprofiler.txt"
+	shell:
+		"""
+		python {input.py_script} --singleton_vars {input.singleton_vars} \
+								 --out {output}
+		"""
+
+rule initialize_sigprofiler:
+	input:
+	output: "data/sigprof_initialized_confirmation.txt"
+	run:
+		from SigProfilerMatrixGenerator import install as genInstall
+		genInstall.install('mm10')
+
+		shell("echo done >> {output}")
+	
+rule run_sigprofiler:
+	input:
+		py_script = "py_scripts/run_sigprofiler.py",
+		spectra = "csv/matrix4sigprofiler.txt",
+		conf = "data/sigprof_initialized_confirmation.txt"
+	output:
+		"data/sigprofiler_outdir/"
+	shell:
+		"""
+		python {input.py_script} --spectra {input.spectra} \
+								 --outdir {output}
+		"""
+
+rule count_windowed_ca_wild_mice:
+	input:
+		exclude = EXCLUDE,
+		ref = "data/ref/mm10.fa",
+		py_script = "py_scripts/identify_windowed_ca.wild_mice.py",
+	output:
+		"csv/wild.windowed_singletons.csv"
 	shell:
 		"""
 		python {input.py_script} --ref {input.ref} \
-								 --chrom {wildcards.chrom} \
-								 --out {output} \
-								 -exclude {input.exclude}
+								--region chr4:115800000-117300000 \
+								--out {output} \
+								-exclude {input.exclude} \
+								-nmer 1 \
+								-min_dp 10 \
+								-min_gq 20
 		"""
 
-# rule concatenate_fixed_vars:
-# 	input:
-# 		expand("csv/fixed_diffs/fixed_differences_d2_b6_{chrom}.csv")#, chrom=["4"])#chrom=list(map(str, range(1, 20))))
-# 	output:
-# 		"csv/fixed_diffs/fixed_differences_d2_b6_combined.csv"
-# 	shell:
-# 		"""
-# 		cat {input} > {output}
-# 		"""
-
-rule count_rare_ca:
+rule make_supp_figure_ten:
 	input:
-		exclude = "data/mm10.seg_dups.simple_repeats.merged.bed.gz",
-		py_script = "py_scripts/count_rare_ca_vars_wild_mice.py",
-		ref = "data/ref/mm10.fa",
-		fixed_vars = "csv/fixed_diffs/fixed_differences_d2_b6_{chrom}.csv"
-
+		py_script = "py_scripts/compare_spectra_wild.py",
+		singleton_vars = expand("data/singleton_vars/{chrom}_singleton_vars.wild_mice.exclude.csv", chrom=chroms),
 	output:
-		"csv/rare_ca_muts/lenient/rare_ca_mutations_wild.{chrom}.csv"
+		"plots/supp_figure_10a.eps",
+		"plots/supp_figure_10b.eps",
+		"plots/supp_figure_10c.eps"
 	shell:
 		"""
-		python py_scripts/count_rare_ca_vars_wild_mice.py --ref {input.ref} \
-								 --fixed_vars {input.fixed_vars} \
-								 --out {output} \
-								 --chrom {wildcards.chrom} \
-								 -nmer 1 \
-								 -min_dp 1 \
-								 -min_gq 1 \
-								 -exclude {input.exclude}
+		python {input.py_script} --wild_singleton_vars {input.singleton_vars}
 		"""
 
-
-rule make_supp_figure_eight_b:
+rule make_supp_figure_eleven:
 	input:
-		counts = expand("csv/rare_ca_muts/lenient/rare_ca_mutations_wild.{chrom}.csv", chrom=list(map(str, range(1, 20)))),
-		py_script = "py_scripts/plot_rare_ca_variants.py"
+		py_script = "py_scripts/quantify_variability_cast_dom.py",
+		csv = "csv/wild.windowed_singletons.csv"
 	output:
-		"plots/supp_figure_8b.eps"
+		"plots/supp_figure_11.eps"
 	shell:
 		"""
-		python {input.py_script} --variants {input.counts} \
-								 --out {output}
+		python {input.py_script} --windowed_vars {input.csv} \
+								 --out {output} 
+		"""
+
+rule intersect_fixed_svs:
+	input:
+		svs = "data/sv_files/structural_variants.fixed_d2_b6_differences.mgp.bed",
+		gtf = "data/sv_files/gencode.mm10.genes.gtf"
+	output:
+		"data/sv_files/exons_overlapping_svs.bed"
+	shell:
+		"""
+		grep exon {input.gtf} | \
+		bedtools intersect -a - -b {input.svs} | \
+		cut -f 9 | cut -d ';' -f 2 | cut -d '"' -f 2 > {output}
 		"""

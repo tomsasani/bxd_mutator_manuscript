@@ -36,7 +36,7 @@ mut2idx = dict(zip(muts, range(len(muts))))
 # for every comparison of domesticus to the other wild strains,
 # generate heatmaps comparing mutation fractions
 for combo, fig_name in zip((["Mmd", "Mmm"], ["Mmd", "Mmc"], ["Mmd", "Ms"]),
-                           ("figure_5a", "figure_5b", "figure_5c")):
+                           ("supp_figure_10a", "supp_figure_10b", "supp_figure_10c")):
 
     a_lab, b_lab = combo
 

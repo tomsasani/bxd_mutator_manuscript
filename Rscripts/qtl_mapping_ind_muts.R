@@ -91,7 +91,7 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # plot LOD scores genome-wide 
     setEPS()
-    fname = sprintf("plots/all_qtl_maps/supp_figure_3_%s.eps", formatted_mut_type)
+    fname = sprintf("plots/all_qtl_maps/supp_figure_4_%s.eps", formatted_mut_type)
     
     postscript(fname, width=10, height=5)
     par(mar=c(4.1, 4.1, 1.6, 1.1))

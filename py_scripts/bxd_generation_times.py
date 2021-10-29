@@ -50,7 +50,7 @@ sns.stripplot(
 
 sns.despine(trim=True, ax=ax)
 ax.set_ylabel("Generation time (years)")
-f.savefig("plots/response_figures/response_figure_1.eps")
+f.savefig("plots/supp_figure_2a.eps")
 
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
@@ -83,4 +83,4 @@ ax.set_xlim(0.15, 0.75)
 ax.set_xlabel("Generation time (years)")
 ax.set_ylabel("C" + r"$\rightarrow$" + "A singleton fraction")
 
-f.savefig("plots/response_figures/response_figure_2.eps")
+f.savefig("plots/supp_figure_2b.eps")

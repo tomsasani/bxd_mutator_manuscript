@@ -11,7 +11,6 @@ p.add_argument(
 args = p.parse_args()
 
 spectra = pd.read_csv(args.tidy_mutation_spectra)
-#smp2hap = dict(zip(spectra.bxd_strain_conv, spectra.haplotype_at_qtl))
 
 activ = pd.read_csv(args.sig_profiler_activities, sep='\t')
 activ['has_sbs18'] = activ['SBS18'].apply(lambda s: int(s) > 0)
@@ -22,10 +21,9 @@ activ['has_sbs30'] = activ['SBS30'].apply(lambda s: int(s) > 0)
 
 merged = activ.merge(spectra, left_on="Samples", right_on="bxd_strain_conv")
 merged = merged.query("estimate_type == 'fraction' and base_mut == 'C>A'")
-#activ['haplotype_at_qtl'] = activ['Samples'].apply(lambda s: smp2hap[s])
 merged['predicted_to_have_sbs18'] = merged['haplotype_at_qtl'].apply(lambda h: h == "D")
 
-print (merged.groupby('has_sbs18').size())
+print (merged.groupby('has_sbs18').size()) 
 
 print (merged.groupby(['haplotype_at_qtl', 'has_sbs18']).size())
 

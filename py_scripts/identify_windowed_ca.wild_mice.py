@@ -148,7 +148,7 @@ def run(args):
     region_s, region_e = args.region.split(':')[-1].split('-')
     region_s, region_e = int(region_s), int(region_e)
 
-    window_size = 500000
+    window_size = 50000 
     windows = np.arange(region_s, region_e, window_size)
 
     out_df = []
@@ -235,16 +235,12 @@ def run(args):
                     anc2gts[ii] = np.sum(anc_gts)
                     ii += 1
 
-
                 # skip this site if more than one sample in a
                 # subspecies has an ALT genotype
                 # i.e., only look at singletons
                 if np.sum(anc2gts) == 0: continue
-                #if not np.all(anc2gts <= 1): continue
-                #print (str(v),)
-
-                #print (anc2gts)
-                #print (good_smps_with_mut)
+                #if np.sum(anc2gts) > 5: continue
+                if not np.all(anc2gts <= 1): continue
 
                 out_a[good_smps_with_mut, kmer_idx] += 1
 

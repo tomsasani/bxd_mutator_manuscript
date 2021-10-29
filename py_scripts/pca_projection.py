@@ -189,7 +189,7 @@ ax2.set_xlabel("PC1 ({}%)".format(round(100 * exp_var[0]), 4), fontsize=18)
 ax2.set_ylabel("PC2 ({}%)".format(round(100 * exp_var[1]), 3), fontsize=18)
 
 #ax1.legend(handles=legend_elements, fontsize=12)
-ax1.legend(fontsize=12, frameon=False)
+ax1.legend(fontsize=16, frameon=False)
 
 f.tight_layout()
 
