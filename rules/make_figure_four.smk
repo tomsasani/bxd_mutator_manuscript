@@ -23,12 +23,12 @@ rule make_figure_four_a2:
 									--out {output}
 		"""
 
-rule make_figure_four_d:
+rule make_figure_four_c:
 	input:
 		dumont_xls = "data/SuppTables_concat.xlsx",
 		py_script = "py_scripts/compare_mgp_spectra.py"
 	output:
-		"plots/figure_4d.eps"
+		"plots/figure_4c.eps"
 	shell:
 		"""
 		python {input.py_script} --dumont_xls {input.dumont_xls} \
