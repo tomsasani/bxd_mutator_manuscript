@@ -67,11 +67,12 @@ novar = ['C57BL_10J', 'C57BL_6NJ', 'C57BR_cdJ', 'C57L_J', 'C58_J', 'KK_HiJ',
 cat2strain = {'D-like': withvar_all, 'intermediate': withvar_some, 
                 'I_LnJ': loner, 'B-like': novar}
 
-f, ax = plt.subplots(figsize=(8, 4))
+f, ax = plt.subplots(figsize=(6, 4))
 
 sns.set_style('ticks')
 
 colors = sns.color_palette('colorblind', 3)
+colors = ['royalblue', 'lightsteelblue', 'gainsboro']
 
 # plot mutation fractions in each of the three categories
 x_adj = -0.25
@@ -97,6 +98,10 @@ ax.set_ylabel('Fraction of strain-private mutations', fontsize=16)
 
 ax.set_xticks(np.arange(6))
 ax.set_xticklabels([m.replace('>', r'$\to$') for m in mut2idx], fontsize=16)
+
+plt.setp(ax.spines.values(), linewidth=1.5)
+ax.xaxis.set_tick_params(width=1.5)
+ax.yaxis.set_tick_params(width=1.5)
 
 sns.despine(ax=ax, top=True, right=True)
 
@@ -180,5 +185,5 @@ for cat in [("D-like", "intermediate"), ("intermediate", "B-like"), ("D-like", "
     _,p,_,_ = ss.chi2_contingency([[a_fore, b_fore], [a_back, b_back]])
 
     print (cat, p)
-        
+
 f.savefig(args.out, bbox_inches='tight')

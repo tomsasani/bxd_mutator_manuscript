@@ -79,6 +79,11 @@ for site_idx, site in enumerate(set(variants['site'])):
     # get a list of samples that share this variant
     smps_sharing = shared_vars['bxd_strain_conv'].values
 
+    # get a list of haplotypes in the samples that share this variant
+    haps_shared = shared_vars['haplotype'].values
+    # and require all samples have the same haplotype
+    if not len(set(haps_shared)) == 1: continue
+
     # increment the site x sample matrix by 1 for each
     # sample at this site
     for smp in smps_sharing:

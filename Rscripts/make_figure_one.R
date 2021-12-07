@@ -47,7 +47,7 @@ f1a <- ggplot(tidy_rates) +
     theme_cowplot() +
     labs(x="Number of generations of inbreeding",
             y="Number of homozygous singletons") +
-    scale_fill_manual(values=cbPalette)
+    scale_fill_manual(values=cbPalette) 
 
 ggsave("plots/figure_1a.eps", f1a, width=6, height=4)
 

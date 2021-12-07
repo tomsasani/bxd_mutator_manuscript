@@ -41,6 +41,7 @@ windows = df.region.unique()
 # loop over all of the mutations 
 for i, mut in enumerate(df.kmer.unique()):
     xs, ys = defaultdict(list), defaultdict(list)
+    sig_xs = defaultdict(list)
     gts = []
     # loop over all of the windows
     for window, window_df in df.groupby("region"):
@@ -64,7 +65,8 @@ for i, mut in enumerate(df.kmer.unique()):
         # type is enriched in one genotype class vs the other
         _, p, _, _ = ss.chi2_contingency(conting)
 
-        if p < 0.05: print (mut, window, p)
+        if p  < 0.05 / df.region.shape[0]: 
+            sig_xs[g].append(pos)
 
         # loop over the genotypes and add to the x/y value 
         # dictionaries for each
@@ -76,11 +78,16 @@ for i, mut in enumerate(df.kmer.unique()):
     for gi, g in enumerate(xs):
         #axarr[i].scatter(xs[g], ys[g], color=colors[gi], ec='k', label=g)
         axarr[i].plot(xs[g], ys[g], color=colors[gi], label=g, lw=2)
+    for gi, g in enumerate(sig_xs):
+        #axarr[i].scatter(xs[g], ys[g], color=colors[gi], ec='k', label=g)
+        for xpos in sig_xs[g]:
+            axarr[i].axvline(x=xpos, color='red', ls=":")
 
+    axarr[i].axvline(x=116807723, color='grey', label="Mutyh coding sequence\n(start position)")
     axarr[i].set_title(mut)
     axarr[i].legend()
     axarr[i].set_xlabel("Position on chromosome 4")
-    axarr[i].set_ylabel("Mutation fraction")
+    axarr[i].set_ylabel("Singleton mutation fraction")
 
 f.tight_layout()
 f.savefig(args.out)

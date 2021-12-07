@@ -115,7 +115,7 @@ toyko_wide = toyko.groupby('kmer').count().add_suffix('_count').reset_index()
 toyko_total = np.sum(toyko_wide[colname + '_count'])
 toyko_wide['frac'] = toyko_wide[colname + '_count'] / toyko_total
 
-f, ax = plt.subplots(figsize=(8,8))
+f, ax = plt.subplots(figsize=(8,6))
 
 sns.set_style('ticks')
 
@@ -139,7 +139,7 @@ for mut in ca_mut2idx:
 
     # manual adjustments so that text annotations look OK
     mut2format = {"TCT>TAT": (10, 30),
-                  "TCA>TAA": (-40, 40),
+                  "TCA>TAA": (-90, 40),
                   "TCC>TAC": (-40, 20),
                   "GCA>GAA": (-42, -50),
                   "GCT>GAT": (-60, 50),
@@ -161,7 +161,7 @@ for mut in ca_mut2idx:
         color = "firebrick"
         sig_counted += 1
 
-    ax.scatter(x, y, color=color, s=200, edgecolor=edgecolor)
+    ax.scatter(x, y, color=color, s=100, edgecolor=edgecolor)
 
     if pvals[idx] < 0.05 / 96:
         text = mut
@@ -177,11 +177,16 @@ for mut in ca_mut2idx:
                     textcoords='offset points', zorder=0)
 
 ax.set_ylabel('Fraction of de novo germline\nmutations in TOY-KO mice', fontsize=18)
-ax.set_xlabel('Log-2 ratio of ' + r'C$\to$A' + ' singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
+ax.set_xlabel('Enrichments of ' + r'C$\to$A' + ' singleton fractions\nin lines with D vs. B haplotypes at QTL', fontsize=18)
+
+plt.setp(ax.spines.values(), linewidth=2)
+ax.tick_params(axis='both', which='major', labelsize=20)
+ax.xaxis.set_tick_params(width=2)
+ax.yaxis.set_tick_params(width=2)
 
 sns.despine(ax=ax, top=True, right=True)
 print (ss.spearmanr(a, b))
-slope, intercept, r_value, p_value, std_err = ss.linregress(a, b)
-print (p_value)
+
+f.tight_layout()
 f.savefig(args.out, bbox_inches='tight')
 

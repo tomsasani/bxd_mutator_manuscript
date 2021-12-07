@@ -1,9 +1,22 @@
-rule make_figure_four_c:
+rule make_figure_four_a1:
+	input:
+		wild_mutyh_vars = "data/wild.mutyh_genotypes.csv",
+		py_script = "py_scripts/make_mutyh_grid.py"
+	output:
+		"plots/figure_4a1.eps",
+	shell:
+		"""
+		python {input.py_script} --strain_vars {input.wild_mutyh_vars} \
+									--out {output} \
+									-is_wild
+		"""
+
+rule make_figure_four_a2:
 	input:
 		mgp_mutyh_vars ="data/mgp.mutyh_genotypes.csv",
 		py_script = "py_scripts/make_mutyh_grid.py"
 	output:
-		"plots/figure_4c.eps"
+		"plots/figure_4a2.eps"
 	shell:
 		"""
 		python {input.py_script} --strain_vars {input.mgp_mutyh_vars} \
@@ -20,17 +33,4 @@ rule make_figure_four_d:
 		"""
 		python {input.py_script} --dumont_xls {input.dumont_xls} \
 									--out {output}
-		"""
-		
-rule make_figure_four_a:
-	input:
-		wild_mutyh_vars = "data/wild.mutyh_genotypes.csv",
-		py_script = "py_scripts/make_mutyh_grid.py"
-	output:
-		"plots/figure_4a.eps",
-	shell:
-		"""
-		python {input.py_script} --strain_vars {input.wild_mutyh_vars} \
-									--out {output} \
-									-is_wild
 		"""

@@ -131,11 +131,11 @@ pca = PCA()
 X_new = pca.fit_transform(X)
 
 strains = set(y)
-strain2color = {"D": "slateblue",
-                "DBA_2J": "slateblue",
-                "B": "lightgreen",
-                "C57BL_6NJ": "lightgreen",
-                "intermediate": "cornflowerblue"}
+strain2color = {"D": "firebrick",
+                "DBA_2J": "firebrick",
+                "B": "cornflowerblue",
+                "C57BL_6NJ": "cornflowerblue",
+                "intermediate": "gainsboro"}
 
 labels = [r'C$\to$A', r'C$\to$T', r'C$\to$G', r'A$\to$T', r'A$\to$C', r'A$\to$G']
 
@@ -185,11 +185,20 @@ for i in range(coef.shape[0]):
 
 ax2.set_ylim(ymin + (ymin / 2), ymax + (ymax / 2))
 ax2.set_xlim(xmin + (xmin / 2), xmax + (xmax / 2))
-ax2.set_xlabel("PC1 ({}%)".format(round(100 * exp_var[0]), 4), fontsize=18)
-ax2.set_ylabel("PC2 ({}%)".format(round(100 * exp_var[1]), 3), fontsize=18)
+ax2.set_xlabel("PC1 ({}%)".format(round(100 * exp_var[0]), 4), fontsize=24)
+ax2.set_ylabel("PC2 ({}%)".format(round(100 * exp_var[1]), 3), fontsize=24)
 
 #ax1.legend(handles=legend_elements, fontsize=12)
 ax1.legend(fontsize=16, frameon=False)
+
+
+for ax in (ax1, ax2):
+    plt.setp(ax.spines.values(), linewidth=2)
+    ax.tick_params(axis='both', which='major', labelsize=24)
+    ax.xaxis.set_tick_params(width=2)
+    ax.yaxis.set_tick_params(width=2)
+    #sns.despine(ax=ax, top=True, right=True)
+
 
 f.tight_layout()
 

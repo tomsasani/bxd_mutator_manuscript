@@ -111,7 +111,7 @@ cosmic = cosmic.sort_values('kmer_idx')
 cosmic_components = cosmic[args.sig_name].values
 
 # make figure object
-f, ax = plt.subplots(figsize=(6,8))
+f, ax = plt.subplots(figsize=(8,6))
 
 sns.set_style('ticks')
 
@@ -120,6 +120,8 @@ mut2c = dict(zip(base_muts, colors))
 
 edgecolors = ['k' if pvals[i] < 0.05 / 96 else 'w' 
                     for i in np.arange(pvals.shape[0])]
+
+a, b = [], []
 
 for mut in mut2idx:
 
@@ -131,10 +133,11 @@ for mut in mut2idx:
     nuc_a = mut.split('>')[0][1]
     nuc_b = mut.split('>')[1][1]
     base_mut = "{}>{}".format(nuc_a, nuc_b)
-    c = mut2c[base_mut]
+    if base_mut != "C>A": continue
+    c = "grey"
 
     ec = 'w'
-    s = 100
+    s = 125
     if pvals[idx] < 0.05 / 96: ec = 'k'
 
     # manual adjustments so that text annotations look OK
@@ -143,12 +146,13 @@ for mut in mut2idx:
                   "TCC>TAC": (-40, 20),
                   "GCA>GAA": (-42, 50),
                   "GCT>GAT": (5, 20),
-                  "CCA>CAA": (-40, -60),
+                  "CCA>CAA": (-110, -10),
                   "CCT>CAT": (5, -35)}
 
     if pvals[idx] < 0.05 / 96:
         ec = 'k'
         text = mut
+        c = "cornflowerblue"
         try:
             xytext = mut2format[text]
         except KeyError: continue
@@ -160,16 +164,22 @@ for mut in mut2idx:
                     headwidth=0.1, headlength=0.2, lw=0.5),
                     textcoords='offset points', zorder=0)
     ax.scatter(x, y, edgecolor=ec, s=s, color=c)
+    a.append(x)
+    b.append(y)
 
-# create custom legend
-legend_elements = [Patch(facecolor=mut2c[mut], edgecolor='w', label=mut) for mut in mut2c]
-ax.legend(handles=legend_elements, frameon=False, 
-            fontsize=16)
+ax.set_ylabel('Fraction of COSMIC\n{} signature'.format(args.sig_name.split('_')[0]), fontsize=20)
+ax.set_xlabel('Enrichments of ' + r'C$\to$A' + ' singleton fractions\nin lines with D vs. B haplotypes at QTL', fontsize=20)
 
-ax.set_ylabel('Fraction of COSMIC {} signature'.format(args.sig_name.split('_')[0]), fontsize=18)
-ax.set_xlabel('Log-2 ratio of singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
+plt.setp(ax.spines.values(), linewidth=2)
+ax.tick_params(axis='both', which='major', labelsize=22)
+ax.xaxis.set_tick_params(width=2)
+ax.yaxis.set_tick_params(width=2)
+
+print (a, b)
+print (ss.spearmanr(a, b))
+
 
 sns.despine(ax=ax, top=True, right=True)
-
+f.tight_layout()
 f.savefig(args.out, bbox_inches='tight')
 
