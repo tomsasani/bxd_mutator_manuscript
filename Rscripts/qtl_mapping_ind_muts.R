@@ -72,10 +72,10 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # perform a permutation test to assess significance
     operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
-                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
+                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
     
     operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
-                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
+                            addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
     
     # get the LOD threshold for a < 0.05
     lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]
@@ -91,7 +91,7 @@ for (mut_type in c("C>A", "C>T", "C>G", "A>T", "A>G", "A>C", "CpG>TpG"))
     
     # plot LOD scores genome-wide 
     setEPS()
-    fname = sprintf("plots/all_qtl_maps/supp_figure_3_%s.eps", formatted_mut_type)
+    fname = sprintf("plots/all_qtl_maps/supp_figure_4_%s.eps", formatted_mut_type)
     
     postscript(fname, width=10, height=5)
     par(mar=c(4.1, 4.1, 1.6, 1.1))

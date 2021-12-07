@@ -45,6 +45,8 @@ args = p.parse_args()
 # read in the mutation file
 singleton = pd.read_csv(args.annotated_singletons)
 
+smp2hap = dict(zip(singleton.bxd_strain_conv, singleton.haplotype_at_qtl))
+
 # columns to group the singletons by
 group_cols = ["bxd_strain_conv", 
               "bxd_strain",
@@ -87,7 +89,18 @@ smp_sums['l_n'] = smp_sums['n_inbreeding_gens'].apply(lambda n: calc_new_gens(n)
 smp_sums['rate'] = smp_sums['total_muts'] / (smp_sums['l_n'] * smp_sums['n_callable_bp'])
 smp2sum = dict(zip(smp_sums['bxd_strain_conv'], smp_sums['total_muts']))
 
-print ("Mean mutation rate across strains is {}".format(np.mean(smp_sums['rate'])))
+mean_mutation_rate = np.mean(smp_sums['rate'])
+stderr_mutation_rate = ss.sem(smp_sums['rate'])
+print ("Mean mutation rate across strains is {} (95% CI = {} - {})".format(mean_mutation_rate, 
+                                                                            mean_mutation_rate - (2 * stderr_mutation_rate),
+                                                                            mean_mutation_rate + (2 * stderr_mutation_rate)))
+d_smps = [s for s in smp2hap if smp2hap[s] == "D"]
+b_smps = [s for s in smp2hap if smp2hap[s] == "B"]
+
+mean_d_mutation_rate = np.mean(smp_sums[smp_sums['bxd_strain_conv'].isin(d_smps)].rate)
+mean_b_mutation_rate = np.mean(smp_sums[smp_sums['bxd_strain_conv'].isin(b_smps)].rate)
+
+print ("Strains with D haplotypes accumulate mutations at {} the rate".format(mean_d_mutation_rate / mean_b_mutation_rate))
 
 df_wide['total_muts'] = df_wide['bxd_strain_conv'].apply(lambda s: smp2sum[s])
 
@@ -133,6 +146,23 @@ df_wide.replace(to_replace=np.inf, value=0, inplace=True)
 df_tidy = df_wide.melt(id_vars=group_cols[:-1], var_name="estimate_type", value_name="estimate")
 
 df_tidy = df_tidy.query('estimate_type != "total_muts"')
+
+
+
+print (df_tidy.query('estimate_type == "count"').groupby('base_mut').sum().reset_index())
+
+for hap in ["D", "B"]:
+    sub_df = df_tidy.query("haplotype_at_qtl == @hap & base_mut == 'C>A' & estimate_type == 'rate'")
+    
+    mean_mutation_rate = np.mean(sub_df['estimate'])
+    stderr_mutation_rate = ss.sem(sub_df['estimate'])
+
+    print ("Mean C>A mutation rate across strains with {} haps is {} (95% CI = {} - {})".format(hap,
+                                                                            mean_mutation_rate, 
+                                                                            mean_mutation_rate - (2 * stderr_mutation_rate),
+                                                                            mean_mutation_rate + (2 * stderr_mutation_rate)))
+
+
 
 # output the tidy dataframe with info about individual mutation types
 df_tidy.to_csv("csv/tidy_mutation_spectra.csv", index=False)

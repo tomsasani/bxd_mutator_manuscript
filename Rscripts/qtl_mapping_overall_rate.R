@@ -60,7 +60,7 @@ out <- scan1(pr, phenotype_rate, kinship=k,
 
 # perform a permutation test to assess significance
 operm <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig = summary(operm, alpha=0.05 / 15)[1]
@@ -70,7 +70,7 @@ ymx <- max(c(maxlod(out), lod_cutoff_sig))
 
 # plot LOD scores genome-wide 
 setEPS()
-fname = "plots/supp_figure_3a.eps"
+fname = "plots/supp_figure_4a.eps"
 postscript(fname, width=7, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
 color <- "green3"

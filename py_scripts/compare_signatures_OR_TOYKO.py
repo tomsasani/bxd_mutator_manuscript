@@ -60,6 +60,13 @@ singleton_tidy = singleton_tidy[group_cols]
 # by the two unique values that the `subset_key` column can take on
 subset_0 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "B"]['chrom_count'].values
 subset_1 = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "D"]['chrom_count'].values
+muts_b = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "B"]["kmer"].values
+muts_d = singleton_tidy[singleton_tidy["haplotype_at_qtl"] == "D"]["kmer"].values
+
+assert np.array_equal(muts_b, muts_d)
+
+# get a mapping of each mutation type to a corresponding index
+mut2idx = dict(zip(muts_b, range(len(muts_b))))
 
 # convert counts in the subsets to fractions
 subset_0_fracs = subset_0 / np.sum(subset_0)
@@ -69,7 +76,8 @@ subset_1_fracs = subset_1 / np.sum(subset_1)
 # the two subsets
 pvals = np.ones(subset_0.shape[0], dtype=np.float64)
 
-for i in np.arange(subset_0.shape[0]):
+for mut in mut2idx:
+    i = mut2idx[mut]
     a_fore, b_fore = subset_0[i], subset_1[i]
     a_back = np.sum(subset_0) - a_fore
     b_back = np.sum(subset_1) - b_fore
@@ -82,12 +90,8 @@ for i in np.arange(subset_0.shape[0]):
 ratios = subset_1_fracs / subset_0_fracs
 log_ratios = np.log2(ratios)
 
-# get a mapping of each mutation type to a corresponding index
-uniq_kmers = list(pd.unique(singleton_tidy['kmer']))
-mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))
-
 # get a list of the 6 "base" mutation types in the signature
-base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in uniq_kmers]
+base_muts = ['>'.join([m.split('>')[0][1], m.split('>')[1][1]]) for m in muts_b]
 base_muts = base_muts[::16]
 
 # read in the TOY-KO signature
@@ -111,29 +115,31 @@ toyko_wide = toyko.groupby('kmer').count().add_suffix('_count').reset_index()
 toyko_total = np.sum(toyko_wide[colname + '_count'])
 toyko_wide['frac'] = toyko_wide[colname + '_count'] / toyko_total
 
-f, ax = plt.subplots(figsize=(8,8))
+f, ax = plt.subplots(figsize=(8,6))
 
 sns.set_style('ticks')
 
-ind = np.arange(len(mut2idx))
+ca_mut2idx = {k:v for k,v in mut2idx.items() if k[1] == "C" and k[5] == "A"}
+ind = np.arange(len(ca_mut2idx))
 
 # get number of significantly enriched mutation types in the BXD
 n_sig = np.where(pvals < 0.05 / 96)[0].shape[0]
 
-colors = sns.color_palette('colorblind', n_sig)
-
 sig_counted = 0
 
-for mut in mut2idx:
+a, b = [], []
+
+for mut in ca_mut2idx:
     toyko_sub = toyko_wide[toyko_wide['kmer'] == mut]
-    if toyko_sub.shape[0] == 0: continue
-    toyko_frac = toyko_sub['frac'].values[0]
+    if toyko_sub.shape[0] == 0: 
+        toyko_frac = 0.
+    else: toyko_frac = toyko_sub['frac'].values[0]
 
     idx = mut2idx[mut]
 
     # manual adjustments so that text annotations look OK
     mut2format = {"TCT>TAT": (10, 30),
-                  "TCA>TAA": (-40, 40),
+                  "TCA>TAA": (-90, 40),
                   "TCC>TAC": (-40, 20),
                   "GCA>GAA": (-42, -50),
                   "GCT>GAT": (-60, 50),
@@ -142,6 +148,9 @@ for mut in mut2idx:
 
     x = log_ratios[mut2idx[mut]]
     y = toyko_frac
+
+    a.append(x)
+    b.append(y)
 
     edgecolor = "w"
     label = None
@@ -152,7 +161,7 @@ for mut in mut2idx:
         color = "firebrick"
         sig_counted += 1
 
-    ax.scatter(x, y, color=color, s=200, edgecolor=edgecolor)
+    ax.scatter(x, y, color=color, s=100, edgecolor=edgecolor)
 
     if pvals[idx] < 0.05 / 96:
         text = mut
@@ -168,9 +177,16 @@ for mut in mut2idx:
                     textcoords='offset points', zorder=0)
 
 ax.set_ylabel('Fraction of de novo germline\nmutations in TOY-KO mice', fontsize=18)
-ax.set_xlabel('Log-2 ratio of ' + r'C$\to$A' + ' singleton fractions\nin strains with D vs. B haplotypes at QTL', fontsize=18)
+ax.set_xlabel('Enrichments of ' + r'C$\to$A' + ' singleton fractions\nin lines with D vs. B haplotypes at QTL', fontsize=18)
+
+plt.setp(ax.spines.values(), linewidth=2)
+ax.tick_params(axis='both', which='major', labelsize=20)
+ax.xaxis.set_tick_params(width=2)
+ax.yaxis.set_tick_params(width=2)
 
 sns.despine(ax=ax, top=True, right=True)
+print (ss.spearmanr(a, b))
 
+f.tight_layout()
 f.savefig(args.out, bbox_inches='tight')
 

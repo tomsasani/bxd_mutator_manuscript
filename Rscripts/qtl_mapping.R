@@ -4,6 +4,7 @@ library(cowplot)
 library(dplyr)
 library(optparse)
 library(tidyr)
+library(RNOmni)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
@@ -16,6 +17,18 @@ opt = parse_args(opt_parser)
 # phenotypes, and covariates
 bxd <- read_cross2(opt$json)
 
+# read in the phenotype values for each BXD strain
+phen_df = read.csv(opt$phenotype_file, header=T)
+
+# and further subset to only include the relevant mutation type
+phen_df_sub = subset(phen_df, base_mut == "C>A")
+
+# get the phenotype as a CLR fraction
+phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
+
+# subset cross2 object to include relevant BXDs
+bxd = bxd[phen_df_sub_frac$bxd_strain_conv, ]
+
 # insert pseudomarkers into the genotype map
 # following lines are from https://kbroman.org/pages/teaching.html
 gmap <- insert_pseudomarkers(bxd$gmap, step=0.2, stepwidth='max')
@@ -25,12 +38,6 @@ pmap <- interp_map(gmap, bxd$gmap, bxd$pmap)
 # (error_prob taken directly from R/qtl2 user guide)
 pr <- calc_genoprob(bxd, gmap, error_prob=0.002, map_function="c-f")
 
-# read in the phenotype values for each BXD strain
-phen_df = read.csv(opt$phenotype_file, header=T)
-
-# and further subset to only include the relevant mutation type
-phen_df_sub = subset(phen_df, base_mut == "C>A")
-
 # calculate kinship between strains using the
 # "leave one chromosome out" method
 k = calc_kinship(pr, 'loco')
@@ -38,9 +45,13 @@ k = calc_kinship(pr, 'loco')
 # get special covariates for the X
 Xcovar <- get_x_covar(bxd)
 
-# get the phenotype as a CLR fraction
-phen_df_sub_frac = subset(phen_df_sub, estimate_type == "clr_fraction")
-phen_matrix_frac = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
+# calculate variance explained
+m = lm(estimate ~ haplotype_at_qtl, data=subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462"))
+af <- anova(m)
+afss <- af$"Sum Sq"
+print(cbind(af,PctExp=afss/sum(afss)*100))
+
+phen_matrix_frac = as.matrix(RankNorm(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
 
 phenotype_frac = as.matrix(phen_matrix_frac[,1])
 strain_names = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
@@ -72,12 +83,14 @@ out_rate <- scan1(pr, phenotype_rate, kinship=k,
 out_frac <- scan1(pr, phenotype_frac, kinship=k, 
                   addcovar=covariate_matrix, Xcovar=Xcovar)
 
+write.csv(out_frac, 'out.csv')
+
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
 
 operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
-                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
+                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]
@@ -104,11 +117,11 @@ setEPS()
 fname = "plots/figure_2a.eps"
 postscript(fname, width=7, height=4)
 par(mar=c(4.1, 4.1, 1.6, 1.1))
-color <- c("green3", "slateblue")
+color <- c("firebrick", "cornflowerblue")
 plot(out_rate, pmap, lodcolumn=1, col=color[1], ylim=c(0, ymx_frac*1.05))
 plot(out_frac, pmap, lodcolumn=1, col=color[2], ylim=c(0, ymx_frac*1.05), add=T)
-abline(h=lod_cutoff_sig_frac, col='slateblue', lwd=2, lty=2)
-abline(h=lod_cutoff_sig_rate, col='green3', lwd=2, lty=2)
+abline(h=lod_cutoff_sig_frac, col='firebrick', lwd=2, lty=2)
+abline(h=lod_cutoff_sig_rate, col='cornflowerblue', lwd=2, lty=2)
 
 legend("topright", lwd=2, col=color, c("C>A rate", "C>A fraction"), bg="gray90", lty=c(1,1,2))
 
@@ -116,15 +129,14 @@ dev.off()
 
 # plot a zoomed in version of the LOD peaks on chr4
 setEPS()
-fname = "plots/figure_2b.eps"
-postscript(fname, width=4, height=4)
+fname = "plots/figure_2a_inset.eps"
+postscript(fname, width=4, height=3.5, bg="gray93")
 par(mar=c(4.1, 4.1, 1.6, 1.1))
-color <- c("green3", "slateblue")
+color <- c("firebrick", "cornflowerblue")
 plot(out_rate, pmap$`4`, lodcolumn=1, col=color[1], ylim=c(0, ymx_frac*1.05))
 plot(out_frac, pmap$`4`, lodcolumn=1, col=color[2], ylim=c(0, ymx_frac*1.05), add=T)
-abline(h=lod_cutoff_sig_frac, col='slateblue', lwd=2, lty=2)
-abline(h=lod_cutoff_sig_rate, col='green3', lwd=2, lty=2)
-title(xlab="Position on chr4 (Mbp)")
+abline(h=lod_cutoff_sig_frac, col='firebrick', lwd=2, lty=2)
+abline(h=lod_cutoff_sig_rate, col='cornflowerblue', lwd=2, lty=2)
 dev.off()
 
 # find the maximum LOD peak
@@ -152,12 +164,12 @@ names(g_new_frac) = inner_join(p_frac, g_frac)$strain
 p_new_frac = inner_join(p_frac, g_frac)$fraction
 names(p_new_frac) = inner_join(p_frac, g_frac)$strain
 
-setEPS()
-fname = "plots/figure_2c.eps"
-postscript(fname, width=4, height=4)
-plot_pxg(g_new_frac, p_new_frac, SEmult=2, 
-         ylab="C>A singleton mutation fraction",
-         xlab="Founder haplotype background")
-dev.off()
+# setEPS()
+# fname = "plots/figure_2c.eps"
+# postscript(fname, width=4, height=4)
+# plot_pxg(g_new_frac, p_new_frac, SEmult=2, col='black', bg="grey",
+#          ylab="C>A singleton mutation fraction",
+#          xlab="Founder haplotype background")
+# dev.off()
 
 

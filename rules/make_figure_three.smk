@@ -25,3 +25,18 @@ rule make_figure_three_b:
 						 	   --ohno_data {input.ohno_data} \
 							   --out {output}
 		"""
+
+rule make_figure_three_c:
+	input:
+		annotated_singletons = "csv/annotated_singleton_vars.csv",
+		cosmic_sig = "data/sigProfiler_SBS_signatures_SBS18.csv",
+		py_script = "py_scripts/compare_signatures_OR_COSMIC.py"
+	output:
+		"plots/figure_3c.eps"
+	shell:
+		"""
+		python {input.py_script} --annotated_singletons {input.annotated_singletons} \
+						 	   --cosmic_signature {input.cosmic_sig} \
+							   --out {output} \
+							   --sig_name SBS18_mm10
+		"""

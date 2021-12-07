@@ -64,18 +64,19 @@ novar = ['C57BL_10J', 'C57BL_6NJ', 'C57BR_cdJ', 'C57L_J', 'C58_J', 'KK_HiJ',
          'NZB_B1NJ', 'NZO_HILtJ', 'NZW_LacJ', 'SEA_GnJ']
 
 # map strains to the "category" of Mutyh mutations they belong to
-cat2strain = {'DBA-like': withvar_all, 'intermediate': withvar_some, 
-                'I_LnJ': loner, 'C57-like': novar}
+cat2strain = {'D-like': withvar_all, 'intermediate': withvar_some, 
+                'I_LnJ': loner, 'B-like': novar}
 
-f, ax = plt.subplots(figsize=(8, 4))
+f, ax = plt.subplots(figsize=(6, 4))
 
 sns.set_style('ticks')
 
 colors = sns.color_palette('colorblind', 3)
+colors = ['royalblue', 'lightsteelblue', 'gainsboro']
 
 # plot mutation fractions in each of the three categories
 x_adj = -0.25
-for cat_i,cat in enumerate(("DBA-like", "intermediate", "C57-like")):
+for cat_i,cat in enumerate(("D-like", "intermediate", "B-like")):
 
     idxs = np.array([smp2idx[s] for s in cat2strain[cat] if s in smp2idx])
 
@@ -98,11 +99,15 @@ ax.set_ylabel('Fraction of strain-private mutations', fontsize=16)
 ax.set_xticks(np.arange(6))
 ax.set_xticklabels([m.replace('>', r'$\to$') for m in mut2idx], fontsize=16)
 
+plt.setp(ax.spines.values(), linewidth=1.5)
+ax.xaxis.set_tick_params(width=1.5)
+ax.yaxis.set_tick_params(width=1.5)
+
 sns.despine(ax=ax, top=True, right=True)
 
 # compare spectra between strains with different
 # configurations of Mutyh mutations
-for cat in [("DBA-like", "intermediate"), ("intermediate", "C57-like"), ("DBA-like", "C57-like")]:
+for cat in [("D-like", "intermediate"), ("intermediate", "B-like"), ("D-like", "B-like")]:
 
     a, b = cat
 
@@ -180,5 +185,5 @@ for cat in [("DBA-like", "intermediate"), ("intermediate", "C57-like"), ("DBA-li
     _,p,_,_ = ss.chi2_contingency([[a_fore, b_fore], [a_back, b_back]])
 
     print (cat, p)
-        
+
 f.savefig(args.out, bbox_inches='tight')

@@ -81,7 +81,7 @@ interval2mut = dict(zip(intervals, ["p.Gln5Arg",
                                    "p.Arg24Cys",
                                    "p.Ser69Arg",
                                    "p.Thr312Pro",
-                                   "p.Thr313Pro"]))
+                                   "p.Ser313Pro"]))
 
 # convert dataframe into `out_a` array of
 # samples by genotypes
