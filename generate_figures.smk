@@ -20,21 +20,17 @@ include: "rules/make_main_bxd_paper_figs.smk"
 
 # pseudo-rule to collect all output figures
 main_figures = ["1a", "1b", 
-				"2a", "2b", "2c", 
-				"2d",
-				"3a", "3b",
-				"4a", "4c", "4d"]
+				"2a", "2a_inset", "2b", "2c", 
+				"3a", "3b", "3c",
+				"4a1", "4a2", "4c"]
 
 supp_figures = ["2a", "2b",
 				"3",
 				"4a",
 				"5",
-				"6a", "6b",
-				"7a", "7b", "7c", "7d",
-				"8",
-				"9",
-				"10a", "10b", "10c"]
-				#"11"]
+				"6",
+				"7a", "7b", "7c",
+				"8"]
 
 
 rule all:

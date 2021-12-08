@@ -83,8 +83,6 @@ out_rate <- scan1(pr, phenotype_rate, kinship=k,
 out_frac <- scan1(pr, phenotype_frac, kinship=k, 
                   addcovar=covariate_matrix, Xcovar=Xcovar)
 
-write.csv(out_frac, 'out.csv')
-
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
                    addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
