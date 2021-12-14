@@ -1,6 +1,6 @@
 # A wild-derived antimutator drives germline mutation spectrum differences in a genetically diverse murine family
 
-*Thomas A. Sasani, David G. Ashbrook, Lu Lu, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
+*Thomas A. Sasani, David G. Ashbrook, Annabel C. Beichman, Lu Lu, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
 
 :mouse: --> :dna: --> :bar_chart:
 
