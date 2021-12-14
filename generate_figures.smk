@@ -20,76 +20,76 @@ include: "rules/make_main_bxd_paper_figs.smk"
 
 # pseudo-rule to collect all output figures
 main_figures = ["1a", "1b", 
-				"2a", "2a_inset", "2b", "2c", 
-				"3a", "3b", "3c",
-				"4a1", "4a2", "4c"]
+                "2a", "2a_inset", "2b", "2c", 
+                "3a", "3b", "3c",
+                "4a1", "4a2", "4c"]
 
 supp_figures = ["2a", "2b",
-				"3",
-				"4a",
-				"5",
-				"6",
-				"7a", "7b", "7c",
-				"8"]
+                "3",
+                "4a",
+                "5",
+                "6",
+                "7a", "7b", "7c",
+                "8"]
 
 
 rule all:
-	input:
-		# generate all of the main and supplementary figures
-		expand("plots/figure_{fig_num}.eps", fig_num=main_figures),
-		expand("plots/supp_figure_{fig_num}.eps", fig_num=supp_figures),
-		"plots/ashbrook/epoch_sharing_heatmap.eps",
-		"plots/ashbrook/figure_1a.eps",
-		"plots/ashbrook/figure_1b.eps",
-		"plots/figure_4b.pdf",
-		# we generate supplementary figure 3 a little differently, since it
-		# comprises a sub-panel for every mutation type
-		expand("plots/all_qtl_maps/supp_figure_4_{mut_type}.eps", 
-						mut_type = [m.replace('>', '.') for m in muts]),
-		
+    input:
+        # generate all of the main and supplementary figures
+        expand("plots/figure_{fig_num}.eps", fig_num=main_figures),
+        expand("plots/supp_figure_{fig_num}.eps", fig_num=supp_figures),
+        "plots/ashbrook/epoch_sharing_heatmap.eps",
+        "plots/ashbrook/figure_1a.eps",
+        "plots/ashbrook/figure_1b.eps",
+        "plots/figure_4b.pdf",
+        # we generate supplementary figure 3 a little differently, since it
+        # comprises a sub-panel for every mutation type
+        expand("plots/all_qtl_maps/supp_figure_4_{mut_type}.eps", 
+                        mut_type = [m.replace('>', '.') for m in muts]),
+        
 
 rule annotate_vars:
-	input: 
-		var_list = expand("data/{{var_type}}_vars/{chrom}_{{var_type}}_vars.exclude.csv", chrom=chroms),
-		strain_metadata = "data/bam_names_to_metadata.xlsx",
-		strain_callable_bp = "data/callable_bp.per_sample.csv",
-		annotate_py = "py_scripts/annotate_vars.py",
-		qtl_geno = "Rqtl_data/bxd.geno.new"
-	output:
-		"csv/annotated_{var_type}_vars.csv"
-	shell:
-		"""
-		python {input.annotate_py} \
-			   --var_list {input.var_list} \
-			   --strain_genotypes {input.qtl_geno} \
-			   --strain_metadata {input.strain_metadata} \
-			   --callable_bp {input.strain_callable_bp} \
-			   --out {output}
-		"""
+    input: 
+        var_list = expand("data/{{var_type}}_vars/{chrom}_{{var_type}}_vars.exclude.csv", chrom=chroms),
+        strain_metadata = "data/bam_names_to_metadata.xlsx",
+        strain_callable_bp = "data/callable_bp.per_sample.csv",
+        annotate_py = "py_scripts/annotate_vars.py",
+        qtl_geno = "Rqtl_data/bxd.geno.new"
+    output:
+        "csv/annotated_{var_type}_vars.csv"
+    shell:
+        """
+        python {input.annotate_py} \
+               --var_list {input.var_list} \
+               --strain_genotypes {input.qtl_geno} \
+               --strain_metadata {input.strain_metadata} \
+               --callable_bp {input.strain_callable_bp} \
+               --out {output}
+        """
 
 rule generate_tidy_data:
-	input:
-		annotated_singletons = "csv/annotated_singleton_vars.csv",
-		tidy_data_py = "py_scripts/make_tidy_data.py"
-	output:
-		mut_rates = "csv/tidy_mutation_rates.csv",
-		mut_spectra = "csv/tidy_mutation_spectra.csv"
-	shell:
-		"""
-		python {input.tidy_data_py} \
-			   --annotated_singleton {input.annotated_singletons} 
-		"""
+    input:
+        annotated_singletons = "csv/annotated_singleton_vars.csv",
+        tidy_data_py = "py_scripts/make_tidy_data.py"
+    output:
+        mut_rates = "csv/tidy_mutation_rates.csv",
+        mut_spectra = "csv/tidy_mutation_spectra.csv"
+    shell:
+        """
+        python {input.tidy_data_py} \
+               --annotated_singleton {input.annotated_singletons} 
+        """
 
 rule calculate_callable_bp:
-	input:
-		py_script = "py_scripts/calculate_callable_bp.py",
-		coverage_fhs = expand("data/coverage_files/{sample}.bam.thresholds.bed", sample=samples),
-		exclude = "data/mm10.seg_dups.simple_repeats.merged.bed.gz"
-	output:
-		"data/callable_bp.per_sample.csv"
-	shell:
-		"""
-		python {input.py_script} --coverage_files {input.coverage_fhs} \
-								 --exclude {input.exclude} \
-								 --out {output}
-		"""
+    input:
+        py_script = "py_scripts/calculate_callable_bp.py",
+        coverage_fhs = expand("data/coverage_files/{sample}.bam.thresholds.bed", sample=samples),
+        exclude = "data/mm10.seg_dups.simple_repeats.merged.bed.gz"
+    output:
+        "data/callable_bp.per_sample.csv"
+    shell:
+        """
+        python {input.py_script} --coverage_files {input.coverage_fhs} \
+                                 --exclude {input.exclude} \
+                                 --out {output}
+        """
