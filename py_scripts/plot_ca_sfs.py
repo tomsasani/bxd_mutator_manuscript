@@ -6,8 +6,17 @@ import argparse
 import numpy as np
 
 p = argparse.ArgumentParser()
-p.add_argument("--wild_sfs", nargs="*")
-p.add_argument("--out")
+p.add_argument(
+    "--wild_sfs",
+    nargs="*",
+    required=True,
+    help="""paths to wild SFS files""",
+)
+p.add_argument(
+    "--out",
+    required=True,
+    help="""name of output file""",
+)
 args = p.parse_args()
 
 species = [a.split('.')[-2] for a in args.wild_sfs]
@@ -26,7 +35,7 @@ for si, species_name in enumerate(species):
         df = pd.read_csv(sfs, sep='\t')
         if mut2idx is None:
             mut2idx = dict(zip(list(df)[1:], range(len(list(df)[1:]))))
-            ac = df.values[:,0]
+            ac = df.values[:, 0]
             af = ac / np.max(ac)
         mut_counts = df.values[:, 1:]
         if out_a is None:

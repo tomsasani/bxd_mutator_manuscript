@@ -11,24 +11,31 @@ from scipy.stats import contingency
 from singleton_calling_utils import *
 import matplotlib.pyplot as plt
 import seaborn as sns
-from codon_table import codons
 from pyfaidx import Fasta
 import scipy.stats as ss
 
-ref = Fasta("/Users/tomsasani/harrislab/bxd_mutator_ms/data/ref/mm10.fa")
+p = argparse.ArgumentParser()
+p.add_argument("--ref", required=True,
+            help="""path to mm10 reference genome""")
+p.add_argument("--vcf", required=True,
+            help="""path to BXD VCF annotated with SnpEff""")
+p.add_argument("--exons", required=True,
+            help="""path to gencode file containing exons of Mutyh in gtf format""")
+args = p.parse_args()
 
-codons = {k.replace('U', 'T'):v for k,v in codons.items()}
+ref = Fasta(args.ref)
 
-mutyh_exons = pd.read_csv("/Users/tomsasani/Downloads/mutyh.exons.gencode.txt", sep='\t').head(1)
+mutyh_exons = pd.read_csv(args.exons, sep='\t').head(1)
 
-exon_starts, exon_ends = mutyh_exons.exonStarts.values[0].split(','), mutyh_exons.exonEnds.values[0].split(',')
+exon_starts, exon_ends = mutyh_exons.exonStarts.values[0].split(
+    ','), mutyh_exons.exonEnds.values[0].split(',')
 
 exon_positions = zip(exon_starts, exon_ends)
 
 # -----------
 # read in VCF
 # -----------
-vcf = VCF("/Users/tomsasani/harrislab/bxd_mutator_ms/vcf/wild.100.120.snpeff.vcf.gz", gts012=True)
+vcf = VCF(args.vcf, gts012=True)
 
 # ------------
 # define some global variables that will come in handy
@@ -52,7 +59,7 @@ pos2mut = defaultdict()
 pos2cons = defaultdict()
 
 for s, e in list(exon_positions)[:-1]:
-    
+
     window = "chr4:{}-{}".format(s, e)
 
     vcf_h = vcf(window)
@@ -124,14 +131,14 @@ for s, e in list(exon_positions)[:-1]:
                 anc_idxs = np.array(anc2idx[anc])
                 anc_good_idxs = np.intersect1d(good_idxs, anc_idxs)
                 anc_gts = gts_reformatted[anc_good_idxs]
-                if np.sum(anc_gts) == 0: 
+                if np.sum(anc_gts) == 0:
                     anc2state[anc] = "no_mutation"
                 elif np.sum(anc_gts) == anc_idxs.shape[0] * 2:
                     anc2state[anc] = "fixed"
                 else:
                     anc2state[anc] = "polymorphic"
-            
-            if any([v == "polymorphic" for k,v in anc2state.items()]): 
+
+            if any([v == "polymorphic" for k,v in anc2state.items()]):
                 pos2mut[v.POS] = "polymorphic"
             elif all([(v == "fixed" or v == "no_mutation") for k,v in anc2state.items()]):
                 pos2mut[v.POS] = "fixed"
@@ -154,8 +161,3 @@ for pos in pos2mut:
 contingency_table = [[fixed_s, fixed_ns], [poly_s, poly_ns]]
 print (contingency_table)
 print (ss.fisher_exact(contingency_table))
-
-
-# https://nov2020.archive.ensembl.org/Mus_musculus/Transcript/Exons?db=core;g=ENSMUSG00000028687;r=4:116807723-116819431;t=ENSMUST00000102699
-
-# https://nov2020.archive.ensembl.org/Mus_musculus/Transcript/Sequence_cDNA?db=core;g=ENSMUSG00000028687;r=4:116807723-116819431;t=ENSMUST00000102699

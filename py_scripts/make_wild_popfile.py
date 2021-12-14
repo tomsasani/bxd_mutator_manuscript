@@ -3,8 +3,16 @@ from collections import defaultdict
 import argparse
 
 p = argparse.ArgumentParser()
-p.add_argument("--out")
-p.add_argument("--species")
+p.add_argument(
+    "--out",
+    required=True,
+    help="""name of output file""",
+)
+p.add_argument(
+    "--species",
+    required=True,
+    help="""species name to generate file for""",
+)
 args = p.parse_args()
 
 vcfh = "https://wwwuser.gwdg.de/~evolbio/evolgen/wildmouse/vcf/AllMouse.vcf_90_recalibrated_snps_raw_indels_reheader_PopSorted.PASS.vcf.gz"
@@ -23,4 +31,4 @@ for smp in smp2idx:
 outfh = open(args.out, "w")
 for s in smp2anc:
     if smp2anc[s] != args.species: continue
-    print (s, file=outfh)
+    print(s, file=outfh)

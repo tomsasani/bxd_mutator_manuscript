@@ -175,13 +175,6 @@ for i in range(coef.shape[0]):
     if t_x > xmax: xmax = t_x 
     if t_x < xmin: xmin = t_x 
 
-#legend_elements = [Patch(facecolor=c, edgecolor='k',
-#                         label=m) for m,c in strain2color.items()]
-
-#legend_elements = [Line2D([0], [0], color='slateblue', marker='x', label='D2 haplotype'),
-#                   Line2D([0], [0], color='slateblue', marker='o', label='DBA/2J-like'),
-#                   Line2D([0], [0], color='lightgreen', marker='x', label='B6 haplotype'),
-#                   Line2D([0], [0], color='lightgreen', marker='o', label='C57BL/6NJ-like')]
 
 ax2.set_ylim(ymin + (ymin / 2), ymax + (ymax / 2))
 ax2.set_xlim(xmin + (xmin / 2), xmax + (xmax / 2))

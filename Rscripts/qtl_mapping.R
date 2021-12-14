@@ -70,7 +70,7 @@ phen_df_sub_frac$is_ail[phen_df_sub_frac$n_intercross_gens == 0] <- 0
 phen_df_sub_frac$is_ail[phen_df_sub_frac$n_intercross_gens > 0] <- 1
 
 # get covariates
-covariate_cols = c("n_intercross_gens", "is_ail", "epoch")
+covariate_cols = c("n_intercross_gens", "epoch")
 covariate_matrix = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")[covariate_cols])
 rownames(covariate_matrix) = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
 

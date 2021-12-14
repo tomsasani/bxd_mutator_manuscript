@@ -3,16 +3,26 @@ import argparse
 from figure_gen_utils import make_interval_tree
 
 p = argparse.ArgumentParser()
-p.add_argument('--coverage_files', required=True, nargs="*",
-                help="""list of paths to sample threshold BED files""")
-p.add_argument('--exclude', required=True,
-                help="""path to file containing regions we want to mask""")
-p.add_argument('--out', required=True,
-                help="""path to output file""")
+p.add_argument(
+    '--coverage_files',
+    required=True,
+    nargs="*",
+    help="""list of paths to sample threshold BED files""",
+)
+p.add_argument(
+    '--exclude',
+    required=True,
+    help="""path to file containing regions we want to mask""",
+)
+p.add_argument(
+    '--out',
+    required=True,
+    help="""path to output file""",
+)
 args = p.parse_args()
 
 outfh = open(args.out, "w")
-print (",".join(["sample", "autosomal_callable_bp"]), file=outfh)
+print(",".join(["sample", "autosomal_callable_bp"]), file=outfh)
 
 exclude = make_interval_tree(args.exclude)
 
@@ -36,7 +46,8 @@ for fh in args.coverage_files:
 
             # figure out how much of this interval overlaps the masked regions
             exclude_overlaps = exclude[chrom].search(int(start), int(end))
-            exclude_overlap_sum = sum([e.end - e.start for e in exclude_overlaps])
+            exclude_overlap_sum = sum(
+                [e.end - e.start for e in exclude_overlaps])
 
             # get the fraction of bases masked in this interval
             # (i.e., in seg dups or simple repeats)
@@ -52,8 +63,4 @@ for fh in args.coverage_files:
             #if sample == "4512-JFI-0354_BXD199_phased_possorted_bam":
             #    print (chrom, start, end, exclude_overlap_sum, interval_size, tenx)
 
-    print (",".join([sample, str(total_bp_callable)]), file=outfh)
-
-        
-        
-        
+    print(",".join([sample, str(total_bp_callable)]), file=outfh)

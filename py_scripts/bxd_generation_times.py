@@ -6,19 +6,30 @@ import numpy as np
 import argparse
 
 p = argparse.ArgumentParser()
-p.add_argument("--tidy_spectra")
-p.add_argument("--strain_metadata")
+p.add_argument(
+    "--tidy_spectra",
+    required=True,
+    help="""tidy dataframe containing BXD mutation spectra""",
+)
+p.add_argument(
+    "--strain_metadata",
+    required=True,
+    help="""metadata about strains in Excel format.""",
+)
 args = p.parse_args()
 
 tidy_spectra = pd.read_csv(args.tidy_spectra)
-tidy_fracs = tidy_spectra.query('estimate_type == "fraction" & base_mut == "C>A"')
+tidy_fracs = tidy_spectra.query(
+    'estimate_type == "fraction" & base_mut == "C>A"')
 
 # read in strain metadata and construct relevant dictionaries that
 # map sample names to metadata
 summary = pd.read_excel(args.strain_metadata)
 
 # convert verbose filial generations to integer numbers of generations in the file
-summary['gen_at_seq'] = summary['Generation at sequencing'].apply(get_generation)
+summary['gen_at_seq'] = summary['Generation at sequencing'].apply(
+    get_generation)
+
 
 def calculate_years_per_gen(row):
     gens = row['gen_at_seq']
@@ -27,6 +38,7 @@ def calculate_years_per_gen(row):
         years_of_breeding = 2017 - int(row['Year breeding started'])
         years_per_gen = years_of_breeding / int(gens)
         return years_per_gen
+
 
 summary['years_per_gen'] = summary.apply(calculate_years_per_gen, axis=1)
 
@@ -56,17 +68,20 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
 # Ordinary Least Squares (OLS) model
-model = ols('years_per_gen ~ C(Epoch)', data=summary.query("years_per_gen != -1")).fit()
+model = ols('years_per_gen ~ C(Epoch)',
+            data=summary.query("years_per_gen != -1")).fit()
 anova_table = sm.stats.anova_lm(model, typ=2)
 
-print (np.mean(summary.query("years_per_gen != -1").years_per_gen))
-print (anova_table)
+print(np.mean(summary.query("years_per_gen != -1").years_per_gen))
+print(anova_table)
 
 strain2gentime = dict(zip(summary['bam_name'], summary['years_per_gen']))
-tidy_fracs['years_per_gen'] = tidy_fracs['bxd_strain'].apply(lambda b: strain2gentime[b])
-model = ols('estimate ~ years_per_gen + C(epoch)', data=tidy_fracs.query("years_per_gen != -1")).fit()
+tidy_fracs['years_per_gen'] = tidy_fracs['bxd_strain'].apply(
+    lambda b: strain2gentime[b])
+model = ols('estimate ~ years_per_gen + C(epoch)',
+            data=tidy_fracs.query("years_per_gen != -1")).fit()
 anova_table = sm.stats.anova_lm(model, typ=2)
-print (anova_table)
+print(anova_table)
 
 f, ax = plt.subplots()
 

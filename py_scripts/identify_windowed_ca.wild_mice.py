@@ -1,15 +1,13 @@
 import numpy as np
 import argparse
-import re
-from collections import defaultdict, Counter
+from collections import defaultdict
 from cyvcf2 import VCF
 from mutyper.ancestor import Ancestor
 import itertools
 import doctest
 import pandas as pd
 from singleton_calling_utils import *
-import matplotlib.pyplot as plt
-import seaborn as sns
+
 
 def revcomp(seq):
     """
@@ -23,20 +21,20 @@ def revcomp(seq):
 	'TCG'
 	"""
 
-    rc_nuc = {'A':'T', 'C':'G', 'T':'A', 'G':'C'}
+    rc_nuc = {'A': 'T', 'C': 'G', 'T': 'A', 'G': 'C'}
 
     seq_rev = seq[::-1]
     seq_rev_comp = ''.join([rc_nuc[n] for n in list(seq_rev)])
 
     return seq_rev_comp
 
+
 def count_mutations(k):
     """
 	generate a list of all possible kmer mutations
 	"""
 
-    nmers = [''.join(x) for x in itertools.product('ATCG',
-       repeat=k)]
+    nmers = [''.join(x) for x in itertools.product('ATCG', repeat=k)]
 
     expanded_muts = []
 
@@ -63,6 +61,7 @@ def count_mutations(k):
         expanded_rc_uniq.append(mut)
 
     return expanded_rc_uniq
+
 
 def levenshtein(s1, s2):
     """
@@ -91,6 +90,7 @@ def levenshtein(s1, s2):
         previous_row = current_row
 
     return previous_row[-1]
+
 
 def run(args):
 
@@ -148,7 +148,7 @@ def run(args):
     region_s, region_e = args.region.split(':')[-1].split('-')
     region_s, region_e = int(region_s), int(region_e)
 
-    window_size = 50000 
+    window_size = 50000
     windows = np.arange(region_s, region_e, window_size)
 
     out_df = []
@@ -159,9 +159,10 @@ def run(args):
         out_a = np.zeros((len(smp2idx), len(mut2idx)), dtype=np.int64)
         window = "chr4:{}-{}".format(region_start, region_start + window_size)
         vcf_h = vcf(window)
-        for i,v in enumerate(vcf_h):
+        for i, v in enumerate(vcf_h):
             # check if the current variant is in the exclude file
-            if exclude and len(exclude[v.CHROM].search(v.start, v.end)) > 0: continue
+            if exclude and len(exclude[v.CHROM].search(v.start, v.end)) > 0:
+                continue
             if v.var_type != "snp": continue
             if '*' in v.ALT: continue
             if len(v.REF) > 1: continue
@@ -187,14 +188,14 @@ def run(args):
                 alt_gt = alt_idx + 1
                 # access sample genotypes, excluding boolean flag indicating
                 # whether sample is phased
-                gts = np.array(v.genotypes)[:,:-1]
+                gts = np.array(v.genotypes)[:, :-1]
                 gts_reformatted = reformat_genotypes(gts, alt_gt=alt_gt)
 
                 # the index of the reference allele is always 0
                 ref_idx = 0
                 # access ref and alt depths
-                rd = v.format('AD')[:,ref_idx]
-                ad = v.format('AD')[:,alt_idx + 1]
+                rd = v.format('AD')[:, ref_idx]
+                ad = v.format('AD')[:, alt_idx + 1]
                 rd[rd < 0] = 0
                 ad[ad < 0] = 0
 
@@ -204,24 +205,26 @@ def run(args):
                 # get a list of sample indices that meet quality thresholds
                 # e.g., non-UNK, DP>=10, GQ>=20
                 good_idxs = get_good_idxs(
-                 gts_reformatted,
-                 gq,
-                 td,
-                 min_dp=args.min_dp,
-                 min_gq=args.min_gq,
+                    gts_reformatted,
+                    gq,
+                    td,
+                    min_dp=args.min_dp,
+                    min_gq=args.min_gq,
                 )
 
                 if good_idxs.shape[0] == 0: continue
 
                 # get the mutation context for this sites using mutyper if it's a SNP
                 # otherwise, we'll just report the kmer is an "indel"
-                kmer = ancestor.mutation_type(v.CHROM, v.start, ref_allele, alt_allele)
+                kmer = ancestor.mutation_type(v.CHROM, v.start, ref_allele,
+                                              alt_allele)
                 if None in kmer: kmer = "N>N"
                 else: kmer = '>'.join(list(kmer))
                 if kmer == "N>N": continue
                 kmer_idx = mut2idx[kmer]
 
-                smps_with_mut = np.where((gts_reformatted == 1) | (gts_reformatted == 2))[0]
+                smps_with_mut = np.where((gts_reformatted == 1)
+                                         | (gts_reformatted == 2))[0]
                 good_smps_with_mut = np.intersect1d(smps_with_mut, good_idxs)
 
                 # determine the number of samples in each subspecies with
@@ -230,7 +233,8 @@ def run(args):
                 ii = 0
                 for anc in anc2idx:
                     anc_idxs = np.array(anc2idx[anc])
-                    anc_good_idxs = np.intersect1d(good_smps_with_mut, anc_idxs)
+                    anc_good_idxs = np.intersect1d(good_smps_with_mut,
+                                                   anc_idxs)
                     anc_gts = gts_reformatted[anc_good_idxs]
                     anc2gts[ii] = np.sum(anc_gts)
                     ii += 1
@@ -254,14 +258,13 @@ def run(args):
                 total = np.sum(out_a[s_i])
                 frac = count / total
                 out_df.append({
-                 "kmer": mut_type,
-                 "region": window,
-                 "count": count,
-                 "frac": frac,
-                 "sample": samp_name,
-                 "total": total,
+                    "kmer": mut_type,
+                    "region": window,
+                    "count": count,
+                    "frac": frac,
+                    "sample": samp_name,
+                    "total": total,
                 })
-
 
     df = pd.DataFrame(out_df)
 
@@ -272,19 +275,42 @@ if __name__ == "__main__":
     doctest.testmod()
     p = argparse.ArgumentParser()
     p.add_argument('--vcf')
-    p.add_argument('--ref', required=True,
-      help="path to reference genome")
-    p.add_argument('--region', required=True,
-      help='region to limit analysis')
-    p.add_argument('--out', required=True,
-      help='name of output file')
-    p.add_argument('-min_dp', default=10, type=int,
-      help='minimum depth required of singletons (default = 10)')
-    p.add_argument('-min_gq', default=20, type=int,
-      help='minimum genotype quality required of singletons (default = 20)')
-    p.add_argument('-nmer', default=3, type=int,
-      help='length of k-mers we want to catalog (default = 3)')
-    p.add_argument('-exclude',
-      help='path to BED of regions to exclude')
+    p.add_argument(
+        '--ref',
+        required=True,
+        help="path to reference genome",
+    )
+    p.add_argument(
+        '--region',
+        required=True,
+        help='region to limit analysis',
+    )
+    p.add_argument(
+        '--out',
+        required=True,
+        help='name of output file',
+    )
+    p.add_argument(
+        '-min_dp',
+        default=10,
+        type=int,
+        help='minimum depth required of singletons (default = 10)',
+    )
+    p.add_argument(
+        '-min_gq',
+        default=20,
+        type=int,
+        help='minimum genotype quality required of singletons (default = 20)',
+    )
+    p.add_argument(
+        '-nmer',
+        default=3,
+        type=int,
+        help='length of k-mers we want to catalog (default = 3)',
+    )
+    p.add_argument(
+        '-exclude',
+        help='path to BED of regions to exclude',
+    )
     args = p.parse_args()
     run(args)

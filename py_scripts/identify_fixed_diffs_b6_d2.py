@@ -1,10 +1,7 @@
 import tabix
 import numpy as np
-import gzip
-import csv
 import argparse
 from cyvcf2 import VCF
-from mutyper.ancestor import Ancestor
 import doctest
 from singleton_calling_utils import *
 
@@ -14,7 +11,6 @@ def run(args):
     # read in VCF
     # -----------
     vcf = VCF("ftp://ftp-mouse.sanger.ac.uk/current_snps/mgp.v5.merged.snps_all.dbSNP142.vcf.gz", gts012=True)
-    #vcf = VCF(args.vcf, gts012=True)
 
     # ------------
     # define some global variables that will come in handy
@@ -118,7 +114,7 @@ def run(args):
             # make sure D2 and B6 are opposite homozygotes
             if not np.abs(gts_reformatted[d2_idx] - gts_reformatted[b6_idx]) == 2: continue
 
-            outvals = [v.CHROM, v.POS, gts_reformatted[b6_idx], gts_reformatted[d2_idx]]
+            outvals = [v.CHROM, v.POS, gts_reformatted[b6_idx], gts_reformatted[d2_idx],]
 
             print (','.join(list(map(str, outvals))), file=outcsvfh)
 
@@ -126,19 +122,19 @@ if __name__ == "__main__":
     doctest.testmod()
     p = argparse.ArgumentParser()
     p.add_argument('--ref', required=True, 
-                        help="path to reference genome")
+                        help="path to reference genome",)
     p.add_argument('--chrom', required=True, 
-                        help='chromosome to limit analysis')
+                        help='chromosome to limit analysis',)
     p.add_argument('--out', required=True, 
-                        help='name of output file')
+                        help='name of output file',)
     p.add_argument('-min_dp', default=10, type=int, 
-                        help='minimum depth required of singletons (default = 10)')
+                        help='minimum depth required of singletons (default = 10)',)
     p.add_argument('-min_gq', default=20, type=int, 
-                        help='minimum genotype quality required of singletons (default = 20)')
+                        help='minimum genotype quality required of singletons (default = 20)',)
     p.add_argument('-nmer', default=3, type=int, 
-                        help='length of k-mers we want to catalog (default = 3)')
+                        help='length of k-mers we want to catalog (default = 3)',)
     p.add_argument('-exclude', 
-                        help='path to BED of regions to exclude')
+                        help='path to BED of regions to exclude',)
     args = p.parse_args()
     run(args)
 

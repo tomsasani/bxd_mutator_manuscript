@@ -1,7 +1,5 @@
 from skbio.alignment import TabularMSA
 from skbio import DNA
-import skbio.io
-import sys
 from io import StringIO
 import argparse
 import numpy as np

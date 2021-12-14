@@ -21,8 +21,9 @@ def convert_kmer_to_sig_profiler_format(k):
     return new_mutation_type
 
 p = argparse.ArgumentParser()
-p.add_argument("--singleton_vars")
-p.add_argument("--out")
+p.add_argument("--singleton_vars", required=True,
+            help="""annotated variants in extended BED format""")
+p.add_argument("--out", required=True)
 args = p.parse_args()
 
 singleton = pd.read_csv(args.singleton_vars)

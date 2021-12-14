@@ -16,8 +16,6 @@ for fh in args.variants:
 
 df = pd.concat(out_df).groupby(["sample", "ancestry"]).sum().reset_index()
 
-print (df)
-
 df['d2_frac'] = df['d2_count'] / (df['d2_count'] + df['b6_count'])
 df['ca_frac'] = df['ca_count'] / df['mut_count']
 

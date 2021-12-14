@@ -7,8 +7,16 @@ from collections import defaultdict
 import argparse
 
 p = argparse.ArgumentParser()
-p.add_argument("--windowed_vars")
-p.add_argument("--out")
+p.add_argument(
+    "--windowed_vars",
+    required=True,
+    help="""path to file containing windows counts of each mutation type""",
+)
+p.add_argument(
+    "--out",
+    required=True,
+    help="""name of output file""",
+)
 args = p.parse_args()
 
 plt.rcParams.update({'font.size': 20})
@@ -69,30 +77,47 @@ for i, mut in enumerate(df.kmer.unique()):
 
         gt2idx = dict(zip(gts, range(len(gts))))
 
-        cast_counts, dom_counts = conting[gt2idx['Mmc']], conting[gt2idx['Mmd']]
-        spret_counts, musc_counts = conting[gt2idx['Ms']], conting[gt2idx['Mmm']]
+        cast_counts, dom_counts = conting[gt2idx['Mmc']], conting[
+            gt2idx['Mmd']]
+        spret_counts, musc_counts = conting[gt2idx['Ms']], conting[
+            gt2idx['Mmm']]
 
         for mouse in gts:
             counts = conting[gt2idx[mouse]]
             frac = counts[0] / sum(counts)
-            out_dict = {'window': window, 'mutation_type': mut, 'Species': mouse, 'fraction': frac}
+            out_dict = {
+                'window': window,
+                'mutation_type': mut,
+                'Species': mouse,
+                'fraction': frac,
+            }
             out_df.append(out_dict)
 
 out_df = pd.DataFrame(out_df)
-sns.stripplot(x="mutation_type", y="fraction", hue="Species", dodge=True, data=out_df, ax=ax, palette='colorblind')
+sns.stripplot(
+    x="mutation_type",
+    y="fraction",
+    hue="Species",
+    dodge=True,
+    data=out_df,
+    ax=ax,
+    palette='colorblind',
+)
 
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
+
 model = ols('fraction ~ C(mutation_type) + C(Species)', data=out_df).fit()
 anova_table = sm.stats.anova_lm(model, typ=2)
-print (anova_table)
+print(anova_table)
 
-for species, species_df in out_df.query('mutation_type == "C>A"').groupby('Species'):
-    print (species, ss.median_abs_deviation(species_df.fraction.values))
-
+for species, species_df in out_df.query('mutation_type == "C>A"').groupby(
+        'Species'):
+    print(species, ss.median_abs_deviation(species_df.fraction.values))
 
 ax.set_xlabel("Mutation type")
-ax.set_ylabel("Singleton fractions in 50-kbp windows\nacross the chr4 QTL interval")
+ax.set_ylabel(
+    "Singleton fractions in 50-kbp windows\nacross the chr4 QTL interval")
 
 f.tight_layout()
 f.savefig(args.out)

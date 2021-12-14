@@ -8,9 +8,10 @@ import matplotlib.patches as patches
 import seaborn as sns
 import matplotlib
 
-font = {'size'   : 16}
+font = {'size': 16}
 
 matplotlib.rc('font', **font)
+
 
 def find_groups(a):
     """
@@ -19,7 +20,7 @@ def find_groups(a):
     """
     groups = []
     cur_val, last_idx = 0, 0
-    for idx,val in enumerate(a):
+    for idx, val in enumerate(a):
         if idx == 0:
             cur_val = val
             continue
@@ -34,11 +35,18 @@ def find_groups(a):
             cur_val = val
     return groups
 
+
 p = argparse.ArgumentParser()
-p.add_argument("--annotated_vars", required=True,
-                help="""annotated variants in extended BED format""")
-p.add_argument("--out", required=True,
-                help="""name of output file""")
+p.add_argument(
+    "--annotated_vars",
+    required=True,
+    help="""annotated variants in extended BED format""",
+)
+p.add_argument(
+    "--out",
+    required=True,
+    help="""name of output file""",
+)
 args = p.parse_args()
 
 variants = pd.read_csv(args.annotated_vars)
@@ -46,7 +54,7 @@ variants = pd.read_csv(args.annotated_vars)
 # get a mapping of each strain to a corresponding index
 smps = list(pd.unique(variants['bxd_strain_conv']))
 smp2idx = dict(zip(smps, range(len(smps))))
-idx2smp = {v:k for k,v in smp2idx.items()}
+idx2smp = {v: k for k, v in smp2idx.items()}
 
 # get a mapping of each strain to its epoch of origin
 smp2epoch = defaultdict()
@@ -58,7 +66,8 @@ for smp in smps:
 epochs = [smp2epoch[s] for s in smps]
 
 # make a single column representing the VCF site
-variants['site'] = variants['chrom'] + ':' + variants['start'].astype(str) + '-' + variants['end'].astype(str)
+variants['site'] = variants['chrom'] + ':' + variants['start'].astype(
+    str) + '-' + variants['end'].astype(str)
 
 n_samps = len(set(variants['bxd_strain_conv']))
 n_sites = len(set(variants['site']))
@@ -101,8 +110,8 @@ for site_idx, site in enumerate(set(variants['site'])):
 # construct a new pairwise matrix that describes the number of variants
 # at which two samples *could have* shared a variant. in other words,
 # the union of two sets: the sites where sample A shares a variant with
-# any other sample, and the sites where sample B shares a variant with 
-# any other sample. 
+# any other sample, and the sites where sample B shares a variant with
+# any other sample.
 sharing_index = np.zeros((n_samps, n_samps))
 
 for s1_idx in np.arange(n_samps):
@@ -111,8 +120,8 @@ for s1_idx in np.arange(n_samps):
 
         # get a list of sites where sample 1 shares a variant
         # with any other sample. do the same for sample 2
-        s1_sites = site_by_sample[:,s1_idx]
-        s2_sites = site_by_sample[:,s2_idx]
+        s1_sites = site_by_sample[:, s1_idx]
+        s2_sites = site_by_sample[:, s2_idx]
 
         s1_nonzero = np.where(s1_sites > 0)[0]
         s2_nonzero = np.where(s2_sites > 0)[0]
@@ -121,7 +130,7 @@ for s1_idx in np.arange(n_samps):
 
         sharing_index[s1_idx, s2_idx] = shared_nonzero.shape[0]
 
-# convert the pairwise numbers of shared sites to fractions by dividing each 
+# convert the pairwise numbers of shared sites to fractions by dividing each
 # pair's number of shared variants by the total number of unique variants that
 # those two samples shared with all other samples
 #pairwise_sharing_frac = np.nan_to_num(smp_by_smp / sharing_index)
@@ -132,12 +141,13 @@ sorted_epoch_idxs = np.argsort(epochs)
 
 # then, sort the pairwise sharing matrix by epoch so that we can
 # plot samples of similar epochs next to each other
-pairwise_sharing_sorted = pairwise_sharing_frac[sorted_epoch_idxs][:,sorted_epoch_idxs]
+pairwise_sharing_sorted = pairwise_sharing_frac[
+    sorted_epoch_idxs][:, sorted_epoch_idxs]
 
 f, ax = plt.subplots(figsize=(12, 9))
 
 # plot the heatmap of pairwise sharing
-sns.heatmap(pairwise_sharing_sorted, ax=ax, vmin=0, vmax=0.5)#, cmap="bwr")
+sns.heatmap(pairwise_sharing_sorted, ax=ax, vmin=0, vmax=0.5)  #, cmap="bwr")
 
 # find the sample indexes that correspond to the ends
 # of epoch groups
@@ -151,10 +161,16 @@ ax_ticks, ax_labels = [], []
 for xy in epoch_idxs:
     x, y, e = xy
     size = y - x
-    
-    rect = patches.Rectangle((x,x), size, size, linewidth=1, 
-                                edgecolor='w', facecolor='none', 
-                                label='Epoch {}'.format(e))
+
+    rect = patches.Rectangle(
+        (x, x),
+        size,
+        size,
+        linewidth=1,
+        edgecolor='w',
+        facecolor='none',
+        label='Epoch {}'.format(e),
+    )
 
     ax.add_patch(rect)
     ax_ticks.append((y + x) / 2)

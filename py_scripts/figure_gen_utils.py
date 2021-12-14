@@ -1,11 +1,11 @@
-import doctest
 import pandas as pd
 import re
-import glob
 from collections import Counter, defaultdict
 from quicksect import IntervalTree
 import gzip
 import csv
+from typing import List
+
 
 def to_base_mut(k: str, cpg=False) -> str:
     """
@@ -37,10 +37,11 @@ def to_base_mut(k: str, cpg=False) -> str:
     # special situation where mutation is CpG>TpG
     subseq_nuc = nuc_1[mid_idx + 1]
     if cpg:
-        if base == "C>T" and subseq_nuc == 'G': 
+        if base == "C>T" and subseq_nuc == 'G':
             base = 'CpG>TpG'
-        
+
     return base
+
 
 def convert_bxd_name(name: str) -> str:
     """
@@ -59,7 +60,8 @@ def convert_bxd_name(name: str) -> str:
 
     return bxd_line_new
 
-def combine_chr_df(path_list: []) -> pd.DataFrame():
+
+def combine_chr_df(path_list: List[str]) -> pd.DataFrame():
     """
     singleton variants are stored in per-chromosome CSV files.
     before annotating or processing these variants, we first
@@ -73,6 +75,7 @@ def combine_chr_df(path_list: []) -> pd.DataFrame():
         else:
             main_df = pd.concat([main_df, pd.read_csv(f)])
     return main_df
+
 
 def get_generation(gen: str) -> int:
     """
@@ -92,23 +95,26 @@ def get_generation(gen: str) -> int:
     split = None
     try:
         split = re.split('(\d+)', gen)
-    except TypeError: 
+    except TypeError:
         return 'NA'
 
     cur_gen = 0
 
-    for i,e in enumerate(split):
-        # add each number of filial generations to the 
+    for i, e in enumerate(split):
+        # add each number of filial generations to the
         # cumulative sum of generations
         if 'F' in e:
             cur_gen += int(split[i + 1])
         # "N"s in JAX designations indicate backcrossing
         # generations. we don't consider strains that have
         # been backcrossed, so return "NA"
-        elif 'N' in e: return -1
-        else: continue
+        elif 'N' in e:
+            return -1
+        else:
+            continue
 
     return int(cur_gen)
+
 
 def find_haplotype(genos: list, sample: str) -> str:
     """
@@ -116,18 +122,21 @@ def find_haplotype(genos: list, sample: str) -> str:
     or is heterozygous, at the genotype marker at the peak
     of the QTL on chromosome 4
     """
-    
+
     genos_in_smp = genos[sample].values
     geno_freq = Counter(genos_in_smp)
-    total = sum([i[1] for i in geno_freq.items()]) 
+    total = sum([i[1] for i in geno_freq.items()])
     most_freq_geno = "H"
     for g in ["B", "D"]:
         if geno_freq[g] > (total * 0.5): most_freq_geno = g[0]
         else: continue
-    
+
     return most_freq_geno
 
-def make_interval_tree(path: str, datacol=False, delim='\t') -> defaultdict(IntervalTree):
+
+def make_interval_tree(path: str,
+                       datacol=False,
+                       delim='\t') -> defaultdict(IntervalTree):
     """
     generate an interval tree from a simple BED
     file with format chr:start:end
@@ -140,9 +149,11 @@ def make_interval_tree(path: str, datacol=False, delim='\t') -> defaultdict(Inte
     for i, line in enumerate(fh):
         if datacol:
             tree[line[0]].add(int(line[1]), int(line[2]), other=line[3])
-        else: tree[line[0]].add(int(line[1]), int(line[2]))
+        else:
+            tree[line[0]].add(int(line[1]), int(line[2]))
 
     return tree
+
 
 def revcomp(seq):
     """
@@ -156,7 +167,7 @@ def revcomp(seq):
     'TCG'
     """
 
-    rc_nuc = {'A':'T', 'C':'G', 'T':'A', 'G':'C'}
+    rc_nuc = {'A': 'T', 'C': 'G', 'T': 'A', 'G': 'C'}
 
     seq_rev = seq[::-1]
     seq_rev_comp = ''.join([rc_nuc[n] for n in list(seq_rev)])

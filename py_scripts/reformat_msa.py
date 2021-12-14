@@ -1,5 +1,3 @@
-import sys
-from Bio.Seq import Seq
 from Bio import SeqIO
 import argparse
 
