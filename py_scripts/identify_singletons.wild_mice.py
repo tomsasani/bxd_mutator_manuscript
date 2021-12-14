@@ -2,7 +2,7 @@ import tabix
 import numpy as np
 import argparse
 import re
-from collections import defaultdict, Counter
+from collections import defaultdict
 from cyvcf2 import VCF
 from mutyper.ancestor import Ancestor
 import itertools
@@ -13,15 +13,15 @@ from singleton_calling_utils import *
 
 def revcomp(seq):
     """
-	reverse complement a nucleotide sequence.
+    reverse complement a nucleotide sequence.
 
-	>>> revcomp('ATTCAG')
-	'CTGAAT'
-	>>> revcomp('T')
-	'A'
-	>>> revcomp('CGA')
-	'TCG'
-	"""
+    >>> revcomp('ATTCAG')
+    'CTGAAT'
+    >>> revcomp('T')
+    'A'
+    >>> revcomp('CGA')
+    'TCG'
+    """
 
     rc_nuc = {'A': 'T', 'C': 'G', 'T': 'A', 'G': 'C'}
 
@@ -33,8 +33,8 @@ def revcomp(seq):
 
 def count_mutations(k):
     """
-	generate a list of all possible kmer mutations
-	"""
+    generate a list of all possible kmer mutations
+    """
 
     nmers = [''.join(x) for x in itertools.product('ATCG', repeat=k)]
 
@@ -67,13 +67,13 @@ def count_mutations(k):
 
 def levenshtein(s1, s2):
     """
-	calculate edit distance between two sequences
+    calculate edit distance between two sequences
 
-	>>> levenshtein('AAA', 'ATA')
-	1
-	>>> levenshtein('ATTTTT', 'CAAAAA')
-	6
-	"""
+    >>> levenshtein('AAA', 'ATA')
+    1
+    >>> levenshtein('ATTTTT', 'CAAAAA')
+    6
+    """
 
     if len(s1) < len(s2):
         return levenshtein(s2, s1)
