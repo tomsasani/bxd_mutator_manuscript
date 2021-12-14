@@ -3,6 +3,7 @@ from figure_gen_utils import to_base_mut, revcomp
 from collections import defaultdict
 import argparse
 
+
 def convert_kmer_to_sig_profiler_format(k):
     """
     convert the mutation types from in the BXD data
@@ -20,10 +21,17 @@ def convert_kmer_to_sig_profiler_format(k):
     new_mutation_type = "{}[{}]{}".format(fprime, base_mut, tprime)
     return new_mutation_type
 
+
 p = argparse.ArgumentParser()
-p.add_argument("--singleton_vars", required=True,
-            help="""annotated variants in extended BED format""")
-p.add_argument("--out", required=True)
+p.add_argument(
+    "--singleton_vars",
+    required=True,
+    help="""annotated variants in extended BED format""",
+)
+p.add_argument(
+    "--out",
+    required=True,
+)
 args = p.parse_args()
 
 singleton = pd.read_csv(args.singleton_vars)
@@ -35,15 +43,18 @@ group_cols = [
 ]
 
 # convert to wide-form dataframe
-singleton_tidy = singleton.groupby(group_cols).count().add_suffix('_count').reset_index()
+singleton_tidy = singleton.groupby(group_cols).count().add_suffix(
+    '_count').reset_index()
 singleton_tidy = singleton_tidy[group_cols + ["chrom_count"]]
-singleton_tidy['base_mut'] = singleton_tidy['kmer'].apply(to_base_mut, cpg=False)
+singleton_tidy['base_mut'] = singleton_tidy['kmer'].apply(to_base_mut,
+                                                          cpg=False)
 
 strain2mut_count = defaultdict(lambda: defaultdict(int))
 
 # make a new column in the dataframe with the reformatted
 # SigProfilerExtractor mutation type
-singleton_tidy['Mutation Types'] = singleton_tidy['kmer'].apply(lambda k: convert_kmer_to_sig_profiler_format(k))
+singleton_tidy['Mutation Types'] = singleton_tidy['kmer'].apply(
+    lambda k: convert_kmer_to_sig_profiler_format(k))
 
 # store the singleton counts of every every mutation
 # type in every strain
@@ -61,7 +72,7 @@ strains = singleton_tidy.bxd_strain_conv.unique()
 # generate the header
 header = ["Mutation Types"]
 header.extend(list(map(str, strains)))
-print ('\t'.join(header), file=out_fh)
+print('\t'.join(header), file=out_fh)
 
 for m, m_df in singleton_tidy.groupby('Mutation Types'):
     counts = []
@@ -73,4 +84,4 @@ for m, m_df in singleton_tidy.groupby('Mutation Types'):
     out_vals = [m]
     out_vals.extend(list(map(str, counts)))
 
-    print ('\t'.join(out_vals), file=out_fh)
+    print('\t'.join(out_vals), file=out_fh)
