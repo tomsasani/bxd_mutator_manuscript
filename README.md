@@ -1,4 +1,4 @@
-# A wild-derived antimutator drives germline mutation spectrum differences in a genetically diverse murine family
+# A natural mutator allele shapes mutation spectrum variation in mice
 
 *Thomas A. Sasani, David G. Ashbrook, Annabel C. Beichman, Lu Lu, Abraham A. Palmer, Robert W. Williams, Jonathan K. Pritchard, Kelley Harris*
 
