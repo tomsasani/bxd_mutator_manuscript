@@ -4,10 +4,10 @@ from collections import Counter, defaultdict
 from quicksect import IntervalTree
 import gzip
 import csv
-from typing import List
+from typing import List, Any
 
 
-def to_base_mut(k: str, cpg=False) -> str:
+def to_base_mut(k: str, cpg: Any = False) -> str:
     """
     convert a 3-mer mutation type into its 
     single-nucleotide mutation type
@@ -61,7 +61,7 @@ def convert_bxd_name(name: str) -> str:
     return bxd_line_new
 
 
-def combine_chr_df(path_list: List[str]) -> pd.DataFrame():
+def combine_chr_df(path_list: List[str]) -> pd.DataFrame:
     """
     singleton variants are stored in per-chromosome CSV files.
     before annotating or processing these variants, we first
@@ -116,7 +116,7 @@ def get_generation(gen: str) -> int:
     return int(cur_gen)
 
 
-def find_haplotype(genos: list, sample: str) -> str:
+def find_haplotype(genos, sample: str) -> str:
     """
     figure out whether each strain has a B or D haplotype,
     or is heterozygous, at the genotype marker at the peak
@@ -135,8 +135,8 @@ def find_haplotype(genos: list, sample: str) -> str:
 
 
 def make_interval_tree(path: str,
-                       datacol=False,
-                       delim='\t') -> defaultdict(IntervalTree):
+                       datacol: Any = False,
+                       delim: str = '\t',) -> defaultdict(IntervalTree):
     """
     generate an interval tree from a simple BED
     file with format chr:start:end

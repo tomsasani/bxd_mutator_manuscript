@@ -9,10 +9,12 @@ import doctest
 from singleton_calling_utils import *
 
 
-def get_singleton_idx(gts: np.ndarray(int),
-                      ad: np.ndarray(int),
-                      rd: np.ndarray(int),
-                      ab_thresh=0.75) -> int:
+def get_singleton_idx(
+    gts: np.ndarray,
+    ad: np.ndarray,
+    rd: np.ndarray,
+    ab_thresh: float = 0.75,
+) -> int:
     """
 	return the index of a sample with a putative
 	singleton variant 

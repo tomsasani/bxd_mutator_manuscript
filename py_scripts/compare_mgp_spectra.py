@@ -31,12 +31,7 @@ dumont = pd.read_excel(args.dumont_xls, sheet_name="TableS3", header=2)
 # namely, the number of callable base pairs in each strain, dichotomized
 # by the nucleotide at that base pair
 dumont_filtered = dumont[[
-    'Strain', 'nA', 'nC', 'nG', 'nT', 'C>A', 'C>G', 'C>T', 'T>A', 'T>C', 'T>G'
-], ]
-
-# rename columns
-dumont_filtered.columns = [
-    'strain',
+    'Strain',
     'nA',
     'nC',
     'nG',
@@ -47,7 +42,14 @@ dumont_filtered.columns = [
     'T>A',
     'T>C',
     'T>G',
-]
+]]
+
+# rename columns
+dumont_filtered.rename(
+    columns={'Strain': 'strain'},
+    inplace=True,
+)
+
 
 # format strain names to be more readable
 dumont_filtered['strain'] = dumont_filtered['strain'].apply(

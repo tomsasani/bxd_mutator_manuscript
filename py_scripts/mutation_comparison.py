@@ -14,12 +14,11 @@ from typing import Dict
 
 
 def mutation_comparison(
-    sub_0_counts: np.ndarray(int),
-    sub_1_counts: np.darray(int),
+    sub_0_counts: np.ndarray,
+    sub_1_counts: np.ndarray,
     mut2idx: Dict[str, int],
     nmer4norm=None,
-    title=r"$log_{2}$" +
-    " ratio of singleton fractions\n in strains with D vs. B haplotypes at QTL",
+    title=r"$log_{2}$" +" ratio of singleton fractions\n in strains with D vs. B haplotypes at QTL",
     outname='heatmap.png',
     plot_type='heatmap',
 ):

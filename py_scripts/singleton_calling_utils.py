@@ -3,10 +3,10 @@ from collections import defaultdict
 from quicksect import IntervalTree
 import csv
 import gzip
-from typing import Tuple
+from typing import Tuple, Any
 
 
-def reformat_genotypes(gts: np.ndarray, alt_gt=1) -> np.ndarray:
+def reformat_genotypes(gts: np.ndarray, alt_gt: int = 1) -> np.ndarray:
     """
 	reformat np.array() of genotypes in VCF so
 	that we can query multi-allelic variants
@@ -65,12 +65,12 @@ def normalize_var(ref: str, alt: str) -> Tuple[str, str]:
 
 
 def get_good_idxs(
-        gts: np.ndarray(int),
-        gq: np.ndarray(int),
-        td: np.ndarray(int),
-        min_dp=10,
-        min_gq=20,
-) -> np.ndarray(int):
+        gts: np.ndarray,
+        gq: np.ndarray,
+        td: np.ndarray,
+        min_dp: int = 10,
+        min_gq: int = 20,
+) -> np.ndarray:
     """
 	get a list of indices corresponding to samples
 	that meet a set of reasonable filters.
@@ -105,8 +105,8 @@ def get_good_idxs(
 
 def make_interval_tree(
     path: str,
-    datacol=False,
-    delim='\t',
+    datacol: Any = False,
+    delim: str = '\t',
 ) -> defaultdict(IntervalTree):
     """
 	generate an interval tree from a simple BED
