@@ -42,32 +42,6 @@ summary = pd.read_excel(args.strain_metadata)
 summary['gen_at_seq'] = summary['Generation at sequencing'].apply(
     get_generation)
 
-# map expanded strain names to generation numbers
-strain2inbreed_gen = dict(zip(
-    summary['bam_name'],
-    summary['gen_at_seq'],
-))
-
-# map expanded strain names to epochs
-strain2epoch = dict(zip(
-    summary['bam_name'],
-    summary['Epoch'],
-))
-
-# map expanded strain names to genenetwork names
-strain2genenet = dict(zip(
-    summary['bam_name'],
-    summary['GeneNetwork name'],
-))
-
-# map expanded strain names to the number of generations
-# each strain was intercrossed prior to inbreeding (0 for F2-derived strains)
-strain2intercross_gens = dict(
-    zip(
-        summary['bam_name'],
-        summary['n_advanced_intercross_gens'],
-    ))
-
 # map strain names to callable base pairs (referred to as "denominators")
 denominators = pd.read_csv(args.callable_bp)
 strain2denom = dict(
@@ -118,21 +92,34 @@ variants = variants[~variants['bxd_strain'].isin(founder_samps)]
 variants['bxd_strain_conv'] = variants['bxd_strain'].apply(
     lambda x: convert_bxd_name(x))
 
-# add columns to the dataframe with relevant metadata
-variants['epoch'] = variants['bxd_strain'].apply(lambda s: strain2epoch[s])
-variants['n_inbreeding_gens'] = variants['bxd_strain'].apply(
-    lambda s: strain2inbreed_gen[s])
+# merge variant file with strain summaries
+variants = variants.merge(summary, left_on="bxd_strain", right_on="bam_name")
+
+# rename some columns
+variants.rename(
+    columns={
+        'gen_at_seq': 'n_inbreeding_gens',
+        'n_advanced_intercross_gens': 'n_intercross_gens',
+        'Epoch': 'epoch',
+    },
+    inplace=True,
+)
+
 # remove strains if they have "bad" values in the `n_inbreeding_gens` column,
 # due to them being backcrossed during inbreeding
 variants = variants[~variants['n_inbreeding_gens'].isin([-1, "NA"])]
-variants['n_intercross_gens'] = variants['bxd_strain'].apply(
-    lambda s: strain2intercross_gens[s])
+
+# add callable base pairs for each sample
 variants['n_callable_bp'] = variants['bxd_strain'].apply(lambda s: strain2denom[s] \
                                                                 if s in strain2denom else "NA")
+# add column with haplotype of line at QTL
 variants['haplotype_at_qtl'] = variants['bxd_strain_conv'].apply(
     lambda s: find_haplotype(genos_at_markers, s)
     if s in list(genos_at_markers) else "NA")
+
 variants = variants[variants['haplotype_at_qtl'] != "NA"]
+
+# require lines to be inbred for at least 20 generations
 variants = variants.query('n_inbreeding_gens >= 20')
 
 print("Total of {} mutations in {} strains".format(
