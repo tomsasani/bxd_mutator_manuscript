@@ -28,9 +28,9 @@ supp_figures = ["2a", "2b",
                 "3",
                 "4a",
                 "5",
-                "6",
-                "7a", "7b", "7c",
-                "8"]
+                #"6",
+                "7a", "7b", "7c",]
+                #"8"]
 
 
 rule all:
@@ -46,7 +46,25 @@ rule all:
         # comprises a sub-panel for every mutation type
         expand("plots/all_qtl_maps/supp_figure_4_{mut_type}.eps", 
                         mut_type = [m.replace('>', '.') for m in muts]),
-        
+
+rule download_reference:
+    input:
+    output:
+        "data/ref/mm10.fa.gz"
+    shell:
+        """
+        wget https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.fa.gz -O {output}
+        """
+
+rule unzip_reference:
+    input:
+        "data/ref/mm10.fa.gz"
+    output:
+        "data/ref/mm10.fa"
+    shell:
+        """
+        gunzip {input}
+        """
 
 rule annotate_vars:
     input: 
