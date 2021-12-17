@@ -10,3 +10,4 @@ dependencies:
     - cyvcf2=0.20.9
     - snakemake=6.0.2
     - pomegranate=0.14.*
+    - pytest=6.2.4
