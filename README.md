@@ -60,6 +60,7 @@ All other `python` and `R` dependencies will be handled by `conda` before execut
 |__R_scripts                            # all of the `R` scripts called by `snakemake` rules
 |__Rqtl_data                            # data used by R/qtl2 for QTL mapping
 |__data                                 # raw data files output by the `identify_singletons.smk` pipeline, plus third-party datasets
+|__tests                                # `pytest` tests for various utility functions
 |__figure_generation.yaml               # YAML file containing all of the dependencies required to generate figures
 |__singleton_calling.yaml               # YAML file containing all of the dependencies required to call singletons
 |__generate_figures.smk                 # main `snakemake` pipeline that generates main and supplementary figures
