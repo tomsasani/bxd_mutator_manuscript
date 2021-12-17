@@ -27,6 +27,7 @@ The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en
 3. [Usage for generating manuscript figures using precomputed data](#usage-for-generating-manuscript-figures-using-precomputed-data)
 4. [Usage for generating all raw data](#usage-for-generating-all-raw-data)
 5. [How to generate raw data on a HPC](#how-to-generate-raw-data-on-a-hpc)
+6. [Running tests](#running-tests)
 
 ## Dependencies
 Make sure that these are installed and in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting. I haven't experimented with other versions, so YMMV.
@@ -184,3 +185,15 @@ snakemake \
 ```
 
 After generating raw data, you can run the figure generation pipeline as described above. 
+
+## Running tests
+
+There are a handful of `pytest` tests for various utility functions that get used by the singleton calling and figure generation pipelines. 
+
+To run these tests, you'll first need to install the repository as a package using `pip`. Make sure you're in the top level of this directory, then run:
+
+```
+pip install -e .
+```
+
+Then, you can simply run `pytest .`, and the tests will run.
