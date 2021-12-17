@@ -30,16 +30,6 @@ summary = pd.read_excel(args.strain_metadata)
 summary['gen_at_seq'] = summary['Generation at sequencing'].apply(
     get_generation)
 
-
-def calculate_years_per_gen(row):
-    gens = row['gen_at_seq']
-    if gens == -1 or gens == "NA": return -1
-    else:
-        years_of_breeding = 2017 - int(row['Year breeding started'])
-        years_per_gen = years_of_breeding / int(gens)
-        return years_per_gen
-
-
 summary['years_per_gen'] = summary.apply(calculate_years_per_gen, axis=1)
 
 f, ax = plt.subplots()
