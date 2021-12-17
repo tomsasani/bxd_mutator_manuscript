@@ -1,5 +1,5 @@
 import argparse
-from pomegranate import *
+from pomegranate import State, DiscreteDistribution, HiddenMarkovModel
 import pandas as pd
 import numpy as np
 

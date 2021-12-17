@@ -1,64 +1,11 @@
 import tabix
 import numpy as np
-import gzip
-import csv
 import argparse
 from cyvcf2 import VCF
 from mutyper.ancestor import Ancestor
 import doctest
+from figure_gen_utils import make_interval_tree
 from singleton_calling_utils import *
-
-
-def get_singleton_idx(
-    gts: np.ndarray,
-    ad: np.ndarray,
-    rd: np.ndarray,
-    ab_thresh: float = 0.75,
-) -> int:
-    """
-	return the index of a sample with a putative
-	singleton variant 
-
-	gts: np.array() of sample genotypes
-	ad: np.array() of sample alternate depths
-	rd: np.array() of sample reference depths
-	ab_thresh: lower bound on allowed allele balance at HETs
-
-	>>> get_singleton_idx(np.array([0, 0, 2, 0]), np.array([0, 0, 12, 0]), np.array([15, 9, 0, 18]))
-	2
-	>>> get_singleton_idx(np.array([0, 0, 2, 1]), np.array([0, 0, 12, 4]), np.array([15, 9, 0, 8])) is None
-	True
-	>>> get_singleton_idx(np.array([0, 0, 0, 1]), np.array([0, 0, 6, 10]), np.array([15, 9, 1, 0]))
-	3
-	"""
-
-    UNK, HOM_REF, HET, HOM_ALT = range(-1, 3)
-
-    # get all unique GTs and their frequencies at this site
-    unique, counts = np.unique(gts, return_counts=True)
-    uc = dict(zip(unique, counts))
-
-    gts_to_use = (HOM_ALT, HET)
-
-    # if there is more than one sample with a HET or HOM_ALT
-    # genotype here, it's not a HQ singleton
-    het_ha_sum = 0
-    if HET in uc: het_ha_sum += uc[HET]
-    if HOM_ALT in uc: het_ha_sum += uc[HOM_ALT]
-    if het_ha_sum > 1: return None
-
-    # if the singleton is HOM_ALT, return it. we'll apply
-    # filters to individual singletons later in the main script
-    if HOM_ALT in uc and HOM_ALT in gts_to_use:
-        return np.where(gts == HOM_ALT)[0][0]
-    # if the singleton is HET, we need to apply
-    # filtering on allele balance.
-    elif HET in uc and HET in gts_to_use:
-        gt_idx = np.where(gts == HET)[0][0]
-        ab = ad[gt_idx] / float(ad[gt_idx] + rd[gt_idx])
-        if ab >= ab_thresh: return gt_idx
-        else: return None
-
 
 def run(args):
 

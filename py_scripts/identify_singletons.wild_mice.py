@@ -1,97 +1,17 @@
 import tabix
 import numpy as np
 import argparse
-import re
 from collections import defaultdict
 from cyvcf2 import VCF
 from mutyper.ancestor import Ancestor
-import itertools
 import doctest
 import pandas as pd
-from singleton_calling_utils import *
-
-
-def revcomp(seq):
-    """
-    reverse complement a nucleotide sequence.
-
-    >>> revcomp('ATTCAG')
-    'CTGAAT'
-    >>> revcomp('T')
-    'A'
-    >>> revcomp('CGA')
-    'TCG'
-    """
-
-    rc_nuc = {'A': 'T', 'C': 'G', 'T': 'A', 'G': 'C'}
-
-    seq_rev = seq[::-1]
-    seq_rev_comp = ''.join([rc_nuc[n] for n in list(seq_rev)])
-
-    return seq_rev_comp
-
-
-def count_mutations(k):
-    """
-    generate a list of all possible kmer mutations
-    """
-
-    nmers = [''.join(x) for x in itertools.product('ATCG', repeat=k)]
-
-    expanded_muts = []
-
-    for n1 in nmers:
-        for n2 in nmers:
-            mut = '>'.join([n1, n2])
-            if mut in expanded_muts: continue
-            expanded_muts.append('>'.join([n1, n2]))
-
-    expanded_rc = []
-    for mut in expanded_muts:
-        anc, der = mut.split('>')
-        middle_nuc_anc = anc[int(len(anc) / 2)]
-        middle_nuc_der = der[int(len(anc) / 2)]
-        if middle_nuc_anc == middle_nuc_der: continue
-        if levenshtein(anc, der) != 1: continue
-        if middle_nuc_anc not in ('C', 'A'):
-            anc, der = revcomp(anc), revcomp(der)
-        expanded_rc.append('>'.join([anc, der]))
-
-    expanded_rc_uniq = []
-    for mut in expanded_rc:
-        if mut in expanded_rc_uniq: continue
-        expanded_rc_uniq.append(mut)
-
-    return expanded_rc_uniq
-
-
-def levenshtein(s1, s2):
-    """
-    calculate edit distance between two sequences
-
-    >>> levenshtein('AAA', 'ATA')
-    1
-    >>> levenshtein('ATTTTT', 'CAAAAA')
-    6
-    """
-
-    if len(s1) < len(s2):
-        return levenshtein(s2, s1)
-
-    if len(s2) == 0:
-        return len(s1)
-
-    previous_row = range(len(s2) + 1)
-    for i, c1 in enumerate(s1):
-        current_row = [i + 1]
-        for j, c2 in enumerate(s2):
-            insertions = previous_row[j + 1] + 1
-            deletions = current_row[j] + 1
-            substitutions = previous_row[j] + (c1 != c2)
-            current_row.append(min(insertions, deletions, substitutions))
-        previous_row = current_row
-
-    return previous_row[-1]
+from singleton_calling_utils import (
+    enumerate_mutations,
+    make_interval_tree,
+    normalize_var,
+    get_good_idxs,
+)
 
 
 def run(args):
@@ -110,12 +30,11 @@ def run(args):
     ancestor = Ancestor(args.ref, k=args.nmer, sequence_always_upper=True)
 
     # get a list of all possible 3-mer mutation types
-    mutations = count_mutations(args.nmer)
+    mutations = enumerate_mutations(args.nmer)
 
     mut2idx = dict(zip(mutations, range(len(mutations))))
 
     # map sample indices to sample IDs and vice versa
-    idx2smp = dict(zip(range(len(vcf.samples)), vcf.samples))
     smp2idx = dict(zip(vcf.samples, range(len(vcf.samples))))
 
     # generate an output array of size n_samples x n_mutations,

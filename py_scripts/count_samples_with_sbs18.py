@@ -2,7 +2,11 @@ import pandas as pd
 import argparse
 
 p = argparse.ArgumentParser()
-p.add_argument("--tidy_mutation_spectra", )
+p.add_argument(
+    "--tidy_spectra",
+    required=True,
+    help="""tidy dataframe containing BXD mutation spectra""",
+)
 p.add_argument(
     "-sig_profiler_activities",
     default=
@@ -10,7 +14,7 @@ p.add_argument(
 )
 args = p.parse_args()
 
-spectra = pd.read_csv(args.tidy_mutation_spectra)
+spectra = pd.read_csv(args.tidy_spectra)
 
 activ = pd.read_csv(args.sig_profiler_activities, sep='\t')
 activ['has_sbs18'] = activ['SBS18'].apply(lambda s: int(s) > 0)

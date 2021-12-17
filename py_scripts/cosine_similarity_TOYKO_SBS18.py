@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
-from figure_gen_utils import revcomp
+from figure_gen_utils import convert_toyko_mutation, convert_cosmic_mutation
 from scipy.spatial.distance import cosine
 
 plt.rc('font', size=16)
@@ -19,60 +19,6 @@ p.add_argument(
     help="""supplementary file from ohno et al. (2014).""",
 )
 args = p.parse_args()
-
-
-def convert_toyko_mutation(sequence):
-    """
-    convert TOY-KO mutations (reported as a string of 50
-    upstream nucleotides plus the mutation plus a string of 50
-    downstream nucleotides) to notation that matches the BXD data
-    """
-    mutation = sequence.split('[')[-1].split(']')[0]
-    left_flank_1bp = sequence.split('/')[0].split('[')[0][-1]
-    right_flank_1bp = sequence.split('/')[-1].split(']')[-1][0]
-
-    anc, der = mutation.split('/')
-
-    kmer_anc = left_flank_1bp + anc + right_flank_1bp
-    kmer_der = left_flank_1bp + der + right_flank_1bp
-
-    if mutation not in ["C/A", "G/T"]: return 'not_CA'
-
-    # reverse complement if necessary
-    rc = False
-    if mutation[0] == "G":
-        rc = True
-
-    if rc: return "{}>{}".format(revcomp(kmer_anc), revcomp(kmer_der))
-    else: return "{}>{}".format(kmer_anc, kmer_der)
-
-
-def revcomp(nuc):
-    d = {
-        'A': 'T',
-        'T': 'A',
-        'C': 'G',
-        'G': 'C',
-    }
-
-    return ''.join([d[n] for n in list(nuc)])[::-1]
-
-
-def convert_cosmic_mutation(row):
-    context = row['Subtype']
-    mutation = row['Type']
-
-    changed_from = mutation.split('>')[0]
-    changed_to = mutation.split('>')[1]
-
-    e_kmer = context[0] + changed_to + context[-1]
-
-    if changed_from == "T":
-        context = revcomp(context)
-        e_kmer = revcomp(e_kmer)
-
-    return context + '>' + e_kmer
-
 
 # read in the TOY-KO signature
 toyko = pd.read_excel(args.ohno_data, header=4)

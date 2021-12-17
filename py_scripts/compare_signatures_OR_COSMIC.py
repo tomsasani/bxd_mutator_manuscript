@@ -1,38 +1,10 @@
 import pandas as pd
 import scipy.stats as ss
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 import seaborn as sns
 import numpy as np
 import argparse
-from figure_gen_utils import revcomp
-
-
-def convert_cosmic_mutation(row):
-    """
-    convert cosmic mutation notation to 3-mer 
-    mutation notation so that it matches the BXD data
-
-    >>> convert_cosmic_mutation("C>G,ACA")
-    "ACA>AGA"
-    >>> convert_cosmic_mutation("T>C,CTG")
-    "CAG>CGG"
-    """
-
-    context = row['Subtype']
-    mutation = row['Type']
-
-    changed_from = mutation.split('>')[0]
-    changed_to = mutation.split('>')[1]
-
-    e_kmer = context[0] + changed_to + context[-1]
-
-    if changed_from == "T":
-        context = revcomp(context)
-        e_kmer = revcomp(e_kmer)
-
-    return context + '>' + e_kmer
-
+from figure_gen_utils import convert_cosmic_mutation
 
 p = argparse.ArgumentParser()
 p.add_argument(

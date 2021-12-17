@@ -1,43 +1,9 @@
-import matplotlib.pyplot as plt
 import pandas as pd
-import csv
 import scipy.stats as ss
-from collections import defaultdict, Counter
-from quicksect import IntervalTree
+from collections import defaultdict
 import numpy as np
-import seaborn as sns
-import glob
-import sys
 import argparse
-
-
-def calc_new_gens(n_gens: int) -> int:
-    """
-    use the method from Uchimura et al. (2015) to calculate
-    the number of generations in which an observed homozgyous
-    singleton could have occurred in a given strain.
-    """
-    p_k_vals = defaultdict(float)
-
-    for k in np.arange(1, n_gens + 1):
-        if k == 1:
-            p_k = 0
-            p_k_vals[k] = p_k
-        elif k == 2:
-            p_k = 0.25
-            p_k_vals[k] = p_k
-        else:
-            p_k_1 = p_k_vals[k - 1]
-            p_k_2 = p_k_vals[k - 2]
-
-            p_k = (p_k_1 / 2) + (p_k_2 / 4)
-            p_k_vals[k] = p_k
-
-    l_n = 0
-    for k in np.arange(1, n_gens + 1):
-        l_n += ((n_gens - k) * p_k_vals[k])
-    return l_n
-
+from figure_gen_utils import calc_new_gens, clr
 
 p = argparse.ArgumentParser()
 p.add_argument(
@@ -136,12 +102,6 @@ for s_i, s in enumerate(samps):
                 (df_wide['base_mut'] == m)]['fraction'].values
         if val.shape[0] == 0: continue
         smp_by_frac[s_i, mut_i] = val[0]
-
-
-def clr(X):
-    # the geometric mean acts as the center of the composition
-    geom_mean = np.power(np.prod(X, axis=1), 1 / X.shape[1])
-    return np.log(X / geom_mean[:, None])
 
 
 sbf_clr = clr(smp_by_frac)

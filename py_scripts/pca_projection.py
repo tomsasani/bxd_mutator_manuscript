@@ -1,26 +1,11 @@
 import argparse
-from matplotlib.lines import Line2D
-import scipy.stats as ss
-import itertools
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import scale, normalize
 import seaborn as sns
-from matplotlib.patches import Patch
 from matplotlib import gridspec
-from collections import Counter
-
-def clr(X):
-    """
-    perform a centered log-ratio transform
-    """
-    # the geometric mean acts as the center of the composition
-    geom_mean = np.power(np.prod(X,axis=1),1/X.shape[1])
-    return np.log(X / geom_mean[:,None])
-
+from figure_gen_utils import clr
 
 p = argparse.ArgumentParser()
 p.add_argument("--tidy_spectra", required=True, 

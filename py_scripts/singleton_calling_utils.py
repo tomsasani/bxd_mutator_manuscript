@@ -1,12 +1,14 @@
 import numpy as np
-from collections import defaultdict
 from quicksect import IntervalTree
-import csv
-import gzip
-from typing import Tuple, Any
+from typing import Tuple
+import itertools
+from py_scripts.figure_gen_utils import revcomp
 
 
-def reformat_genotypes(gts: np.ndarray, alt_gt: int = 1) -> np.ndarray:
+def reformat_genotypes(
+    gts: np.ndarray,
+    alt_gt: int = 1,
+) -> np.ndarray:
     """
 	reformat np.array() of genotypes in VCF so
 	that we can query multi-allelic variants
@@ -43,13 +45,6 @@ def reformat_genotypes(gts: np.ndarray, alt_gt: int = 1) -> np.ndarray:
 def normalize_var(ref: str, alt: str) -> Tuple[str, str]:
     """
 	method for normalizing a variant by hand
-
-	>>> normalize_var('TCC', 'CCC')
-	('T', 'C')
-	>>> normalize_var('CAGGGGG', 'CTGGGGG')
-	('A', 'T')
-	>>> normalize_var('GAT', 'GAT')
-	('N', 'N')
 	"""
 
     ref_a = np.array(list(ref))
@@ -65,27 +60,21 @@ def normalize_var(ref: str, alt: str) -> Tuple[str, str]:
 
 
 def get_good_idxs(
-        gts: np.ndarray,
-        gq: np.ndarray,
-        td: np.ndarray,
-        min_dp: int = 10,
-        min_gq: int = 20,
+    gts: np.ndarray,
+    gq: np.ndarray,
+    td: np.ndarray,
+    min_dp: int = 10,
+    min_gq: int = 20,
 ) -> np.ndarray:
     """
-	get a list of indices corresponding to samples
-	that meet a set of reasonable filters.
+    get a list of indices corresponding to samples
+    that meet a set of reasonable filters.
 
-	gts: 	array of sample genotypes
-	gq: 	array of sample genotype qualities 
-	td: 	array of sample depths
-	
-	>>> get_good_idxs(np.array([0, 0, 2, 0]), np.array([20, 4, 99, 33]), np.array([15, 9, 22, 4]))
-	array([0, 2])
-	>>> get_good_idxs(np.array([0, -1, -1, 1]), np.array([20, -1, -1, 47]), np.array([15, -1, -1, 23]))
-	array([0, 3])
-	>>> get_good_idxs(np.array([0, 0, 0, 0]), np.array([55, 99, 10, 34]), np.array([5, 9, 23, 56]))
-	array([3])
-	"""
+    gts: 	array of sample genotypes
+    gq: 	array of sample genotype qualities 
+    td: 	array of sample depths
+
+    """
 
     UNK, HOM_REF, HET, HOM_ALT = range(-1, 3)
 
@@ -103,37 +92,104 @@ def get_good_idxs(
     return good_sites_not_unk
 
 
-def make_interval_tree(
-    path: str,
-    datacol: Any = False,
-    delim: str = '\t',
-) -> defaultdict(IntervalTree):
+def enumerate_mutations(k):
     """
-	generate an interval tree from a simple BED
-	file with format chr:start:end
+    generate a list of all possible kmer mutations
+    """
+
+    nmers = [''.join(x) for x in itertools.product('ATCG', repeat=k)]
+
+    expanded_muts = []
+
+    for n1 in nmers:
+        for n2 in nmers:
+            mut = '>'.join([n1, n2])
+            if mut in expanded_muts: continue
+            expanded_muts.append('>'.join([n1, n2]))
+
+    expanded_rc = []
+    for mut in expanded_muts:
+        anc, der = mut.split('>')
+        middle_nuc_anc = anc[int(len(anc) / 2)]
+        middle_nuc_der = der[int(len(anc) / 2)]
+        if middle_nuc_anc == middle_nuc_der: continue
+        if levenshtein(anc, der) != 1: continue
+        if middle_nuc_anc not in ('C', 'A'):
+            anc, der = revcomp(anc), revcomp(der)
+        expanded_rc.append('>'.join([anc, der]))
+
+    expanded_rc_uniq = []
+    for mut in expanded_rc:
+        if mut in expanded_rc_uniq: continue
+        expanded_rc_uniq.append(mut)
+
+    return expanded_rc_uniq
+
+
+def levenshtein(s1: str, s2: str):
+    """
+    calculate edit distance between two sequences
+    """
+
+    if len(s1) < len(s2):
+        return levenshtein(s2, s1)
+
+    if len(s2) == 0:
+        return len(s1)
+
+    previous_row = range(len(s2) + 1)
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+
+    return previous_row[-1]
+
+
+def get_singleton_idx(
+    gts: np.ndarray,
+    ad: np.ndarray,
+    rd: np.ndarray,
+    ab_thresh: float = 0.75,
+) -> int:
+    """
+	return the index of a sample with a putative
+	singleton variant 
+
+	gts: np.array() of sample genotypes
+	ad: np.array() of sample alternate depths
+	rd: np.array() of sample reference depths
+	ab_thresh: lower bound on allowed allele balance at HETs
 	"""
 
-    tree = defaultdict(IntervalTree)
-    added = defaultdict(int)
-    f = gzip.open(path, 'rt') if path.endswith('.gz') else open(path, 'r')
-    fh = csv.reader(f, delimiter=delim)
-    for i, line in enumerate(fh):
-        if datacol:
-            tree[line[0]].add(int(line[1]), int(line[2]), other=line[3])
-        else:
-            tree[line[0]].add(int(line[1]), int(line[2]))
+    UNK, HOM_REF, HET, HOM_ALT = range(-1, 3)
 
-    return tree
+    # get all unique GTs and their frequencies at this site
+    unique, counts = np.unique(gts, return_counts=True)
+    uc = dict(zip(unique, counts))
 
+    gts_to_use = (HOM_ALT, HET)
 
-def convert_bxd_name(name: str) -> str:
-    """
-	depending on the VCF file we're using we may
-	have to convert BXD strain names for portability
-	"""
-    bxd_line_name = '_'.join(name.split('_phased')[0].split('_')[1:])
-    bxd_line_num = name.split('_phased')[0].split('_')[0].split('-')[-1]
+    # if there is more than one sample with a HET or HOM_ALT
+    # genotype here, it's not a HQ singleton
+    het_ha_sum = 0
+    if HET in uc: het_ha_sum += uc[HET]
+    if HOM_ALT in uc: het_ha_sum += uc[HOM_ALT]
+    if het_ha_sum > 1: return None
 
-    bxd_line_new = bxd_line_name + '_' + bxd_line_num
+    # if the singleton is HOM_ALT, return it. we'll apply
+    # filters to individual singletons later in the main script
+    if HOM_ALT in uc and HOM_ALT in gts_to_use:
+        return np.where(gts == HOM_ALT)[0][0]
+    # if the singleton is HET, we need to apply
+    # filtering on allele balance.
+    elif HET in uc and HET in gts_to_use:
+        gt_idx = np.where(gts == HET)[0][0]
+        ab = ad[gt_idx] / float(ad[gt_idx] + rd[gt_idx])
+        if ab >= ab_thresh: return gt_idx
+        else: return None
 
-    return bxd_line_new

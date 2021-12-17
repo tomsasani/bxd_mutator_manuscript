@@ -7,7 +7,7 @@ import numpy as np
 import argparse
 
 
-def get_bootstrap_ci(cons, n_trials=100):
+def get_bootstrap_ci(cons: np.ndarray, n_trials: int = 100):
     """
     generate a bootstrap confidence interval
     """

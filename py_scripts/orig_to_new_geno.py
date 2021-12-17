@@ -5,13 +5,22 @@ from collections import defaultdict
 from figure_gen_utils import convert_bxd_name
 
 p = argparse.ArgumentParser()
-p.add_argument("--geno", required=True, 
-                    help="""original geno file containing genotypes
-                            for all BXDs at each of ~7300 markers""")
-p.add_argument("--strain_metadata", required=True,
-                    help="""Excel file containing strain metadata""")
-p.add_argument("--out", required=True,
-                    help="""name of output geno file""")
+p.add_argument(
+    "--geno",
+    required=True,
+    help=
+    """original geno file containing genotypes for all BXDs at each of ~7300 markers""",
+)
+p.add_argument(
+    "--strain_metadata",
+    required=True,
+    help="""Excel file containing strain metadata""",
+)
+p.add_argument(
+    "--out",
+    required=True,
+    help="""name of output geno file""",
+)
 args = p.parse_args()
 
 outfh = open(args.out, "w")
@@ -39,11 +48,11 @@ with open(args.geno, "r") as csvfh:
     for i,l in enumerate(f):
         # skip the header
         if l[0].startswith("#"): continue
-        # generate a new header with updated
-        # sample names
+            # generate a new header with updated
+            # sample names
         elif l[0] == "marker":
             new_header = ['marker']
-            # loop over samples in the order they appear in the 
+            # loop over samples in the order they appear in the
             # original geno header
             for s_i,s in enumerate(l[1:]):
                 # keep track of samples that are in the original geno

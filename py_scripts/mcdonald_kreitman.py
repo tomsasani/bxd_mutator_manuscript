@@ -15,12 +15,21 @@ from pyfaidx import Fasta
 import scipy.stats as ss
 
 p = argparse.ArgumentParser()
-p.add_argument("--ref", required=True,
-            help="""path to mm10 reference genome""")
-p.add_argument("--vcf", required=True,
-            help="""path to BXD VCF annotated with SnpEff""")
-p.add_argument("--exons", required=True,
-            help="""path to gencode file containing exons of Mutyh in gtf format""")
+p.add_argument(
+    "--ref",
+    required=True,
+    help="""path to mm10 reference genome""",
+)
+p.add_argument(
+    "--vcf",
+    required=True,
+    help="""path to BXD VCF annotated with SnpEff""",
+)
+p.add_argument(
+    "--exons",
+    required=True,
+    help="""path to gencode file containing exons of Mutyh in gtf format""",
+)
 args = p.parse_args()
 
 ref = Fasta(args.ref)

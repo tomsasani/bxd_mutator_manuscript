@@ -1,11 +1,10 @@
 import pandas as pd
 import scipy.stats as ss
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 import seaborn as sns
 import numpy as np
 import argparse
-from figure_gen_utils import revcomp
+from figure_gen_utils import convert_toyko_mutation
 
 plt.rc('font', size=16)
 
@@ -28,30 +27,7 @@ p.add_argument(
 args = p.parse_args()
 
 
-def convert_toyko_mutation(sequence):
-    """
-    convert TOY-KO mutations (reported as a string of 50
-    upstream nucleotides plus the mutation plus a string of 50
-    downstream nucleotides) to notation that matches the BXD data
-    """
-    mutation = sequence.split('[')[-1].split(']')[0]
-    left_flank_1bp = sequence.split('/')[0].split('[')[0][-1]
-    right_flank_1bp = sequence.split('/')[-1].split(']')[-1][0]
 
-    anc, der = mutation.split('/')
-
-    kmer_anc = left_flank_1bp + anc + right_flank_1bp
-    kmer_der = left_flank_1bp + der + right_flank_1bp
-
-    if mutation not in ["C/A", "G/T"]: return 'not_CA'
-
-    # reverse complement if necessary
-    rc = False
-    if mutation[0] == "G":
-        rc = True
-
-    if rc: return "{}>{}".format(revcomp(kmer_anc), revcomp(kmer_der))
-    else: return "{}>{}".format(kmer_anc, kmer_der)
 
 
 # read in BXD singleton data

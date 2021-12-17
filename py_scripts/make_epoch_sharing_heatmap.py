@@ -7,34 +7,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import seaborn as sns
 import matplotlib
+from figure_gen_utils import find_groups
 
 font = {'size': 16}
 
 matplotlib.rc('font', **font)
-
-
-def find_groups(a):
-    """
-    function to get the indexes of shared "groups"
-    in an arbitrary list
-    """
-    groups = []
-    cur_val, last_idx = 0, 0
-    for idx, val in enumerate(a):
-        if idx == 0:
-            cur_val = val
-            continue
-        if val != cur_val or idx == len(a) - 1:
-            if idx == len(a) - 1:
-                groups.append((last_idx, idx + 1, cur_val))
-            else:
-                groups.append((last_idx, idx, cur_val))
-            last_idx = idx
-            cur_val = val
-        else:
-            cur_val = val
-    return groups
-
 
 p = argparse.ArgumentParser()
 p.add_argument(
