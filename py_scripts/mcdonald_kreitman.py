@@ -1,16 +1,9 @@
 import numpy as np
 import argparse
-import re
-from collections import defaultdict, Counter
+from collections import defaultdict
 from cyvcf2 import VCF
-from mutyper.ancestor import Ancestor
-import itertools
-import doctest
 import pandas as pd
-from scipy.stats import contingency
 from singleton_calling_utils import *
-import matplotlib.pyplot as plt
-import seaborn as sns
 from pyfaidx import Fasta
 import scipy.stats as ss
 

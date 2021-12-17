@@ -8,7 +8,6 @@ import numpy as np
 import math
 import argparse
 import glob
-from statsmodels.stats.multitest import multipletests
 from figure_gen_utils import convert_bxd_name
 from typing import Dict
 

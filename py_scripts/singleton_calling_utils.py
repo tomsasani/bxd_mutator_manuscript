@@ -2,7 +2,7 @@ import numpy as np
 from quicksect import IntervalTree
 from typing import Tuple
 import itertools
-from py_scripts.figure_gen_utils import revcomp
+from figure_gen_utils import revcomp
 
 
 def reformat_genotypes(
