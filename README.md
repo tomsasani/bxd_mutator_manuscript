@@ -5,7 +5,7 @@
 :mouse: --> :dna: --> :bar_chart:
 
 ![qtlgif](assets/qtl_scan.gif)
-
+<img src="assets/qtl_scan.gif" alt="drawing" height="200"/>
 The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce the entire [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1) from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
 
 **The basic outline is as follows:**
