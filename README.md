@@ -4,8 +4,9 @@
 
 :mouse: --> :dna: --> :bar_chart:
 
-
+<p align="center">
 <img src="assets/qtl_scan.gif" alt="drawing" height="300"/>
+</p>
 
 ***Figure 1:** The gist of the manuscript in a single gif*
 
