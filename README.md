@@ -4,7 +4,7 @@
 
 :mouse: --> :dna: --> :bar_chart:
 
-> We've made an interactive Dash app available that enables interactive exploration of some results from the manuscript. [Check it out!](https://bxd-mutator-exploration.herokuapp.com)
+> We've made a Dash app that enables interactive exploration of some results from the manuscript. [Check it out!](https://bxd-mutator-exploration.herokuapp.com)
 
 The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce the entire [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1) from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
 
@@ -18,7 +18,7 @@ The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en
 
 **IMPORTANT NOTE:**
 
->I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system or cluster. The `identify_singletons.smk` pipeline assumes you've downloaded the BXD VCF (~50 Gb), and the hundreds of individual steps in the pipeline include downloading the mm10 reference genome (~1 Gb) and many Gbs of phastCons scores.
+>I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system or cluster. The `identify_singletons.smk` pipeline assumes you've downloaded the BXD VCF (~50 Gb), and the many individual steps in the pipeline include downloading the mm10 reference genome (~1 Gb) and many Gbs of phastCons scores.
 
 >Depending on the particular steps of the pipeline you want to run, some of these steps/downloads can be avoided by editing the `identify_singletons.smk` pipeline directly. For example, if you don't want to get singleton data from the wild mouse genomes, simply comment out those output files in `rule: all`. Or if you already have a copy of the mm10 reference, just add it to the `data/ref` directory.
 
@@ -32,14 +32,17 @@ The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en
 6. [Running tests](#running-tests)
 
 ## Dependencies
-Make sure that these are installed and in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting. I haven't experimented with other versions, so YMMV.
+Make sure that these are installed and/or in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting. I haven't experimented with other versions, so YMMV.
 
 ### Common requirements for all pipelines
 * [conda (v4.9.2)](https://docs.conda.io/en/latest/)
-
+    * these days, I'd recommend using [`mamba`](https://github.com/mamba-org/mamba) for building the `python` environments described below
+    * assuming you have `conda` installed, use `conda install mamba -n base -c conda-forge` to install `mamba`, and then you can use `mamba` as a 1-to-1 replacement for `conda` in the instructions for building `python` environments provided later in the README
+    
 ### Requirements if you want to generate singleton data from scratch
 * [bedtools (v2.29.2)](https://bedtools.readthedocs.io/en/latest/)
 * [bedops (v2.4.38)](https://bedops.readthedocs.io/en/latest/)
+    * technically, you'll only need `wig2bed`
 * [tabix (v1.10.2-125-g4162046)](http://www.htslib.org/doc/tabix.html)
 * [mutyper (v0.5.0)](https://harrispopgen.github.io/mutyper/install.html)
 * [bcftools (v1.12)](https://samtools.github.io/bcftools/bcftools.html)
