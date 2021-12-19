@@ -4,7 +4,6 @@ library(cowplot)
 library(dplyr)
 library(optparse)
 library(tidyr)
-library(RNOmni)
 
 option_list = list(
   make_option(c("-j", "--json"), type="character", default=NULL),
@@ -24,7 +23,7 @@ phen_df = read.csv(opt$phenotype_file, header=T)
 phen_df_sub = subset(phen_df, base_mut == "C>A")
 
 # get the phenotype as a CLR fraction
-phen_df_sub_frac = subset(phen_df_sub, estimate_type == "fraction")
+phen_df_sub_frac = subset(phen_df_sub, estimate_type == "clr_fraction")
 
 # subset cross2 object to include relevant BXDs
 bxd = bxd[phen_df_sub_frac$bxd_strain_conv, ]
@@ -51,7 +50,7 @@ af <- anova(m)
 afss <- af$"Sum Sq"
 print(cbind(af,PctExp=afss/sum(afss)*100))
 
-phen_matrix_frac = as.matrix(RankNorm(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate))
+phen_matrix_frac = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
 
 phenotype_frac = as.matrix(phen_matrix_frac[,1])
 strain_names = subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$bxd_strain_conv
