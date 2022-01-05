@@ -8,6 +8,10 @@
 
 The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce the entire [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1) from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
 
+This code is archived on [Zenodo](https://zenodo.org).
+
+[![DOI](https://zenodo.org/badge/346161036.svg)](https://zenodo.org/badge/latestdoi/346161036)
+
 **The basic outline is as follows:**
 
 1) Identify high-quality singleton mutations from the BXD VCF using `identify_singletons.smk`.
