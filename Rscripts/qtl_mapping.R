@@ -84,10 +84,10 @@ out_frac <- scan1(pr, phenotype_frac, kinship=k,
 
 # perform a permutation test to assess significance
 operm_rate <- scan1perm(pr, phenotype_rate, kinship=k, 
-                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+                   addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
 
 operm_frac <- scan1perm(pr, phenotype_frac, kinship=k, 
-                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=100)
+                        addcovar=covariate_matrix, Xcovar=Xcovar, n_perm=1000)
 
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]
@@ -160,13 +160,3 @@ names(g_new_frac) = inner_join(p_frac, g_frac)$strain
 
 p_new_frac = inner_join(p_frac, g_frac)$fraction
 names(p_new_frac) = inner_join(p_frac, g_frac)$strain
-
-# setEPS()
-# fname = "plots/figure_2c.eps"
-# postscript(fname, width=4, height=4)
-# plot_pxg(g_new_frac, p_new_frac, SEmult=2, col='black', bg="grey",
-#          ylab="C>A singleton mutation fraction",
-#          xlab="Founder haplotype background")
-# dev.off()
-
-
