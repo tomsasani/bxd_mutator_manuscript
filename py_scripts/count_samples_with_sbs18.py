@@ -1,5 +1,6 @@
 import pandas as pd
 import argparse
+import scipy.stats as ss
 
 p = argparse.ArgumentParser()
 p.add_argument(
@@ -9,8 +10,7 @@ p.add_argument(
 )
 p.add_argument(
     "-sig_profiler_activities",
-    default=
-    "data/sigprofiler_outdir/SBS96/Suggested_Solution/COSMIC_SBS96_Decomposed_Solution/Activities/COSMIC_SBS96_Activities_refit.txt",
+    default="data/sigprofiler_data/COSMIC_SBS96_activities.tsv",
 )
 args = p.parse_args()
 
@@ -27,22 +27,26 @@ merged = merged.query("estimate_type == 'fraction' and base_mut == 'C>A'")
 merged['predicted_to_have_sbs18'] = merged['haplotype_at_qtl'].apply(
     lambda h: h == "D")
 
-print(merged.groupby('has_sbs18').size())
+#print(merged.groupby('has_sbs18').size())
 
-print(merged.groupby(['haplotype_at_qtl', 'has_sbs18']).size())
+#print(merged.groupby(['haplotype_at_qtl', 'has_sbs18']).size())
 
-print(
-    merged.query('predicted_to_have_sbs18 != has_sbs18')[[
-        'epoch', 'n_inbreeding_gens'
-    ]])
+# print(
+#     merged.query('predicted_to_have_sbs18 != has_sbs18')[[
+#         'epoch', 'n_inbreeding_gens'
+#     ]])
 
 for c in [
         'has_sbs30',
         'has_sbs5',
-        'has_sbs1',
+       # 'has_sbs1',
         'has_sbs18',
 ]:
-    print(merged.groupby(c).size())
+    print(merged.groupby(['haplotype_at_qtl', c]).size())
+    vals = merged.groupby(['haplotype_at_qtl', c]).size().values
+    print (vals)
+    print (vals.reshape((2, 2)))
+    print (ss.chi2_contingency(vals.reshape((2,2))))
 
 groupby_cols = [
     "Samples",
