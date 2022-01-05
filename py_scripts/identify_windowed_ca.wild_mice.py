@@ -7,11 +7,11 @@ import doctest
 import pandas as pd
 from singleton_calling_utils import (
     enumerate_mutations,
-    make_interval_tree,
     normalize_var,
     reformat_genotypes,
     get_good_idxs,
 )
+from figure_gen_utils import make_interval_tree
 
 
 def run(args):
