@@ -53,8 +53,6 @@ smp_sums = df_wide.groupby([
 
 smp_sums.rename(columns={'count_sum': 'total_muts'}, inplace=True)
 
-print(smp_sums.groupby('epoch').count().reset_index())
-
 print("Total of {} mutations in {} strains".format(
     np.sum(smp_sums['total_muts']),
     len(pd.unique(smp_sums['bxd_strain_conv']))))
@@ -70,6 +68,7 @@ smp2sum = dict(zip(smp_sums['bxd_strain_conv'], smp_sums['total_muts']))
 
 mean_mutation_rate = np.mean(smp_sums['rate'])
 stderr_mutation_rate = ss.sem(smp_sums['rate'])
+
 print("Mean mutation rate across strains is {} (95% CI = {} - {})".format(
     mean_mutation_rate,
     mean_mutation_rate - (2 * stderr_mutation_rate),
