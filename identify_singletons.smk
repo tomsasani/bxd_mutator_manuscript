@@ -130,7 +130,6 @@ rule generate_windows:
         WORKDIR + "data/mm10.50kbp.windows"
     shell:
         """
-        module load bedtools/2.29.2
         bedtools makewindows -g {input} -w 50000 > {output}
         """
 
