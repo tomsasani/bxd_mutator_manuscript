@@ -1,7 +1,8 @@
 from cyvcf2 import VCF
 import argparse
 import numpy as np
-from singleton_calling_utils import get_good_idxs, make_interval_tree
+from singleton_calling_utils import get_good_idxs
+from figure_gen_utils import make_interval_tree
 
 
 def make_output(fh):

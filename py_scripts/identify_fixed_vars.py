@@ -6,6 +6,7 @@ from cyvcf2 import VCF
 from mutyper.ancestor import Ancestor
 import doctest
 from singleton_calling_utils import *
+from figure_gen_utils import make_interval_tree
 
 
 def run(args):
