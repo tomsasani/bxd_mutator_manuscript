@@ -68,7 +68,7 @@ print(anova_table)
 strain2gentime = dict(zip(summary['bam_name'], summary['years_per_gen']))
 tidy_fracs['years_per_gen'] = tidy_fracs['bxd_strain'].apply(
     lambda b: strain2gentime[b])
-model = ols('estimate ~ years_per_gen + C(epoch)',
+model = ols('estimate ~ years_per_gen',
             data=tidy_fracs.query("years_per_gen != -1")).fit()
 anova_table = sm.stats.anova_lm(model, typ=2)
 print(anova_table)
