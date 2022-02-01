@@ -1,4 +1,3 @@
-import csv
 import argparse
 import pandas as pd
 from collections import defaultdict
@@ -28,6 +27,9 @@ outfh = open(args.out, "w")
 # read in strain metadata
 strain_metadata = pd.read_excel(args.strain_metadata)
 
+# read in genotype file
+geno = pd.read_csv(args.geno)
+
 # map the GeneNetwork names of strains to their names as
 # they appear in the BAM files/VCF sample info
 gn2orig = dict(zip(strain_metadata['GeneNetwork name'], strain_metadata['bam_name']))
@@ -41,29 +43,22 @@ for gn in gn2orig:
     conv = convert_bxd_name(orig)
     gn2conv[gn.split(' ')[0]] = conv
 
-# read in the original geno file
-with open(args.geno, "r") as csvfh:
-    f = csv.reader(csvfh)
-    bad_indices = []
-    for i,l in enumerate(f):
-        # skip the header
-        if l[0].startswith("#"): continue
-            # generate a new header with updated
-            # sample names
-        elif l[0] == "marker":
-            new_header = ['marker']
-            # loop over samples in the order they appear in the
-            # original geno header
-            for s_i,s in enumerate(l[1:]):
-                # keep track of samples that are in the original geno
-                # file but that I leave out of my own analyses
-                if s not in gn2conv: bad_indices.append(s_i)
-                else: new_header.append(gn2conv[s])
-            print (','.join(new_header), file=outfh)
-        else:
-            new_out = [l[0]]
-            # loop over haplotypes in the order they appear
-            for v_i, v in enumerate(l[1:]):
-                if v_i in bad_indices: continue
-                new_out.append(v)
-            print (','.join(new_out), file=outfh)
+def column_converter(cname, gn2conv):
+    """
+    helper function to apply to each of the
+    column names in the geno dataframe (i.e., the
+    gene network names of each BXD
+    """
+    if cname == "marker": return cname
+    else:
+        if cname in gn2conv: return gn2conv[cname]
+        else: return "NOT_IN_METADATA"
+
+# rename columns so that they match the "converted" BAM names
+geno.columns = geno.columns.to_series().apply(lambda n: column_converter(n, gn2conv))
+
+# output the formatted geno file
+cols2keep = [c for c in list(geno) if c != "NOT_IN_METADATA"]
+geno = geno[cols2keep]
+
+geno.to_csv(args.out, index=False)
