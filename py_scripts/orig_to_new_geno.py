@@ -28,7 +28,7 @@ outfh = open(args.out, "w")
 strain_metadata = pd.read_excel(args.strain_metadata)
 
 # read in genotype file
-geno = pd.read_csv(args.geno)
+geno = pd.read_csv(args.geno, skiprows=3)
 
 # map the GeneNetwork names of strains to their names as
 # they appear in the BAM files/VCF sample info
