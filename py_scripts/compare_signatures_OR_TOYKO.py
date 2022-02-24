@@ -104,7 +104,7 @@ toyko = toyko[toyko[colname] != 0]
 toyko['kmer'] = toyko[colname].apply(lambda s: convert_toyko_mutation(s))
 
 # only consider the C>A mutation types (99% of the data)
-toyko = toyko.query('kmer != "not_CA"')
+#toyko = toyko.query('kmer != "not_CA"')
 
 # get the relative frequencies of each 3-mer C>A mutation
 toyko_wide = toyko.groupby('kmer').count().add_suffix('_count').reset_index()
