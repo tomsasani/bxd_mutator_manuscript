@@ -113,6 +113,9 @@ There are a handful of `pytest` tests for various utility functions that get use
 To run these tests, you'll first need to install the repository as a package using `pip`. Make sure you're in the top level of this directory, then run:
 
 ```
+# activate previously created env
+conda activate figure_generation
+
 pip install -e .
 ```
 
