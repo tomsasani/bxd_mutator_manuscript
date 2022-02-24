@@ -6,60 +6,30 @@
 
 > We've made a Dash app that enables interactive exploration of some results from the manuscript. [Check it out!](https://bxd-mutator-exploration.herokuapp.com)
 
-The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce the entire [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1) from "top to bottom." This includes everything from downloading a reference genome to generating supplementary figures. However, it's also possible to simply generate the figures in the manuscript (step #2 below), since step #1 requires very large input files and quite a bit of time to execute.
-
-This code is archived on [Zenodo](https://zenodo.org).
-
-[![DOI](https://zenodo.org/badge/346161036.svg)](https://zenodo.org/badge/latestdoi/346161036)
-
-**The basic outline is as follows:**
-
-1) Identify high-quality singleton mutations from the BXD VCF using `identify_singletons.smk`.
-
-2) Annotate singleton mutations and generate figures using `generate_figures.smk`.
-
-**If you just want to generate all of the manuscript figures, skip to the section entitled [Usage for generating manuscript figures using precomputed data](#usage-for-generating-manuscript-figures-using-precomputed-data).**
-
-**IMPORTANT NOTE:**
-
->I highly recommend that the `identify_singletons.smk` pipeline is run on a high-performance computing system or cluster. The `identify_singletons.smk` pipeline assumes you've downloaded the BXD VCF (~50 Gb), and the many individual steps in the pipeline include downloading the mm10 reference genome (~1 Gb) and many Gbs of phastCons scores.
-
->Depending on the particular steps of the pipeline you want to run, some of these steps/downloads can be avoided by editing the `identify_singletons.smk` pipeline directly. For example, if you don't want to get singleton data from the wild mouse genomes, simply comment out those output files in `rule: all`. Or if you already have a copy of the mm10 reference, just add it to the `data/ref` directory.
+The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce all of the main figures in our recent germline mutator [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1).
 
 ## Table of Contents
 
 1. [Dependencies](#dependencies)
 2. [Directory structure](#directory-structure)
 3. [Usage for generating manuscript figures using precomputed data](#usage-for-generating-manuscript-figures-using-precomputed-data)
-4. [Usage for generating all raw data](#usage-for-generating-all-raw-data)
-5. [How to generate raw data on a HPC](#how-to-generate-raw-data-on-a-hpc)
-6. [Running tests](#running-tests)
+4. [Running tests](#running-tests)
 
 ## Dependencies
-Make sure that these are installed and/or in your system `$PATH`! Versions in parentheses are the ones I used at the time of manuscript posting. I haven't experimented with other versions, so YMMV.
 
-### Common requirements for all pipelines
-* [conda (v4.9.2)](https://docs.conda.io/en/latest/)
-    * these days, I'd recommend using [`mamba`](https://github.com/mamba-org/mamba) for building the `python` environments described below
-    * assuming you have `conda` installed, use `conda install mamba -n base -c conda-forge` to install `mamba`, and then you can use `mamba` as a 1-to-1 replacement for `conda` in the instructions for building `python` environments provided later in the README
-    
-### Requirements if you want to generate singleton data from scratch
-* [bedtools (v2.29.2)](https://bedtools.readthedocs.io/en/latest/)
-* [bedops (v2.4.38)](https://bedops.readthedocs.io/en/latest/)
-    * technically, you'll only need `wig2bed`
-* [tabix (v1.10.2-125-g4162046)](http://www.htslib.org/doc/tabix.html)
-* [mutyper (v0.5.0)](https://harrispopgen.github.io/mutyper/install.html)
-* [bcftools (v1.12)](https://samtools.github.io/bcftools/bcftools.html)
-* [bgzip (v1.12)](http://www.htslib.org/doc/bgzip.html)
+First, make sure that [`conda`](https://docs.conda.io/en/latest/) is installed and in your system `$PATH`. I used v4.9.2, but more recent versions will likely work, as well. 
 
-### Requirements if you want to reproduce manuscript figures + analysis
-* [perl (v5.32.1)](https://www.perl.org)
-* [pal2nal (v14)](http://www.bork.embl.de/pal2nal/#Download)
-* [SigProfilerExtractor (v1.1.3)](https://github.com/AlexandrovLab/SigProfilerExtractor)
-* [codeml](http://abacus.gene.ucl.ac.uk/software/paml.html)
-    * `codeml` is used by `ete3` for the PAML selection scans. Rather than installing `codeml` directly, I recommend using `ete3 upgrade-external-tools` to install, followed by copying the `codeml` binary from `/Users/your_username/.etetoolkit/ext_apps-latest/bin/codeml` (the default installation directory for `ete3 upgrade-external-tools`) into `/Users/your_username/opt/anaconda3/envs/figure_generation/bin/` (i.e., the `bin` directory of the `conda` installation directory created after initializing an environment below).
+Then, install [`mamba`](https://github.com/mamba-org/mamba) using the following command:
 
-All other `python` and `R` dependencies will be handled by `conda` before executing a pipeline. 
+```
+conda install mamba -n base -c conda-forge
+```
+
+> Why `mamba`?
+
+These days, `conda` can be *extremely* slow, and will often hang when building a new Python environment. I recommend using `mamba` as a 1-to-1 replacement for `conda` when building the Python env for this repository.
+
+All other `python` and `R` dependencies will be handled by `mamba` before executing a pipeline. 
 
 ## Directory structure
 ```
@@ -68,21 +38,18 @@ All other `python` and `R` dependencies will be handled by `conda` before execut
 |__py_scripts                           # all of the `python` scripts called by `snakemake` rules
 |__R_scripts                            # all of the `R` scripts called by `snakemake` rules
 |__Rqtl_data                            # data used by R/qtl2 for QTL mapping
-|__data                                 # raw data files output by the `identify_singletons.smk` pipeline, plus third-party datasets
+|__data                                 # raw singleton data files, plus third-party datasets
 |__tests                                # `pytest` tests for various utility functions
 |__figure_generation.yaml               # YAML file containing all of the dependencies required to generate figures
-|__singleton_calling.yaml               # YAML file containing all of the dependencies required to call singletons
 |__generate_figures.smk                 # main `snakemake` pipeline that generates main and supplementary figures
-|__identify_singletons.smk              # main `snakemake` pipeline that identifies singletons using the BXD VCF
-|__singleton_calling_hpc_config.json    # JSON config file template for running pipelines on cluster like SGE 
 ```
 ## Usage for generating manuscript figures using precomputed data
 
-If you'd rather not spend the time (and compute) needed to generate all of the singleton data from scratch, I've included the output of `identify_singletons.smk` in the `data/` directory. The command-line instructions below will reproduce all but one or two figures in the manuscript (like Supp. Fig. 1), which were created by hand in Illustrator.
+All of the BXD singleton data (in addition to relevant third-party data) are included in the `data/` directory. The command-line instructions below will reproduce all of the main figures in the paper using these data.
 
 #### What steps are involved?
 
-1) Annotate singletons and fixed variants with various metadata.
+1) Annotate singletons with various metadata.
 2) Construct "tidy" dataframes containing summary information about mutation rates and spectra in each BXD.
 3) Perform QTL scans for phenotypes related to the mutation rate.
 4) Make plots.
@@ -112,10 +79,10 @@ cd bxd_mutator_manuscript
 
 # create a new conda environment with all of the dependencies
 # required for running the pipeline
-conda env create --name figure_generation --file figure_generation.yaml
+mamba env create --name figure_generation --file figure_generation.yaml
 
 # activate the new environment
-conda activate figure_generation
+mamba activate figure_generation
 
 # run the pipeline
 snakemake \
@@ -123,78 +90,7 @@ snakemake \
         -s generate_figures.smk # name of the snakemake pipeline
 ```
 
-This will produce plots from every main and supplementary figure in the manuscript, which will be added to a new `plots/` directory.
-
-## Usage for generating all raw data
-
-#### What steps are involved?
-
-1) Download mm10 reference assembly.
-2) Download phastCons 60-way placental mammal WIG files for each chromosome, and convert to BED format.
-3) Identify singletons in each BXD.
-4) Identify "fixed" variants in D2 that we'll use for conservation score comparisons.
-
-To generate all of the **raw data in the manuscript**, it's highly recommended that you run the following on a machine with the ability to run many simultaneous processes, and **with at least 20 Gb of free space in the working directory.**
-
-**The pipeline below also assumes that you've downloaded the BXD VCF (about 50 Gb). The path to this VCF must be edited in the Snakemake file.**
-
-```
-# enter a directory of your choice (make sure
-# you have at least 20 Gb of free space here)
-cd $WORKDIR
-
-# clone the BXD analysis GitHub repository
-git clone https://github.com/harrispopgen/bxd_mutator_manuscript.git
-
-# enter the directory
-cd bxd_mutator_manuscript
-
-# create a new conda environment with all of the dependencies
-# required for running the pipeline
-conda env create --name singleton_calling --file singleton_calling.yaml
-
-# activate the new environment
-conda activate singleton_calling
-
-# install mutyper
-pip install mutyper==0.5.0
-
-# ---
-# before running the pipeline, use your text editor of choice
-# and make sure that the WORKDIR variable at the top of 
-# `identify_singletons.smk` is the absolute path to the directory
-# that you're currently in, and that all of
-# the other paths at the top of the pipeline point to the right
-# binaries and directories on your machine.
-# ---
-
-# run the pipeline
-snakemake \
-        -j 20 \ # number of simultaneous jobs to run (change if you want)
-        -s identify_singletons.smk # name of the snakemake pipeline
-```
-
-## How to generate raw data on a HPC
-
-The Department of Genome Sciences at UW uses the Sun Grid Engine (SGE) for job management on the cluster. As an example, I've included a config file that can be used in conjunction with the following command to run the `identify_singletons.smk` pipeline on a system with SGE. Just edit the various parameters in the file accordingly. If you use a different job management system (e.g., SLURM), there is documentation on how to submit jobs using `snakemake` [here](https://snakemake.readthedocs.io/en/stable/executing/cluster.html).
-
-```
-# run the pipeline using SGE
-snakemake \
-        -j 20 \
-        -s identify_singletons.smk \
-        --cluster-config singleton_calling_hpc_config.json \
-        --cluster "qsub -l centos={cluster.os} \
-                        -l mfree={cluster.memory} \
-                        -l h_rt={cluster.time} \
-                        -l s_rt={cluster.time} \
-                        -o {cluster.erroutdir} \
-                        -e {cluster.erroutdir}" \
-        --latency-wait 30 \
-        --rerun-incomplete
-```
-
-After generating raw data, you can run the figure generation pipeline as described above. 
+This will produce plots from every main figure in the manuscript, which will be added to a new `plots/` directory.
 
 ## Running tests
 
