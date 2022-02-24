@@ -24,7 +24,7 @@ This repository includes all of the code necessary to reproduce the main figures
 
 1. `mamba` (by way of `conda`)
 
-First, make sure that [`conda`](https://docs.conda.io/en/latest/) is installed and in your system `$PATH`. I used `v4.9.2`, but more recent versions will likely work, as well. 
+First, make sure that [`conda`](https://docs.conda.io/en/latest/) is installed and in your system `$PATH`. I used `conda v4.9.2`, but more recent versions will likely work, as well. 
 
 Then, install [`mamba`](https://github.com/mamba-org/mamba) using the following command:
 
@@ -33,8 +33,7 @@ conda install mamba -n base -c conda-forge
 ```
 
 > Why `mamba`?
-
-These days, `conda` can be *extremely* slow, and will often hang when building a new Python environment. I recommend using `mamba` as a 1-to-1 replacement for `conda` when building the Python env for this repository.
+> These days, `conda` can be *extremely* slow, and will often hang when building a new Python environment. I recommend using `mamba` as a 1-to-1 replacement for `conda` when building the Python env for this repository.
 
 2. `perl` (`v5.32.1`)
 
@@ -57,26 +56,6 @@ All other `python` and `R` dependencies will be handled by `mamba` before execut
 ## Usage for generating manuscript figures
 
 All of the BXD singleton data (in addition to relevant third-party data) are included in the `data/` directory. The command-line instructions below will reproduce all of the main figures in the paper using these data.
-
-#### What steps are involved?
-
-1) Annotate singletons with various metadata.
-2) Construct "tidy" dataframes containing summary information about mutation rates and spectra in each BXD.
-3) Perform QTL scans for phenotypes related to the mutation rate.
-4) Make plots.
-
-In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **I've included the files below in the `data/` directory, but here are instructions for downloading if necessary:** 
-
-* singleton data from [Dumont 2019](https://academic.oup.com/mbe/article/36/5/865/5315518)
-    * download ZIP file from [Supplementary data](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/mbe/36/5/10.1093_molbev_msz026/2/msz026_supp.zip?Expires=1616302324&Signature=u8neUFiV~0aBABDNG-ZPeMwd~usDZPmIO5TVjLHqKVcjHXrUWBm7MnR1ZJpSkMmDmQhMGrcdK~G7hySKLp79xgpQnj-SCFD09Hj7e9uCi9oYvVT-guMav1JY6qEMzSCubzlChpHfItUKJt15lXbxmuT2FxTibIs2gSrXvHCexmwGLxQYCoIAZJHY1nOjOfSDDlIejE-aGrPFozB86PXTZz~uM9JuAnmfZ5wmARxwuEzOHMfYZWh7WnWzeXEaNwKqYzrYHYDhej5sq~LSOfsQTzSPI-nrtn~KOV7x9ckk0RzqJ0kIhmF0uBLMkF8grDXTTRTHEjYV1dBALvxO1ZMVmA__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) associated with the manuscript
-    * uncompress file and move `SuppTables_concat.xlsx` into the `data` directory of this repository
-* *de novo* germline mutation data from [Ohno et al. 2014](https://www.nature.com/articles/srep04689)
-    * download [Supplementary Data 1](https://static-content.springer.com/esm/art%3A10.1038%2Fsrep04689/MediaObjects/41598_2014_BFsrep04689_MOESM2_ESM.xls)
-    * move `41598_2014_BFsrep04689_MOESM2_ESM.xls` into the `data` directory of this repository
-* mutation signatures from [COSMIC](https://cancer.sanger.ac.uk/cosmic)
-    * download [SBS36](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS36.csv)
-    * download [SBS18](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS18.csv)
-    * move these two files (`sigProfiler_SBS_signatures_SBS36.csv` and `sigProfiler_SBS_signatures_SBS18.csv`) into the `data` directory of this repository
 
 ```
 # enter a directory of your choice
@@ -105,6 +84,26 @@ snakemake \
 ```
 
 This will produce plots from every main figure in the manuscript, which will be added to a new `plots/` directory.
+
+#### What steps are involved?
+
+1) Annotate singletons with various metadata.
+2) Construct "tidy" dataframes containing summary information about mutation rates and spectra in each BXD.
+3) Perform QTL scans for phenotypes related to the mutation rate.
+4) Make plots.
+
+In a number of analyses, we compare mutation spectra between the BXD singletons and previously published datasets. **I've included the files below in the `data/` directory, but here are instructions for downloading if necessary:** 
+
+* singleton data from [Dumont 2019](https://academic.oup.com/mbe/article/36/5/865/5315518)
+    * download ZIP file from [Supplementary data](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/mbe/36/5/10.1093_molbev_msz026/2/msz026_supp.zip?Expires=1616302324&Signature=u8neUFiV~0aBABDNG-ZPeMwd~usDZPmIO5TVjLHqKVcjHXrUWBm7MnR1ZJpSkMmDmQhMGrcdK~G7hySKLp79xgpQnj-SCFD09Hj7e9uCi9oYvVT-guMav1JY6qEMzSCubzlChpHfItUKJt15lXbxmuT2FxTibIs2gSrXvHCexmwGLxQYCoIAZJHY1nOjOfSDDlIejE-aGrPFozB86PXTZz~uM9JuAnmfZ5wmARxwuEzOHMfYZWh7WnWzeXEaNwKqYzrYHYDhej5sq~LSOfsQTzSPI-nrtn~KOV7x9ckk0RzqJ0kIhmF0uBLMkF8grDXTTRTHEjYV1dBALvxO1ZMVmA__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) associated with the manuscript
+    * uncompress file and move `SuppTables_concat.xlsx` into the `data` directory of this repository
+* *de novo* germline mutation data from [Ohno et al. 2014](https://www.nature.com/articles/srep04689)
+    * download [Supplementary Data 1](https://static-content.springer.com/esm/art%3A10.1038%2Fsrep04689/MediaObjects/41598_2014_BFsrep04689_MOESM2_ESM.xls)
+    * move `41598_2014_BFsrep04689_MOESM2_ESM.xls` into the `data` directory of this repository
+* mutation signatures from [COSMIC](https://cancer.sanger.ac.uk/cosmic)
+    * download [SBS36](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS36.csv)
+    * download [SBS18](https://cancer.sanger.ac.uk/sigs-assets-20/SBS_vignettes/sigProfiler_SBS_signatures_SBS18.csv)
+    * move these two files (`sigProfiler_SBS_signatures_SBS36.csv` and `sigProfiler_SBS_signatures_SBS18.csv`) into the `data` directory of this repository
 
 ## Running tests
 
