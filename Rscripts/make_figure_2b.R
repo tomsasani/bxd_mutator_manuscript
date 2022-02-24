@@ -13,9 +13,6 @@ tidy_spectra = read.csv(opt$tidy_spectra)
 
 tidy_spectra = subset(tidy_spectra, estimate_type == "fraction" & base_mut == "C>A")
 
-print (dim(subset(tidy_spectra, haplotype_at_qtl == "B")))
-print (dim(subset(tidy_spectra, haplotype_at_qtl == "D")))
-
 # make figure
 setEPS()
 fname = "plots/figure_2b.eps"

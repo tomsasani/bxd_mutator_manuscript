@@ -27,8 +27,6 @@ names(tidy_spectra)[names(tidy_spectra) == 'epoch'] <- 'Epoch'
 # of inbreeding time
 m = glm(total_muts ~ n_inbreeding_gens, family=poisson(link="identity"), data=tidy_rates)
 
-print (summary(m))
-
 # use model to predict Y values given X
 preds = predict(m, type='response', se.fit=TRUE)
 
@@ -54,7 +52,6 @@ ggsave("plots/figure_1a.eps", f1a, width=6, height=4)
 # subset spectra to only include fractions
 tidy_spectra = subset(tidy_spectra, estimate_type == "fraction")
 m = aov(estimate ~ base_mut + Epoch, data=tidy_spectra)
-print (anova(m, test="Chisq"))
 
 # make figure 1b
 f1b <- ggplot(tidy_spectra, aes(x=base_mut, y=estimate, fill=Epoch)) +

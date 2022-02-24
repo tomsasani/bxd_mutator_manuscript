@@ -48,7 +48,6 @@ Xcovar <- get_x_covar(bxd)
 m = lm(estimate ~ haplotype_at_qtl, data=subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462"))
 af <- anova(m)
 afss <- af$"Sum Sq"
-print(cbind(af,PctExp=afss/sum(afss)*100))
 
 phen_matrix_frac = as.matrix(subset(phen_df_sub_frac, bxd_strain_conv != "BXD68_RwwJ_0462")$estimate)
 
@@ -92,18 +91,6 @@ operm_frac <- scan1perm(pr, phenotype_frac, kinship=k,
 # get the LOD threshold for a < 0.05
 lod_cutoff_sig_rate = summary(operm_rate, alpha=0.05 / 15)[1]
 lod_cutoff_sig_frac = summary(operm_frac, alpha=0.05 / 15)[1]
-
-# print Bayes 95% credible intervals
-print ("Bayes 95% CI (fraction)")
-print (bayes_int(out_frac, pmap, lodcolumn=1, chr=4, prob=0.95))
-print ("Bayes 95% CI (rate)")
-print (bayes_int(out_rate, pmap, lodcolumn=1, chr=4, prob=0.95))
-
-# print LOD peaks
-print("LOD peak (fraction)")
-print (find_peaks(out_frac, pmap, threshold=lod_cutoff_sig_frac))
-print ("LOD peak (rate)")
-print (find_peaks(out_rate, pmap, threshold=lod_cutoff_sig_rate))
 
 # plot peaks and LOD threshold
 ymx_rate <- maxlod(out_rate)
