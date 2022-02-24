@@ -4,9 +4,13 @@
 
 :mouse: --> :dna: --> :bar_chart:
 
-> We've made a Dash app that enables interactive exploration of some results from the manuscript. [Check it out!](https://bxd-mutator-exploration.herokuapp.com)
+## Brief overview of the manuscript and associated code
 
-The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en/stable/) to reproduce all of the main figures in our recent germline mutator [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1).
+We recently published a [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1) describing our discovery of a genetic modifier of the germline mutation rate in mice. As part of this analysis, we identified *de novo* germline mutations in approximately 100 recombinant inbred mice, known as the [BXD family](https://www.cell.com/cell-systems/fulltext/S2405-4712(20)30503-2?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS2405471220305032%3Fshowall%3Dtrue).
+
+Using these germline mutations (which we referred to as "singletons" in the manuscript), we then mapped quantitative trait loci (QTL) for various phenotypes related to the mutation spectrum in these mice. Notably, we found a QTL for the rate of C>A germline mutations. 
+
+This repository includes all of the code necessary to reproduce the main figures from our paper. This code is packaged into a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline, enabling users to generate all of these figures using a handful of simple commands, described below. 
 
 ## Table of Contents
 
@@ -14,10 +18,11 @@ The code in this repository uses [Snakemake](https://snakemake.readthedocs.io/en
 2. [Directory structure](#directory-structure)
 3. [Usage for generating manuscript figures using precomputed data](#usage-for-generating-manuscript-figures-using-precomputed-data)
 4. [Running tests](#running-tests)
+5. [Dash application](#dash-application)
 
 ## Dependencies
 
-First, make sure that [`conda`](https://docs.conda.io/en/latest/) is installed and in your system `$PATH`. I used v4.9.2, but more recent versions will likely work, as well. 
+First, make sure that [`conda`](https://docs.conda.io/en/latest/) is installed and in your system `$PATH`. I used `v4.9.2`, but more recent versions will likely work, as well. 
 
 Then, install [`mamba`](https://github.com/mamba-org/mamba) using the following command:
 
@@ -77,6 +82,9 @@ git clone https://github.com/harrispopgen/bxd_mutator_manuscript.git
 # enter the directory
 cd bxd_mutator_manuscript
 
+# check out this simplified branch of the repo
+git checkout simplified_code_sample
+
 # create a new conda environment with all of the dependencies
 # required for running the pipeline
 mamba env create --name figure_generation --file figure_generation.yaml
@@ -103,3 +111,7 @@ pip install -e .
 ```
 
 Then, you can simply run `pytest .`, and the tests will run.
+
+## Dash application
+
+We've also made a Dash app that enables interactive exploration of some results from the manuscript. [Check it out!](https://bxd-mutator-exploration.herokuapp.com)
