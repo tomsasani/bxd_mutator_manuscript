@@ -22,6 +22,8 @@ This repository includes all of the code necessary to reproduce the main figures
 
 ## Dependencies
 
+1. `mamba` (by way of `conda`)
+
 First, make sure that [`conda`](https://docs.conda.io/en/latest/) is installed and in your system `$PATH`. I used `v4.9.2`, but more recent versions will likely work, as well. 
 
 Then, install [`mamba`](https://github.com/mamba-org/mamba) using the following command:
@@ -33,6 +35,10 @@ conda install mamba -n base -c conda-forge
 > Why `mamba`?
 
 These days, `conda` can be *extremely* slow, and will often hang when building a new Python environment. I recommend using `mamba` as a 1-to-1 replacement for `conda` when building the Python env for this repository.
+
+2. `perl` (`v5.32.1`)
+
+Download [`perl`](https://www.perl.org) and make sure that the `perl` executable is in your system `$PATH`.
 
 All other `python` and `R` dependencies will be handled by `mamba` before executing a pipeline. 
 
@@ -90,7 +96,7 @@ git checkout simplified_code_sample
 mamba env create --name figure_generation --file figure_generation.yaml
 
 # activate the new environment
-mamba activate figure_generation
+conda activate figure_generation
 
 # run the pipeline
 snakemake \
