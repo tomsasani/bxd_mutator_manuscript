@@ -199,7 +199,6 @@ ax.xaxis.set_tick_params(width=2)
 ax.yaxis.set_tick_params(width=2)
 
 sns.despine(ax=ax, top=True, right=True)
-print(ss.spearmanr(a, b))
 
 f.tight_layout()
 f.savefig(args.out, bbox_inches='tight')

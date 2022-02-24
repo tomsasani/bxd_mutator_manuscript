@@ -53,10 +53,6 @@ smp_sums = df_wide.groupby([
 
 smp_sums.rename(columns={'count_sum': 'total_muts'}, inplace=True)
 
-print("Total of {} mutations in {} strains".format(
-    np.sum(smp_sums['total_muts']),
-    len(pd.unique(smp_sums['bxd_strain_conv']))))
-
 # calculate overall mutation rates as the sum of singletons divided
 # by the number of generations of inbreeding and the diploid number
 # of base pairs that were "callable" in the strain
@@ -69,11 +65,6 @@ smp2sum = dict(zip(smp_sums['bxd_strain_conv'], smp_sums['total_muts']))
 mean_mutation_rate = np.mean(smp_sums['rate'])
 stderr_mutation_rate = ss.sem(smp_sums['rate'])
 
-print("Mean mutation rate across strains is {} (95% CI = {} - {})".format(
-    mean_mutation_rate,
-    mean_mutation_rate - (2 * stderr_mutation_rate),
-    mean_mutation_rate + (2 * stderr_mutation_rate),
-))
 d_smps = [s for s in smp2hap if smp2hap[s] == "D"]
 b_smps = [s for s in smp2hap if smp2hap[s] == "B"]
 
@@ -81,9 +72,6 @@ mean_d_mutation_rate = np.mean(
     smp_sums[smp_sums['bxd_strain_conv'].isin(d_smps)].rate)
 mean_b_mutation_rate = np.mean(
     smp_sums[smp_sums['bxd_strain_conv'].isin(b_smps)].rate)
-
-print("Strains with D haplotypes accumulate mutations at {} the rate".format(
-    mean_d_mutation_rate / mean_b_mutation_rate))
 
 df_wide['total_muts'] = df_wide['bxd_strain_conv'].apply(lambda s: smp2sum[s])
 
@@ -132,10 +120,6 @@ df_tidy = df_wide.melt(
 
 df_tidy = df_tidy.query('estimate_type != "total_muts"')
 
-print(
-    df_tidy.query('estimate_type == "count"').groupby(
-        'base_mut').sum().reset_index())
-
 for hap in ["D", "B"]:
     sub_df = df_tidy.query(
         "haplotype_at_qtl == @hap & base_mut == 'C>A' & estimate_type == 'rate'"
@@ -143,15 +127,6 @@ for hap in ["D", "B"]:
 
     mean_mutation_rate = np.mean(sub_df['estimate'])
     stderr_mutation_rate = ss.sem(sub_df['estimate'])
-
-    print(
-        "Mean C>A mutation rate across strains with {} haps is {} (95% CI = {} - {})"
-        .format(
-            hap,
-            mean_mutation_rate,
-            mean_mutation_rate - (2 * stderr_mutation_rate),
-            mean_mutation_rate + (2 * stderr_mutation_rate),
-        ))
 
 # output the tidy dataframe with info about individual mutation types
 df_tidy.to_csv("csv/tidy_mutation_spectra.csv", index=False)

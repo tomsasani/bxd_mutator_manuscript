@@ -50,4 +50,3 @@ cosmic['kmer'] = cosmic.apply(convert_cosmic_mutation, axis=1)
 merged_df = cosmic.merge(toyko_wide, on="kmer")
 
 cosine_similarity = 1 - cosine(merged_df.SBS18_mm10.values, merged_df.frac)
-print(cosine_similarity)

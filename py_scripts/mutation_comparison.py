@@ -340,10 +340,6 @@ if __name__ == "__main__":
     subset_0 = df_wide[df_wide[args.subset_key] == "B"]['chrom_count'].values
     subset_1 = df_wide[df_wide[args.subset_key] == "D"]['chrom_count'].values
 
-    print(
-        "Using the key: {}, there are {} mutations in subset 0 and {} in subset 1"
-        .format(args.subset_key, np.sum(subset_0), np.sum(subset_1)))
-
     # get a mapping of each mutation type to a corresponding index
     uniq_kmers = list(pd.unique(df_wide['kmer']))
     mut2idx = dict(zip(uniq_kmers, range(len(uniq_kmers))))

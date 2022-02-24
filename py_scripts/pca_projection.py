@@ -137,7 +137,6 @@ y_vals = X_new[:,1]
 colors = [strain2color[s] for s in y]
 
 # plot each BXD and founder on PC plot
-
 for strain_name in ["D", "DBA_2J", "B", "C57BL_6NJ"]:
     idxs = np.where(y == strain_name)[0]
     if strain_name in ["D", "B"]: marker = 'x'
@@ -166,7 +165,6 @@ ax2.set_xlim(xmin + (xmin / 2), xmax + (xmax / 2))
 ax2.set_xlabel("PC1 ({}%)".format(round(100 * exp_var[0]), 4), fontsize=24)
 ax2.set_ylabel("PC2 ({}%)".format(round(100 * exp_var[1]), 3), fontsize=24)
 
-#ax1.legend(handles=legend_elements, fontsize=12)
 ax1.legend(fontsize=16, frameon=False)
 
 
@@ -175,7 +173,6 @@ for ax in (ax1, ax2):
     ax.tick_params(axis='both', which='major', labelsize=24)
     ax.xaxis.set_tick_params(width=2)
     ax.yaxis.set_tick_params(width=2)
-    #sns.despine(ax=ax, top=True, right=True)
 
 
 f.tight_layout()
