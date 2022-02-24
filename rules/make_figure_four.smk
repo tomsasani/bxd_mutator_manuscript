@@ -1,23 +1,3 @@
-rule get_wild_genotypes:
-    input:
-        "py_scripts/mutyh_mutations_in_mice.py"
-    output:
-        "data/wild.mutyh_genotypes.csv"
-    shell:
-        """
-        python {input} --out {output} -is_wild
-        """
-
-rule get_mgp_genotypes:
-    input:
-        "py_scripts/mutyh_mutations_in_mice.py"
-    output:
-        "data/mgp.mutyh_genotypes.csv"
-    shell:
-        """
-        python {input} --out {output}
-        """
-
 rule make_figure_four_a1:
     input:
         wild_mutyh_vars = "data/wild.mutyh_genotypes.csv",

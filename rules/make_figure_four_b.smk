@@ -1,8 +1,14 @@
-PAL2NAL = "/Users/tomsasani/src/pal2nal.v14/pal2nal.pl"
-
 FASTA = "data/ete3_data/multi_organism_mutyh_cds.fa"
 PROTEIN = "data/ete3_data/multi_organism_mutyh_protein_alignment.fa"
 TREE = "data/ete3_data/multi_organism_mutyh_tree.nwk"
+
+rule download_pal2nal:
+    input:
+    output: "data/ete3_data/pal2nal.pl"
+    shell:
+        """
+        wget http://www.bork.embl.de/pal2nal/distribution/pal2nal.v14.tar.gz -O {output}
+        """
 
 rule format_tree:
     input: TREE
@@ -44,7 +50,7 @@ rule codon_aware_aln:
     input: 
         protein = "data/ete3_data/multi_organism_mutyh_protein_alignment.reformatted.aln",
         msa = "data/ete3_data/multi_organism_mutyh_cds.reformatted.fa",
-        pal2nal = PAL2NAL
+        pal2nal = "data/ete3_data/pal2nal.pl"
     output: temp("data/ete3_data/multi_organism_mutyh_cds.codon_aligned.fa")
     shell:
         """
