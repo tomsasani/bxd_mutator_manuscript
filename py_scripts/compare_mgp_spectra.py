@@ -253,6 +253,4 @@ for cat in [
 
     _, p, _, _ = ss.chi2_contingency([[a_fore, b_fore], [a_back, b_back]])
 
-    print(cat, p)
-
 f.savefig(args.out, bbox_inches='tight')
