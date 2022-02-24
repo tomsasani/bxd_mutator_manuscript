@@ -8,7 +8,7 @@
 
 We recently published a [manuscript](https://www.biorxiv.org/content/10.1101/2021.03.12.435196v1) describing our discovery of a genetic modifier of the germline mutation rate in mice. As part of this analysis, we identified *de novo* germline mutations in approximately 100 recombinant inbred mice, known as the [BXD family](https://www.cell.com/cell-systems/fulltext/S2405-4712(20)30503-2?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS2405471220305032%3Fshowall%3Dtrue).
 
-Using these germline mutations (which we referred to as "singletons" in the manuscript), we then mapped quantitative trait loci (QTL) for various phenotypes related to the mutation spectrum in these mice. Notably, we found a QTL for the rate of C>A germline mutations. 
+Using these germline mutations (which we referred to as "singletons" in the manuscript), we then mapped quantitative trait loci (QTL) for various phenotypes related to the mutation spectrum. Notably, we found a QTL for the rate of C>A germline mutations. 
 
 This repository includes all of the code necessary to reproduce the main figures from our paper. This code is packaged into a [Snakemake](https://snakemake.readthedocs.io/en/stable/) pipeline, enabling users to generate all of these figures using a handful of simple commands, described below. 
 
@@ -16,7 +16,7 @@ This repository includes all of the code necessary to reproduce the main figures
 
 1. [Dependencies](#dependencies)
 2. [Directory structure](#directory-structure)
-3. [Usage for generating manuscript figures using precomputed data](#usage-for-generating-manuscript-figures-using-precomputed-data)
+3. [Usage for generating manuscript figures](#usage-for-generating-manuscript-figures)
 4. [Running tests](#running-tests)
 5. [Dash application](#dash-application)
 
@@ -48,7 +48,7 @@ All other `python` and `R` dependencies will be handled by `mamba` before execut
 |__figure_generation.yaml               # YAML file containing all of the dependencies required to generate figures
 |__generate_figures.smk                 # main `snakemake` pipeline that generates main and supplementary figures
 ```
-## Usage for generating manuscript figures using precomputed data
+## Usage for generating manuscript figures
 
 All of the BXD singleton data (in addition to relevant third-party data) are included in the `data/` directory. The command-line instructions below will reproduce all of the main figures in the paper using these data.
 
@@ -77,7 +77,7 @@ In a number of analyses, we compare mutation spectra between the BXD singletons 
 cd $WORKDIR
 
 # clone the BXD analysis GitHub repository
-git clone https://github.com/harrispopgen/bxd_mutator_manuscript.git
+git clone https://github.com/tomsasani/bxd_mutator_manuscript.git
 
 # enter the directory
 cd bxd_mutator_manuscript
