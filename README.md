@@ -35,9 +35,9 @@ conda install mamba -n base -c conda-forge
 > Why `mamba`?
 > These days, `conda` can be *extremely* slow, and will often hang when building a new Python environment. I recommend using `mamba` as a 1-to-1 replacement for `conda` when building the Python env for this repository.
 
-2. `perl` (`v5.32.1`)
+2. `perl`
 
-Download [`perl`](https://www.perl.org) and make sure that the `perl` executable is in your system `$PATH`.
+Download [`perl`](https://www.perl.org) and make sure that the `perl` executable is in your system `$PATH`. I used `perl v5.32.1`, but more recent versions may work.
 
 All other `python` and `R` dependencies will be handled by `mamba` before executing a pipeline. 
 
